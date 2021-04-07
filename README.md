@@ -2,6 +2,8 @@
 
 `docker-compose up`
 
+Check docker-compose.yml file
+
 ## Deploy
 
 1. Log in to serverless by `serverless login`

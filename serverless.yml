@@ -1,0 +1,20 @@
+org: sairamtummala
+app: realestate
+service: listhub-replica
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  region: us-west-2
+  environment:
+    TEST_ENV: ${param:TEST_ENV}
+
+functions:
+  rateHandler:
+    handler: handler.run
+    events:
+      # Invoke Lambda function every minute
+      - schedule: rate(1 hour)

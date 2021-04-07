@@ -20,5 +20,4 @@ functions:
   rateHandler:
     handler: handler.run
     events:
-      # Invoke Lambda function every minute
       - schedule: rate(1 hour)

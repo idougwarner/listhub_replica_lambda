@@ -10,7 +10,11 @@ provider:
   lambdaHashingVersion: 20201221
   region: us-west-2
   environment:
-    TEST_ENV: ${param:TEST_ENV}
+    DB_HOST: ${param:DB_HOST}
+    DB_PORT: ${param:DB_PORT}
+    DB_NAME: ${param:DB_NAME}
+    DB_USER: ${param:DB_USER}
+    DB_PASSWORD: ${param:DB_PASSWORD}
 
 functions:
   rateHandler:

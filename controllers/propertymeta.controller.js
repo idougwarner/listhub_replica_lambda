@@ -2,7 +2,7 @@ const connectToDatabase = require("../models");
 const TimeUtil=require("../utils/timeFunctions");
 
 // Create and Save a new ProperyMeta
-module.exports.create = (jsonData) => {
+module.exports.create = async (jsonData) => {
         
         // Validate request
         if (!jsonData) {
@@ -56,7 +56,7 @@ module.exports.create = (jsonData) => {
 };
 
 // Retrieve all Propertymeta from the database.
-module.exports.findAll = (req, res) => {
+module.exports.findAll = async () => {
 
         try 
         {
@@ -107,7 +107,7 @@ module.exports.findAll = (req, res) => {
 };
 
 // Check if there is Metadata data
-module.exports.metadataExists = () => {
+module.exports.metadataExists = async () => {
 
         try 
         {
@@ -157,7 +157,7 @@ module.exports.metadataExists = () => {
         }
 };
 
-module.exports.ismetadataNew = (lastModified) => {
+module.exports.ismetadataNew = async (lastModified) => {
 
     // Check whether there is data before comparing otherwise store the new data
         try 
@@ -213,7 +213,7 @@ module.exports.ismetadataNew = (lastModified) => {
 }
 
 // Delete all PropertyMetas from the database.
-module.exports.deleteAll = () => {
+module.exports.deleteAll = async () => {
        
             try 
             {

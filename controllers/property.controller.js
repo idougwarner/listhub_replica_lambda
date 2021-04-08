@@ -91,7 +91,7 @@ module.exports.bulkCreate = async (jsonData) => {
 };
 
 // Retrieve all Properties from the database.
-module.exports.findAll = () => {
+module.exports.findAll = async () => {
 
         try {
             const { Property } = await connectToDatabase()
@@ -138,7 +138,7 @@ module.exports.findAll = () => {
 
 };
 
-module.exports.propertydataExists = () => {
+module.exports.propertydataExists = async () => {
 
         try {
             const { Property } = await connectToDatabase()
@@ -185,7 +185,7 @@ module.exports.propertydataExists = () => {
 };
 
 // Delete all Properties from the database.
-module.exports.deleteAll = () => {
+module.exports.deleteAll = async () => {
 
         try {
             const { Property } = await connectToDatabase()

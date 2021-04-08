@@ -419,7 +419,7 @@ const newListData = async (type) => {
             })
             .pipe(new JsonLinesTransform())
             .pipe(writeStream)
-            .on('finish', () => {
+            .on('finish', async () => {
 
               // Data was successfully added therefore add step and downloadedSize and proceed to get next chunk in next loop
               step = step + 1;
@@ -535,7 +535,7 @@ const newListData = async (type) => {
         })
         .pipe(new JsonLinesTransform())
         .pipe(writeStream)
-        .on('finish', () => {
+        .on('finish', async () => {
 
           console.log('Done downloading Property Listing data!');
 

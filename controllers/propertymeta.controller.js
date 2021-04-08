@@ -109,8 +109,6 @@ module.exports.findAll = (req, res) => {
 // Check if there is Metadata data
 module.exports.metadataExists = () => {
 
-    return new Promise(function(resolve, reject) {
-
         try 
         {
             const { PropertyMeta } = await connectToDatabase()
@@ -157,7 +155,6 @@ module.exports.metadataExists = () => {
 
             return result; 
         }
-    });
 };
 
 module.exports.ismetadataNew = (lastModified) => {

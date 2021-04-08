@@ -92,8 +92,7 @@ module.exports.bulkCreate = async (jsonData) => {
 
 // Retrieve all Properties from the database.
 module.exports.findAll = () => {
-    return new Promise((resolve, reject) => {
- 
+
         try {
             const { Property } = await connectToDatabase()
 
@@ -137,7 +136,6 @@ module.exports.findAll = () => {
             return result;  
         }
 
-      });
 };
 
 module.exports.propertydataExists = () => {

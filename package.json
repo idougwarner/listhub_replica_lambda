@@ -3,5 +3,20 @@
   "version": "1.0.0",
   "description": "",
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "body-parser": "^1.19.0",
+    "content-range": "^2.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "got": "^11.8.2",
+    "pg": "^8.5.1",
+    "pg-hstore": "^2.3.3",
+    "redis": "^3.0.2",
+    "request": "^2.88.2",
+    "sequelize": "^6.6.2",
+    "serverless-http": "^2.7.0",
+    "stream": "0.0.2"
+  }
 }

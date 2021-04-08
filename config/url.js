@@ -1,0 +1,8 @@
+module.exports = {
+    metaURL: "https://api.listhub.com/replication/metadata",
+    replicationURL: "http://api.listhub.com/public_sandbox/replication/query?select=ListingKey",
+    token: "eyJraWQiOiI1c0RNZ1dhbDlSUXFyLTJDNVRmNVFES3I3MGZSMXM3a202X1FzUUxWb2w4IiwiYWxnIjoiUFMyNTYifQ.eyJ1c2VyIjp7ImNsaWVudElkIjoicmVkZWZ5cmVuIiwiY2hhbm5lbElkIjo1MDh9LCJzdWIiOiJyZWRlZnlyZW4iLCJhdWQiOiJhcGkubGlzdGh1Yi5jb20iLCJpc3MiOiJ0cnVzcy5saXN0aHViLm1vdmVhd3MuY29tIiwiaWF0IjoxNjE3MTk4NjAzLCJleHAiOjE2MTcyODUwMDN9.RYneLCFDx9nic2PXB7hTXmMuRVnIukN93xAp3Ve4m-F2QW5R8R_JGq5B7OWScUMR12TXIxywRjBwWjVuzx3PYv1gtNKcqSbkaRkzuDfMW65WYX1K6Y2kh3F4qSVCdZ7Pa0jdnRmdvCxR6f0O6ILaZ49J1uFXBLlUSbrzTvOYtMJboPfbnopMjQAKY7kW2srce2h1C2jkbO9E_Z_SOV23Kp0k6nhnIVyKvpfnPaAciYpWytBsnAC-s6-FxTlSzPZxHXT7Xswa0mpLB2mLU-H1fP4fbHi4YTxxpMIe_zu67UNjsXoR_xOxTOIMJW2IBTfhLKVP2RmvgiDnCDWa2iilzg"
+  };
+
+  // http://api.listhub.com/public_sandbox
+  // https://api.listhub.com/replication/query

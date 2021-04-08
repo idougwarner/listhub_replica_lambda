@@ -1,10 +1,9 @@
-const db = require("../models");
-const Property = db.property;
+const connectToDatabase = require("../models");
 
 // Create and Save a new Property Listing
-const create = (jsonData) => {
+module.exports.create = async (jsonData) => {
 
-        return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
 
         // Validate request
         if (!jsonData) {
@@ -20,128 +19,162 @@ const create = (jsonData) => {
 
         console.log("Listing Key "+property.listingKey);
 
-        // Save Property in the database
-                Property.create(property)
-                .then(data => {
-                    console.log("New Property Data is"+data);
+        try {
+           const { Property } = await connectToDatabase()
 
-                    resolve({dataAdded:true, data:data});
-                })
-                .catch(err => {
-                    reject(new Error(err));
-                });
-        });
-};
-
-const bulkCreate = (jsonData) => {
-
-    return new Promise((resolve, reject) => {
-
-    // Validate request
-    if (!jsonData) {
-        
-        reject(new Error("Listing data is empty")) ;
-    }
-
-    //console.log("Listing Key "+jsonData);
-
-    // Save Property in the database
-            Property.bulkCreate(jsonData)
+           Property.create(property)
             .then(data => {
-                
-                //console.log("Bulk List created "+data);
+                console.log("New Property Data is"+data);
 
                 resolve({dataAdded:true, data:data});
             })
             .catch(err => {
                 reject(new Error(err));
             });
+        }
+        catch(err) {
+            reject ({
+                statusCode: err.statusCode || 500,
+                headers: { 'Content-Type': 'text/plain' },
+                body: 'Could not create the Property.'
+            })
+        }            
+    });
+};
+
+module.exports.bulkCreate = async (jsonData) => {
+
+    return new Promise((resolve, reject) => {
+
+        // Validate request
+        if (!jsonData) {
+            
+            reject(new Error("Listing data is empty")) ;
+        }
+
+        try {
+            const { Property } = await connectToDatabase()
+
+            Property.bulkCreate(jsonData)
+            .then(data => {
+
+                resolve({dataAdded:true, data:data});
+            })
+            .catch(err => {
+                reject(new Error(err));
+            });
+        }
+        catch(err) {
+            reject ({
+                statusCode: err.statusCode || 500,
+                headers: { 'Content-Type': 'text/plain' },
+                body: 'Could not create the Properties.'
+            })   
+        }
     });
 };
 
 // Retrieve all Properties from the database.
-const findAll = () => {
+module.exports.findAll = () => {
     return new Promise((resolve, reject) => {
-        Property.findAll({ raw: true })
-        .then(data => {
-    
-            console.log('Property Listing Data '+data.length);
-    
-            if(data.length!==0)
-            {
-                console.log("Data exists")
-                resolve({dataExists:true,data:data});
-            }
-    
-            else 
-            {
-                resolve({dataExists:false});
-            }
-        })
-        .catch(err => {
-          reject(new Error("Problem accessing data error is"));
-        });
+ 
+        try {
+            const { Property } = await connectToDatabase()
+
+            Property.findAll({ raw: true })
+            .then(data => {
+        
+                console.log('Property Listing Data '+data.length);
+        
+                if(data.length!==0)
+                {
+                    console.log("Data exists")
+                    resolve({dataExists:true,data:data});
+                }
+        
+                else 
+                {
+                    resolve({dataExists:false});
+                }
+            })
+            .catch(err => {
+            reject(new Error("Problem accessing data error is"));
+            });
+        }
+        catch(err) {
+            reject ({
+                statusCode: err.statusCode || 500,
+                headers: { 'Content-Type': 'text/plain' },
+                body: 'Could not find the Properties.'
+            })   
+        }
+
       });
 };
 
-// Find a single Property with an id
-const findOne = (req, res) => {
-  
-};
-
-// Update a Property by the id in the request
-const update = (req, res) => {
-  
-};
-
-const propertydataExists = () => {
+module.exports.propertydataExists = () => {
 
     return new Promise(function(resolve, reject) {
-        Property.findAll({ raw: true })
-        .then(data => {
-    
-            console.log('Property Data Exists'+data.length);
-    
-            if(data.length!==0)
-            {
-                console.log("Property Data exists")
-                resolve({dataExists:true, data:data});
-            }
-    
-            else 
-            {
-                resolve({dataExists:false, data:data});
-            }
-        })
-        .catch(err => {
-            reject(new Error('Problem with database check later!'));
-    
-        });
+
+        try {
+            const { Property } = await connectToDatabase()
+
+            Property.findAll({ raw: true })
+            .then(data => {
+        
+                console.log('Property Listing Data '+data.length);
+        
+                if(data.length!==0)
+                {
+                    console.log("Data exists")
+                    resolve({dataExists:true,data:data});
+                }
+        
+                else 
+                {
+                    resolve({dataExists:false});
+                }
+            })
+            .catch(err => {
+            reject(new Error("Problem accessing data error is"));
+            });
+        }
+        catch(err) {
+            reject ({
+                statusCode: err.statusCode || 500,
+                headers: { 'Content-Type': 'text/plain' },
+                body: 'Could not find Properties.'
+            })  
+        }
       });
 };
 
 // Delete all Properties from the database.
-const deleteAll = () => {
+module.exports.deleteAll = () => {
 
     return new Promise(function(resolve, reject) {
 
-        Property.destroy({
-            where: {},
-            truncate: false
-          })
+        try {
+            const { Property } = await connectToDatabase()
+
+            Property.destroy({
+                where: {},
+                truncate: false
+              })
             .then(nums => {
-              resolve({ message:'Property List was deleted successfully!', deleted:true});
+                resolve({ message:'Property List was deleted successfully!', deleted:true});
             })
             .catch(err => {
-              reject({message:"Some error occurred while removing Property Listings." });
+                reject({message:"Some error occurred while removing Property Listings.", "err":err });
             });
+        }
+        catch(err) {
+            reject ({
+                statusCode: err.statusCode || 500,
+                headers: { 'Content-Type': 'text/plain' },
+                body: 'Could not delete the Properties.'
+            })   
+        }
+
       }); 
 };
-
-module.exports.create=create;
-module.exports.bulkCreate=bulkCreate;
-module.exports.findAll=findAll;
-module.exports.findOne=findOne;
-module.exports.propertydataExists=propertydataExists;
-module.exports.update=update;
-module.exports.deleteAll=deleteAll;

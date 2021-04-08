@@ -17,10 +17,24 @@ const Property = PropertyModel(sequelize, Sequelize);
 const PropertyMeta = PropertyMetaModel(sequelize, Sequelize);
 
 const Models = { Property, PropertyMeta }
-db.Sequelize = Sequelize;
-db.sequelize = sequelize;
+const connection = {}
 
-db.property = require("./Property.js")(sequelize, Sequelize);
-db.propertymeta = require("./PropertyMeta.js")(sequelize, Sequelize);
+module.exports = async () => {
 
-module.exports = db;
+  if(connection.isConnected) {
+    
+    console.log('=> Using existing connection.');
+    return Models
+
+  }
+
+  await sequelize.sync()
+  await sequelize.authenticate()
+
+  connection.isConnected =  true
+  
+  console.log(' Created a new connection to DB')
+
+  return Models
+
+}

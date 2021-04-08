@@ -15,9 +15,14 @@ provider:
     DB_NAME: ${param:DB_NAME}
     DB_USER: ${param:DB_USER}
     DB_PASSWORD: ${param:DB_PASSWORD}
+    DB_DIALECT: ${param:DB_DIALECT}
 
 functions:
   rateHandler:
     handler: handler.run
+    events:
+      - schedule: rate(1 hour)
+  fetchListingsData:
+    handler: handler.fetchListingsData
     events:
       - schedule: rate(1 hour)

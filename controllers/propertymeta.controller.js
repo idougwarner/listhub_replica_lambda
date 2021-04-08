@@ -2,12 +2,12 @@ const connectToDatabase = require("../models");
 const TimeUtil=require("../utils/timeFunctions");
 
 // Create and Save a new ProperyMeta
-module.exports.create = async (jsonData) => {
+module.exports.metaCreate = async (jsonData) => {
         
         // Validate request
         if (!jsonData) {
             
-            const result = { dataAdded:false, error:'' };
+            const result = { metadataAdded:false, error:'' };
 
             return result;
         }
@@ -28,14 +28,14 @@ module.exports.create = async (jsonData) => {
 
                     console.log("New Meta Data is"+data);
 
-                    const result = { dataAdded:true, data:data }
+                    const result = { metadataAdded:true, data:data }
 
                     return result;
 
                 })
                 .catch(err => {
 
-                    const result = { dataAdded:false, error:err } 
+                    const result = { metadataAdded:false, error:err } 
 
                     return result;
 
@@ -45,7 +45,7 @@ module.exports.create = async (jsonData) => {
             catch(err) 
             {
                 const result = {
-                    dataAdded:false,
+                    metadataAdded:false,
                     statusCode: 500,
                     headers: { 'Content-Type': 'text/plain' },
                     body: 'Could not create the PropertyMeta.'
@@ -56,7 +56,7 @@ module.exports.create = async (jsonData) => {
 };
 
 // Retrieve all Propertymeta from the database.
-module.exports.findAll = async () => {
+module.exports.metaFindAll = async () => {
 
         try 
         {
@@ -107,7 +107,7 @@ module.exports.findAll = async () => {
 };
 
 // Check if there is Metadata data
-module.exports.metadataExists = async () => {
+module.exports.metaDataExists = async () => {
 
         try 
         {
@@ -122,21 +122,21 @@ module.exports.metadataExists = async () => {
                 {
                     console.log("Data exists")
 
-                    const result = { dataExists:true, data:data }
+                    const result = { metadataExists:true, data:data }
 
                     return result;
                 }
         
                 else 
                 {
-                    const result = { dataExists:false, error: "No Data" }
+                    const result = { metadataExists:false, error: "No Data" }
 
                     return result;
                 }
             })
             .catch(err => {
 
-                const result = { dataExists:false,"error":err } 
+                const result = { metadataExists:false,"error":err } 
 
                 return result;
         
@@ -146,7 +146,7 @@ module.exports.metadataExists = async () => {
         catch(err) 
         {
             const result = {
-                dataExists:false,
+                metadataExists:false,
                 statusCode: 500,
                 headers: { 'Content-Type': 'text/plain' },
                 body: 'Problem finding PropertyMeta Info.',
@@ -213,7 +213,7 @@ module.exports.ismetadataNew = async (lastModified) => {
 }
 
 // Delete all PropertyMetas from the database.
-module.exports.deleteAll = async () => {
+module.exports.metaDeleteAll = async () => {
        
             try 
             {
@@ -224,13 +224,13 @@ module.exports.deleteAll = async () => {
                     truncate: false
                 })
                 .then(nums => {
-                    const result = { dataDeleted:true }
+                    const result = { metadataDeleted:true, error:null }
 
                     return result;
                 })
                 .catch(err => {
 
-                    const result = { dataDeleted:false, "err":err }
+                    const result = { metadataDeleted:false, error:err }
 
                     return result;
 
@@ -240,10 +240,11 @@ module.exports.deleteAll = async () => {
             catch(err) 
             {
                 const result = {
-                    dataDeleted:false,
+                    metadataDeleted:false,
                     statusCode: 500,
                     headers: { 'Content-Type': 'text/plain' },
-                    body: 'Problem Deleting Property Meta.'
+                    body: 'Problem Deleting Property Meta.',
+                    error: err
                 }
     
                 return result;

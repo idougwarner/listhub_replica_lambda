@@ -4,8 +4,8 @@ const request = require('request');
 const fs = require("fs");
 const stream = require("stream");
 
-const properties = require("./controllers/property.controller");
-const propertyMeta = require("./controllers/propertymeta.controller");
+const { propertyCreate, propertyBulkCreate, propertyDataExists, propertyDeleteAll, propertyFindAll } = require("./controllers/property.controller");
+const { metaCreate, metaDataExists, metaFindAll, metaDeleteAll, ismetadataNew } = require("./controllers/propertymeta.controller");
 
 const { metaURL, replicationURL, token } = require("./config/url");
 
@@ -628,6 +628,9 @@ module.exports.run = async (event, context) => {
 };
 
 module.exports.fetchListingsData = async (event, context) => {
+
+  console.log("Inside FetchListings")
+
   // Call Metadata URL to get necessary data
   axios.get(metaURL, {
     headers: {
@@ -637,19 +640,16 @@ module.exports.fetchListingsData = async (event, context) => {
       .then(response => {                       
         
         console.log(response.data);           
-        
-        // this is the response body from Listhub (https://api.listhub.com/replication/metadata)
-    
-        // Check if metadata is newer than what is stored
     
         console.log("Last Modified is "+response.data.LastModified);
         console.log("Content Length: "+response.data.ContentLength);
         console.log("Etag Value: "+response.data.Etag);
       
-        // CHECK IF PRODUCT LISTING DATA EXISTS AND POPULATE
-        properties.propertydataExists().then(data => {
+        // CHECK IF PRODUCT LISTING DATA EXISTS AND IF NOT POPULATE OUR TABLE
+
+        const {dataExists} = await propertyDataExists();
           
-          if(data.dataExists!==true) {
+          if(!dataExists) {
     
             // Pass value to replication function
             // This replicate function is populating data for the first time
@@ -672,37 +672,26 @@ module.exports.fetchListingsData = async (event, context) => {
     
           }
     
-          // If it does exist do nothing unless the metadata suggests that there is an update on listings
-    
-        }).catch(err => {
-          console.log("Error checking Property Listing Data"+err);
-        })
-    
         // CHECK WHETHER PROPERTY METADATA EXISTS AND IF NOT CREATE NEW METADATA
-        propertyMeta.metadataExists().then((metadata) => {
-    
-          console.log("Exists data promise:"+data);
+        const {metadataExists} = await metaDataExists()
+
     
           // If metadata does not exist then store to database
-          if(metadata.dataExists!==true) {
+          if(!metadataExists) {
     
             // Store the new Metadata
-            propertyMeta.create(response.data).then(data => {
+            const {metadataAdded} = await metaCreate()
               
               // Check if meta has been stored
-              if(data.dataAdded) {
+              if(metadataAdded) {
                 console.log("New metadata has been created");
               }
-    
-            }).catch(err=> {
-              console.log("Error creating new MetaData"+err);
-            });
           }
     
           // Check if Property listing exists and populate if not
-          properties.propertydataExists().then(data => {
+          const { dataExists } = await propertyDataExists()
             
-            if(data.dataExists!==true) {
+            if(!dataExists) {
               // Call Replicate data to populate new data
               newListData({"storeType":"new", "contentLength":response.data.ContentLength}).then(data => {
     
@@ -720,30 +709,29 @@ module.exports.fetchListingsData = async (event, context) => {
             else {
               console.log("Product listing data exists");
             }
-    
-          }).catch(err => {
-            console.log('Error No Product list data'+err);
-          })
                       
           // Compare stored meta data and new meta data coming in from Metadata URL to see if we have new listings
-          propertyMeta.ismetadataNew(response.data.LastModified).then((data) => {
-            
-            console.log("New listings ready for download: "+data.newUpdate);
+          const { newUpdate } = await ismetadataNew()
     
-            if(data.newUpdate===true) {
-              
+            if(newUpdate===true) {
+
+              console.log("New listings ready for download: ");
+
               // If new metadata detected delete old metadata and save new metadata and call replicationData to download new listings
-              propertyMeta.deleteAll().then(data => {
+              const { metadataDeleted, error } = await metaDeleteAll()
     
-                if(data.deleted)
+                if(metadataDeleted)
                 {
                   // Store the new Metadata
-                  propertyMeta.create(response.data).then(data => {
+
+                  const {metadataAdded} = await metaCreate()
+                  
+                  if(metadataAdded){
                     
                     console.log("New Metadata"+JSON.stringify(data));
     
                     // Request new Product Listing data to property listing
-                    newListData({ "storeType":"newDownload", "contentLength":response.data.ContentLength }).then(data => {
+                    newListData({ storeType:"newDownload", contentLength:response.data.ContentLength }).then(data => {
     
                       if(data.dataAdded){
                         console.log("New Property Listings downloaded");
@@ -754,30 +742,19 @@ module.exports.fetchListingsData = async (event, context) => {
                     console.log("Error replicating data"+err)
     
                     });
-    
-                  }).catch(err=> {
-                    console.log(err);
-                  });
+                  }
+                  else {
+                    console.log('Problem Adding new Meta Data')
+                  }
                 }
-    
-              }).catch(err =>{
-                console.log('Error deleting old metadata'+err);
-              })
+                else {
+                  console.log('Problem deleting Meta Data '+error)
+                }
             }
     
             else {
               // Do nothing to existing listings
             }
-            
-          }).catch(err => {
-            console.log("No new listing data promise Error is"+err);
-          });
-    
-        }).catch(err => {
-    
-          console.log("Problem checking metadata"+err);
-    
-        });
     
       })
       .catch(error => {

@@ -1,7 +1,7 @@
 const connectToDatabase = require("../models");
 
 // Create and Save a new Property Listing
-module.exports.create = async (jsonData) => {
+module.exports.propertyCreate = async (jsonData) => {
 
         // Validate request
         if (!jsonData) {
@@ -50,7 +50,7 @@ module.exports.create = async (jsonData) => {
         }
 };
 
-module.exports.bulkCreate = async (jsonData) => {
+module.exports.propertyBulkCreate = async (jsonData) => {
 
         // Validate request
         if (!jsonData) {
@@ -91,7 +91,7 @@ module.exports.bulkCreate = async (jsonData) => {
 };
 
 // Retrieve all Properties from the database.
-module.exports.findAll = async () => {
+module.exports.propertyFindAll = async () => {
 
         try {
             const { Property } = await connectToDatabase()
@@ -138,7 +138,7 @@ module.exports.findAll = async () => {
 
 };
 
-module.exports.propertydataExists = async () => {
+module.exports.propertyDataExists = async () => {
 
         try {
             const { Property } = await connectToDatabase()
@@ -185,7 +185,7 @@ module.exports.propertydataExists = async () => {
 };
 
 // Delete all Properties from the database.
-module.exports.deleteAll = async () => {
+module.exports.propertyDeleteAll = async () => {
 
         try {
             const { Property } = await connectToDatabase()

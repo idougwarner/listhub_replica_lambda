@@ -30,17 +30,15 @@ class JsonLinesTransform extends stream.Transform {
 }
 
 // Retrieve new streamed data and store to database
-const newListData = (type) => {
-
-  return new Promise((resolve, reject) => {
-      
+const newListData = async (type) => {
+     
       // Create a time object and store start time we want stream to read data for 7 minutes. 
       /* It is possible to finish reading all data in the seven minutes */
       let startTime = new Date();
 
       const Etag="";
 
-      if(type.storeType==="new")
+      if(type.storeType=="new")
       {
 
           const getSize = (bytes) => {
@@ -64,22 +62,7 @@ const newListData = (type) => {
           else if(bytes < teraBytes) return { "bytes": (bytes / gigaBytes).toFixed(decimal), "type":"GB" };
 
           }
-          
-      
 
-      /*
-        const determineChunkRange = (startOfRange, endOfRange) => {
-            
-            // 1 Mib = 1,048,576 B.
-            // Only byteSize chunks will be downloaded till the end where we get the remainder.
-            const MiB = byteSize;
-            const chunkSize = MiB * 1048576;
-            const startOfRange = step === 0 ? 0 + ((chunkSize * step)) : 1 + ((chunkSize * step));
-            const endOfRange = startOfRange + chunkSize;
-        
-            return { 'startOfRange' : startOfRange, 'endOfRange': endOfRange }
-        }
-      */
 
         // Extract new data and store Etag and sequence
         // Run get request to read data to file then read the data to the database
@@ -236,6 +219,7 @@ const newListData = (type) => {
                   and no data is left
                 */
                 var lastRecord=JSON.parse(mylist[mylist.length()-1]);
+                
                 var metarecords={"Etag":Etag,"sequence":lastRecord.sequence};
 
                 // Create a json file that stores Etag and Sequence value
@@ -245,41 +229,43 @@ const newListData = (type) => {
 
                 } catch (err) {
 
-                  reject(new Error(""+err))
+                  return {listdataAdded: false, listerror: "Failed to store metavalues"}
 
                 }
                 
                 const listings1 = JSON.parse(mylist);
-                
-                properties.bulkCreate(listings1).then(data => {
+
+                // Create All Property Listings at once
+
+                const {dataAdded, error} = await propertyBulkCreate()
                             
-                  if(data.dataAdded) {
-                    resolve({ dataAdded:true, })
-                  }
+                if(dataAdded) {
+                  const result = { listdataAdded:dataAdded, listerror: error }
+                  return result;
+                }
 
-                }).catch(err => {
-
-                  reject(new Error("Erro Adding Product Listing data"+err));
-
-                });
+                else {
+                  const result = {listdataAdded: dataAdded, listerror: error}
+                  return result;
+                }
 
             }) // End of Input Stream
 
         } // End while
 
-      }
+      }// End of new download
 
       // Fresh listings download
       else if(type.storeType==="newDownload") {
 
-        properties.propertydataExists().then(data => {
+        const {dataExists} = await propertyDataExists()
         
-          if(data.dataExists) {
+          if(dataExists) {
             
             // Delete old data and put new data
-            properties.deleteAll().then(data => {
-  
-              if(data.deleted) {
+            const {dataDeleted, error} = await propertyDeleteAll()
+            
+              if(dataDeleted) {
 
                 const getSize = (bytes) => {
                   var marker = 1024;
@@ -302,22 +288,6 @@ const newListData = (type) => {
                   else if(bytes < teraBytes) return { "bytes": (bytes / gigaBytes).toFixed(decimal), "type":"GB" };
         
                   }
-                  
-              
-        
-              /*
-                const determineChunkRange = (startOfRange, endOfRange) => {
-                    
-                    // 1 Mib = 1,048,576 B.
-                    // Only byteSize chunks will be downloaded till the end where we get the remainder.
-                    const MiB = byteSize;
-                    const chunkSize = MiB * 1048576;
-                    const startOfRange = step === 0 ? 0 + ((chunkSize * step)) : 1 + ((chunkSize * step));
-                    const endOfRange = startOfRange + chunkSize;
-                
-                    return { 'startOfRange' : startOfRange, 'endOfRange': endOfRange }
-                }
-              */
         
                 // Extract new data and store Etag and sequence
                 // Run get request to read data to file then read the data to the database
@@ -483,34 +453,33 @@ const newListData = (type) => {
         
                         } catch (err) {
         
-                          reject(new Error(""+err))
+                          return {listerror: "Failed to store metavalues", listdataAdded: false}
         
                         }
                         
                         const listings1 = JSON.parse(mylist);
-                        
-                        properties.bulkCreate(listings1).then(data => {
-                                    
-                          if(data.dataAdded) {
-                            resolve({ dataAdded:true, })
-                          }
-        
-                        }).catch(err => {
-        
-                          reject(new Error("Erro Adding Product Listing data"+err));
-        
-                        });
+
+                        const {dataAdded, error} = await propertyBulkCreate()
+                            
+                        if(dataAdded) {
+                          const result = { listdataAdded:true, listerror: error }
+                          return result;
+                        }
+
+                        else {
+                          const result = {listdataAdded: dataAdded, listerror: error}
+                          return result;
+                        }
         
                     }) // End of Input Stream
         
                 } // End while
               } // Data deleted successfully
-  
-            }).catch(err=>{
-  
-              reject(new Error("Problem deleting old Property listing data"+err));
-  
-            })
+
+              else {
+                result = {listdataDeleted:dataDeleted, listerror:error}
+                return result;
+              }  
           }
   
           else {
@@ -588,28 +557,22 @@ const newListData = (type) => {
   
                   const listings1 = JSON.parse(mylist);
   
-                  properties.bulkCreate(listings1).then(data => {
-                              
-                    if(data.dataAdded) {
-                      resolve({ dataAdded:true, })
-                    }
-  
-                  }).catch(err => {
-  
-                    reject(new Error("Erro Adding Product Listing data"+err));                            
-  
-                  });
+                  const {dataAdded, error} = await propertyBulkCreate()
+                            
+                  if(dataAdded) {
+                    const result = { listdataAdded:true, listerror: error }
+                    return result;
+                  }
+
+                  else {
+                    const result = {listdataAdded: dataAdded, listerror: error}
+                    return result;
+                  }
                     
                 })    
-          }
-  
-        }).catch( err=> {
-  
-          reject(new Error("Problem checking if Property listing data exists"+err));
-        })
-      }     
-               
-  });
+          } // End of fresh data download 
+        
+      }
 }
 
 module.exports.run = async (event, context) => {
@@ -653,22 +616,18 @@ module.exports.fetchListingsData = async (event, context) => {
     
             // Pass value to replication function
             // This replicate function is populating data for the first time
+
+            const data= { storeType:"new", contentLength: response.data.ContentLength }
+
+            const {listdataAdded, listerror} = await newListData(data)
     
-            newListData({"storeType":"new", "contentLength":response.data.ContentLength}).then(data => {
-    
-              if(data.dataAdded==true){
+              if(listdataAdded==true){
                 console.log("Product List Data Added");
               }
     
               else {
                 console.log("Problem adding data");
               }
-    
-            }).catch(err=>{
-              
-              console.log("Error replicating data "+err);
-    
-            });
     
           }
     
@@ -693,17 +652,17 @@ module.exports.fetchListingsData = async (event, context) => {
             
             if(!dataExists) {
               // Call Replicate data to populate new data
-              newListData({"storeType":"new", "contentLength":response.data.ContentLength}).then(data => {
+              const data= { storeType:"new", contentLength: response.data.ContentLength }
+
+              const {listdataAdded, listerror} = await newListData(data)
     
-                if(data.dataAdded){
-                  console.log("New Property Listings downloaded");
-                }
+              if(listdataAdded){
+                console.log("Product List Data Added");
+              }
     
-              }).catch(err=>{
-              
-              console.log("Error replicating data"+err)
-    
-              });              
+              else {
+                console.log("Problem adding data");
+              }            
             }
     
             else {
@@ -728,20 +687,19 @@ module.exports.fetchListingsData = async (event, context) => {
                   
                   if(metadataAdded){
                     
-                    console.log("New Metadata"+JSON.stringify(data));
+                    console.log("New Metadata"+JSON.stringify(data));             
     
-                    // Request new Product Listing data to property listing
-                    newListData({ storeType:"newDownload", contentLength:response.data.ContentLength }).then(data => {
-    
-                      if(data.dataAdded){
-                        console.log("New Property Listings downloaded");
-                      }
-    
-                    }).catch(err=>{
-                    
-                    console.log("Error replicating data"+err)
-    
-                    });
+                    const data= { storeType:"newDownload", contentLength: response.data.ContentLength }
+
+                    const {listdataAdded, listerror} = await newListData(data)
+          
+                    if(listdataAdded){
+                      console.log("Product List Data Added");
+                    }
+          
+                    else {
+                      console.log("Problem adding data");
+                    } 
                   }
                   else {
                     console.log('Problem Adding new Meta Data')

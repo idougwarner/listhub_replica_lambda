@@ -55,7 +55,7 @@ module.exports.propertyBulkCreate = async (jsonData) => {
         // Validate request
         if (!jsonData) {
             
-            const result = { dataAdded:false, data:data };
+            const result = { dataAdded:false, data:null, error: 'No Data to Add' };
 
             return result;
         }
@@ -66,7 +66,7 @@ module.exports.propertyBulkCreate = async (jsonData) => {
             Property.bulkCreate(jsonData)
             .then(data => {
 
-                const result = { dataAdded:true, data:data }
+                const result = { dataAdded:true, data:data, error: null }
 
                 return result;
             })
@@ -83,7 +83,8 @@ module.exports.propertyBulkCreate = async (jsonData) => {
                 dataAdded:false,
                 statusCode: 500,
                 headers: { 'Content-Type': 'text/plain' },
-                body: 'Could not create the Property.'
+                body: 'Could not create the Property.',
+                error: err
             }
 
             return result;   
@@ -196,13 +197,13 @@ module.exports.propertyDeleteAll = async () => {
               })
             .then(nums => {
 
-                const result = { dataDeleted:true }
+                const result = { dataDeleted:true, error:null }
 
                 return result;
             })
             .catch(err => {
 
-                const result = { dataDeleted:false, err:err }
+                const result = { dataDeleted:false, error:err }
 
                 return result;
             });
@@ -213,7 +214,8 @@ module.exports.propertyDeleteAll = async () => {
                 dataDeleted:false,
                 statusCode: 500,
                 headers: { 'Content-Type': 'text/plain' },
-                body: 'Problem Deleting Property Info.'
+                body: 'Problem Deleting Property Info.',
+                error: err
             }
 
             return result;   

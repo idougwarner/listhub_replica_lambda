@@ -3,12 +3,10 @@ const connectToDatabase = require("../models");
 // Create and Save a new Property Listing
 module.exports.create = async (jsonData) => {
 
-    return new Promise((resolve, reject) => {
-
         // Validate request
         if (!jsonData) {
             
-            reject(new Error("Listing data is empty")) ;
+            const result = { "dataAdded":true, "data":data };
         }
 
         // Create a Property Listing
@@ -24,22 +22,30 @@ module.exports.create = async (jsonData) => {
 
            Property.create(property)
             .then(data => {
+                
                 console.log("New Property Data is"+data);
 
-                resolve({dataAdded:true, data:data});
+                const result = { "dataAdded":true, "data":data }
+
+                return result;
             })
             .catch(err => {
-                reject(new Error(err));
+
+                const result = { "dataAdded":false,"error":err } 
+
+                return result;
             });
         }
         catch(err) {
-            reject ({
-                statusCode: err.statusCode || 500,
+
+            const result = {
+                dataAdded:false,
+                statusCode: 500,
                 headers: { 'Content-Type': 'text/plain' },
                 body: 'Could not create the Property.'
-            })
-        }            
-    });
+            }
+            return result;
+        }
 };
 
 module.exports.bulkCreate = async (jsonData) => {

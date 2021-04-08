@@ -101,21 +101,22 @@ const newListData = (type) => {
         
         // Get size of file in either B, KB, MB or GB
         const filetoDownloadSize = getSize(type.ContentLength);
-        const chunks = "";
-        const downloadedSize = 0;
-        const chunkSize = 0;
-        const step=0;
-        const remainingDownloadSize=0;
-        const startOfRange;
-        const endOfRange
+        var chunks = "";
+        var downloadedSize = 0;
+        var chunkSize = 0;
+        var step=0;
+        var remainingDownloadSize=0;
+        var startOfRange;
+        var endOfRange;
                 
         if(fileSize.type == 'MB') {
-          // Check if between 20 and 30 and set chunks to be 5
+          // Check if filesize is between 20MB and 30MB and set chunks to be 5
           if(fileSize<=30 && fileSize>=20) {
             chunks=5; 
           } 
         }
 
+        // If file size is in KB then there is no need to chunk
         else if(fileSize.type=='KB') {
           chunks=1;
         }
@@ -123,8 +124,7 @@ const newListData = (type) => {
         // while downloadedfilesize!=contentLength keep downloading in specified chunks
         while(downloadedSize!=filetoDownloadSize && downloadedSize<filetoDownloadSize) 
         {
-          // Set the chunk size
-
+          
           var rangeValues;
 
           if(chunks==1) {

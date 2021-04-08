@@ -456,7 +456,7 @@ const newListData = async (type) => {
 
               const listings1 = JSON.parse(mylist);
 
-              const { dataAdded, error } = await propertyBulkCreate()
+              const { dataAdded, error } = await propertyBulkCreate(listings1)
 
               if (dataAdded) {
                 const result = { listdataAdded: true, listerror: error }
@@ -554,7 +554,7 @@ const newListData = async (type) => {
 
           const listings1 = JSON.parse(mylist);
 
-          const { dataAdded, error } = await propertyBulkCreate()
+          const { dataAdded, error } = await propertyBulkCreate(listings1)
 
           if (dataAdded) {
             const result = { listdataAdded: true, listerror: error }
@@ -623,7 +623,7 @@ module.exports.fetchListingsData = async (event, context) => {
         }
 
         else {
-          console.log("Problem adding data");
+          console.log("Problem adding data"+listerror);
         }
 
       }

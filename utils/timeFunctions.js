@@ -1,10 +1,3 @@
-/*
-
-var dateStart = new Date("2019-12-18T13:55:20.000Z");
-var dateEnd = new Date("2019-12-18T13:55:21.000Z");
-
-*/
-
 // Newer time A should be more than older time B
 module.exports.istimeANewerthantimeB = (timeA, timeB) => {
 

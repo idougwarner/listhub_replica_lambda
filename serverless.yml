@@ -21,7 +21,7 @@ functions:
   rateHandler:
     handler: handler.run
     events:
-      - schedule: rate(2 hour)
+      - schedule: rate(1 hour)
   fetchListingsData:
     handler: handler.fetchListingsData
     events:

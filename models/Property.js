@@ -4,15 +4,15 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
       autoIncrement: true,
       unique: true,
-      primaryKey: true
+      primaryKey: true,
     },
     ListingKey: {
-      type: Sequelize.TEXT
+      type: Sequelize.TEXT,
     },
     sequence: {
       type: Sequelize.BIGINT,
-      unique: true
-    }
+      unique: true,
+    },
   });
 
   return Property;

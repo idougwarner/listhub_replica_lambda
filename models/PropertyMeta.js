@@ -4,11 +4,11 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
       autoIncrement: true,
       unique: true,
-      primaryKey: true
+      primaryKey: true,
     },
     propertymeta: {
-      type: Sequelize.JSONB
-    }
+      type: Sequelize.JSONB,
+    },
   });
 
   return PropertyMeta;

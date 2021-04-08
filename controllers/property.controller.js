@@ -3,222 +3,218 @@ const connectToDatabase = require("../models");
 // Create and Save a new Property Listing
 module.exports.propertyCreate = async (jsonData) => {
 
-        // Validate request
-        if (!jsonData) {
-            
-            const result = { dataAdded:false, error:'Empty Property' };
+    // Validate request
+    if (!jsonData) {
 
-            return result;
-        }
+        const result = { dataAdded: false, error: 'Empty Property' };
 
-        // Create a Property Listing
-        const property = {
-            listingKey: jsonData.ListingKey,
-            sequence: jsonData.sequence
-        };
+        return result;
+    }
 
-        console.log("Listing Key "+property.listingKey);
+    // Create a Property Listing
+    const property = {
+        listingKey: jsonData.ListingKey,
+        sequence: jsonData.sequence
+    };
 
-        try {
-           const { Property } = await connectToDatabase()
+    console.log("Listing Key " + property.listingKey);
 
-           Property.create(property)
+    try {
+        const { Property } = await connectToDatabase()
+
+        Property.create(property)
             .then(data => {
-                
-                console.log("New Property Data is"+data);
 
-                const result = { dataAdded:true, data:data }
+                console.log("New Property Data is" + data);
+
+                const result = { dataAdded: true, data: data }
 
                 return result;
             })
             .catch(err => {
 
-                const result = { dataAdded:false, error:err } 
+                const result = { dataAdded: false, error: err }
 
                 return result;
             });
-        }
-        catch(err) {
+    }
+    catch (err) {
 
-            const result = {
-                dataAdded:false,
-                statusCode: 500,
-                headers: { 'Content-Type': 'text/plain' },
-                body: 'Could not create the Property.'
-            }
-            return result;
+        const result = {
+            dataAdded: false,
+            statusCode: 500,
+            headers: { 'Content-Type': 'text/plain' },
+            body: 'Could not create the Property.'
         }
+        return result;
+    }
 };
 
 module.exports.propertyBulkCreate = async (jsonData) => {
 
-        // Validate request
-        if (!jsonData) {
-            
-            const result = { dataAdded:false, data:null, error: 'No Data to Add' };
+    // Validate request
+    if (!jsonData) {
 
-            return result;
-        }
+        const result = { dataAdded: false, data: null, error: 'No Data to Add' };
 
-        try {
-            const { Property } = await connectToDatabase()
+        return result;
+    }
 
-            Property.bulkCreate(jsonData)
+    try {
+        const { Property } = await connectToDatabase()
+
+        Property.bulkCreate(jsonData)
             .then(data => {
 
-                const result = { dataAdded:true, data:data, error: null }
+                const result = { dataAdded: true, data: data, error: null }
 
                 return result;
             })
             .catch(err => {
-                
-                const result = { dataAdded:false, error:err } 
+
+                const result = { dataAdded: false, error: err }
 
                 return result;
             });
-        }
-        catch(err) {
-            
-            const result = {
-                dataAdded:false,
-                statusCode: 500,
-                headers: { 'Content-Type': 'text/plain' },
-                body: 'Could not create the Property.',
-                error: err
-            }
+    }
+    catch (err) {
 
-            return result;   
+        const result = {
+            dataAdded: false,
+            statusCode: 500,
+            headers: { 'Content-Type': 'text/plain' },
+            body: 'Could not create the Property.',
+            error: err
         }
+
+        return result;
+    }
 };
 
 // Retrieve all Properties from the database.
 module.exports.propertyFindAll = async () => {
 
-        try {
-            const { Property } = await connectToDatabase()
+    try {
+        const { Property } = await connectToDatabase()
 
-            Property.findAll({ raw: true })
+        Property.findAll({ raw: true })
             .then(data => {
-        
-                console.log('Property Listing Data '+data.length);
-        
-                if(data.length!==0)
-                {
+
+                console.log('Property Listing Data ' + data.length);
+
+                if (data.length !== 0) {
                     console.log("Data exists")
 
-                    const result = { dataExists:true, data:data }
+                    const result = { dataExists: true, data: data }
 
                     return result;
                 }
-        
-                else 
-                {
-                    const result = { dataExists:false, error:"No Data" }
+
+                else {
+                    const result = { dataExists: false, error: "No Data" }
 
                     return result;
                 }
             })
             .catch(err => {
-                const result = { dataExists:false, error:err } 
+                const result = { dataExists: false, error: err }
 
                 return result;
             });
-        }
-        catch(err) {
+    }
+    catch (err) {
 
-            const result = {
-                dataExists:false,
-                statusCode: 500,
-                headers: { 'Content-Type': 'text/plain' },
-                body: 'Problem obtain Property Info.',
-                error: err
-            }
-
-            return result;  
+        const result = {
+            dataExists: false,
+            statusCode: 500,
+            headers: { 'Content-Type': 'text/plain' },
+            body: 'Problem obtain Property Info.',
+            error: err
         }
+
+        return result;
+    }
 
 };
 
 module.exports.propertyDataExists = async () => {
 
-        try {
-            const { Property } = await connectToDatabase()
+    try {
+        const { Property } = await connectToDatabase()
 
-            Property.findAll({ raw: true })
+        Property.findAll({ raw: true })
             .then(data => {
-        
-                console.log('Property Listing Data '+data.length);
-        
-                if(data.length!==0)
-                {
+
+                console.log('Property Listing Data ' + data.length);
+
+                if (data.length !== 0) {
                     console.log("Data exists")
 
-                    const result = { dataExists:true, data:data }
+                    const result = { dataExists: true, data: data }
 
                     return result;
                 }
-        
-                else 
-                {
-                    const result = { dataExists:false, error: "No Data" }
+
+                else {
+                    const result = { dataExists: false, error: "No Data" }
 
                     return result;
                 }
             })
             .catch(err => {
-                const result = { dataExists:false, error:err } 
+                const result = { dataExists: false, error: err }
 
                 return result;
             });
-        }
-        catch(err) {
+    }
+    catch (err) {
 
-            const result = {
-                dataExists:false,
-                statusCode: 500,
-                headers: { 'Content-Type': 'text/plain' },
-                body: 'Problem finding Property Info.'
-            }
-
-            return result;  
+        const result = {
+            dataExists: false,
+            statusCode: 500,
+            headers: { 'Content-Type': 'text/plain' },
+            body: 'Problem finding Property Info.'
         }
+
+        return result;
+    }
 
 };
 
 // Delete all Properties from the database.
 module.exports.propertyDeleteAll = async () => {
 
-        try {
-            const { Property } = await connectToDatabase()
+    try {
+        const { Property } = await connectToDatabase()
 
-            Property.destroy({
-                where: {},
-                truncate: false
-              })
+        Property.destroy({
+            where: {},
+            truncate: false
+        })
             .then(nums => {
 
-                const result = { dataDeleted:true, error:null }
+                const result = { dataDeleted: true, error: null }
 
                 return result;
             })
             .catch(err => {
 
-                const result = { dataDeleted:false, error:err }
+                const result = { dataDeleted: false, error: err }
 
                 return result;
             });
-        }
-        catch(err) {
+    }
+    catch (err) {
 
-            const result = {
-                dataDeleted:false,
-                statusCode: 500,
-                headers: { 'Content-Type': 'text/plain' },
-                body: 'Problem Deleting Property Info.',
-                error: err
-            }
-
-            return result;   
+        const result = {
+            dataDeleted: false,
+            statusCode: 500,
+            headers: { 'Content-Type': 'text/plain' },
+            body: 'Problem Deleting Property Info.',
+            error: err
         }
- 
+
+        return result;
+    }
+
 };

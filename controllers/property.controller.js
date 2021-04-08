@@ -6,7 +6,9 @@ module.exports.create = async (jsonData) => {
         // Validate request
         if (!jsonData) {
             
-            const result = { "dataAdded":true, "data":data };
+            const result = { dataAdded:false, error:'Empty Property' };
+
+            return result;
         }
 
         // Create a Property Listing
@@ -25,13 +27,13 @@ module.exports.create = async (jsonData) => {
                 
                 console.log("New Property Data is"+data);
 
-                const result = { "dataAdded":true, "data":data }
+                const result = { dataAdded:true, data:data }
 
                 return result;
             })
             .catch(err => {
 
-                const result = { "dataAdded":false,"error":err } 
+                const result = { dataAdded:false, error:err } 
 
                 return result;
             });
@@ -50,12 +52,12 @@ module.exports.create = async (jsonData) => {
 
 module.exports.bulkCreate = async (jsonData) => {
 
-    return new Promise((resolve, reject) => {
-
         // Validate request
         if (!jsonData) {
             
-            reject(new Error("Listing data is empty")) ;
+            const result = { dataAdded:false, data:data };
+
+            return result;
         }
 
         try {
@@ -64,20 +66,28 @@ module.exports.bulkCreate = async (jsonData) => {
             Property.bulkCreate(jsonData)
             .then(data => {
 
-                resolve({dataAdded:true, data:data});
+                const result = { dataAdded:true, data:data }
+
+                return result;
             })
             .catch(err => {
-                reject(new Error(err));
+                
+                const result = { dataAdded:false, error:err } 
+
+                return result;
             });
         }
         catch(err) {
-            reject ({
-                statusCode: err.statusCode || 500,
+            
+            const result = {
+                dataAdded:false,
+                statusCode: 500,
                 headers: { 'Content-Type': 'text/plain' },
-                body: 'Could not create the Properties.'
-            })   
+                body: 'Could not create the Property.'
+            }
+
+            return result;   
         }
-    });
 };
 
 // Retrieve all Properties from the database.
@@ -95,32 +105,42 @@ module.exports.findAll = () => {
                 if(data.length!==0)
                 {
                     console.log("Data exists")
-                    resolve({dataExists:true,data:data});
+
+                    const result = { dataExists:true, data:data }
+
+                    return result;
                 }
         
                 else 
                 {
-                    resolve({dataExists:false});
+                    const result = { dataExists:false, error:"No Data" }
+
+                    return result;
                 }
             })
             .catch(err => {
-            reject(new Error("Problem accessing data error is"));
+                const result = { dataExists:false, error:err } 
+
+                return result;
             });
         }
         catch(err) {
-            reject ({
-                statusCode: err.statusCode || 500,
+
+            const result = {
+                dataExists:false,
+                statusCode: 500,
                 headers: { 'Content-Type': 'text/plain' },
-                body: 'Could not find the Properties.'
-            })   
+                body: 'Problem obtain Property Info.',
+                error: err
+            }
+
+            return result;  
         }
 
       });
 };
 
 module.exports.propertydataExists = () => {
-
-    return new Promise(function(resolve, reject) {
 
         try {
             const { Property } = await connectToDatabase()
@@ -133,32 +153,41 @@ module.exports.propertydataExists = () => {
                 if(data.length!==0)
                 {
                     console.log("Data exists")
-                    resolve({dataExists:true,data:data});
+
+                    const result = { dataExists:true, data:data }
+
+                    return result;
                 }
         
                 else 
                 {
-                    resolve({dataExists:false});
+                    const result = { dataExists:false, error: "No Data" }
+
+                    return result;
                 }
             })
             .catch(err => {
-            reject(new Error("Problem accessing data error is"));
+                const result = { dataExists:false, error:err } 
+
+                return result;
             });
         }
         catch(err) {
-            reject ({
-                statusCode: err.statusCode || 500,
+
+            const result = {
+                dataExists:false,
+                statusCode: 500,
                 headers: { 'Content-Type': 'text/plain' },
-                body: 'Could not find Properties.'
-            })  
+                body: 'Problem finding Property Info.'
+            }
+
+            return result;  
         }
-      });
+
 };
 
 // Delete all Properties from the database.
 module.exports.deleteAll = () => {
-
-    return new Promise(function(resolve, reject) {
 
         try {
             const { Property } = await connectToDatabase()
@@ -168,19 +197,28 @@ module.exports.deleteAll = () => {
                 truncate: false
               })
             .then(nums => {
-                resolve({ message:'Property List was deleted successfully!', deleted:true});
+
+                const result = { dataDeleted:true }
+
+                return result;
             })
             .catch(err => {
-                reject({message:"Some error occurred while removing Property Listings.", "err":err });
+
+                const result = { dataDeleted:false, err:err }
+
+                return result;
             });
         }
         catch(err) {
-            reject ({
-                statusCode: err.statusCode || 500,
-                headers: { 'Content-Type': 'text/plain' },
-                body: 'Could not delete the Properties.'
-            })   
-        }
 
-      }); 
+            const result = {
+                dataDeleted:false,
+                statusCode: 500,
+                headers: { 'Content-Type': 'text/plain' },
+                body: 'Problem Deleting Property Info.'
+            }
+
+            return result;   
+        }
+ 
 };

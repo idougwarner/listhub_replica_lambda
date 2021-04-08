@@ -3,13 +3,13 @@ const TimeUtil=require("../utils/timeFunctions");
 
 // Create and Save a new ProperyMeta
 module.exports.create = (jsonData) => {
-
-    return new Promise((resolve, reject) => {
         
         // Validate request
         if (!jsonData) {
             
-            reject(new Error("Listing Meta data is empty")) ;
+            const result = { dataAdded:false, error:'' };
+
+            return result;
         }
 
         // Create a Property Listing
@@ -28,31 +28,35 @@ module.exports.create = (jsonData) => {
 
                     console.log("New Meta Data is"+data);
 
-                    resolve({dataAdded:true});
+                    const result = { dataAdded:true, data:data }
+
+                    return result;
 
                 })
                 .catch(err => {
 
-                    reject(new Error("Some error occurred while creating the PropertyMeta."));
+                    const result = { dataAdded:false, error:err } 
+
+                    return result;
 
                 });
             }
 
             catch(err) 
             {
-                reject ({
-                    statusCode: err.statusCode || 500,
+                const result = {
+                    dataAdded:false,
+                    statusCode: 500,
                     headers: { 'Content-Type': 'text/plain' },
-                    body: 'Could not create the Property.'
-                })
-            }       
-    });
+                    body: 'Could not create the PropertyMeta.'
+                }
+
+                return result;
+            }
 };
 
 // Retrieve all Propertymeta from the database.
 module.exports.findAll = (req, res) => {
-
-    return new Promise((resolve, reject) => {
 
         try 
         {
@@ -66,30 +70,40 @@ module.exports.findAll = (req, res) => {
                 if(data.length!==0)
                 {
                     console.log("Data exists")
-                    resolve({dataExists:true,data:data});
+
+                    const result = { dataExists:true, data:data }
+
+                    return result;
                 }
         
                 else 
                 {
-                    resolve({dataExists:false});
+                    const result = { dataExists:false, error: "No Data" }
+
+                    return result;
                 }
             })
             .catch(err => {
-                reject(new Error("Problem accessing data error is"));
+                const result = { dataExists:false, error:err } 
+
+                return result;
         
             });
         }
 
         catch(err) 
         {
-            reject ({
-                statusCode: err.statusCode || 500,
+            const result = {
+                dataExists:false,
+                statusCode: 500,
                 headers: { 'Content-Type': 'text/plain' },
-                body: 'Could not find the PropertyMeta.'
-            })
+                body: 'Problem obtain PropertyMeta Info.',
+                error: err
+            }
+
+            return result; 
         }
         
-    });
 };
 
 // Check if there is Metadata data
@@ -109,27 +123,39 @@ module.exports.metadataExists = () => {
                 if(data.length!==0)
                 {
                     console.log("Data exists")
-                    resolve({dataExists:true,data:data});
+
+                    const result = { dataExists:true, data:data }
+
+                    return result;
                 }
         
                 else 
                 {
-                    resolve({dataExists:false});
+                    const result = { dataExists:false, error: "No Data" }
+
+                    return result;
                 }
             })
             .catch(err => {
-                reject(new Error("Problem accessing data error is"));
+
+                const result = { dataExists:false,"error":err } 
+
+                return result;
         
             });
         }
 
         catch(err) 
         {
-            reject ({
-                statusCode: err.statusCode || 500,
+            const result = {
+                dataExists:false,
+                statusCode: 500,
                 headers: { 'Content-Type': 'text/plain' },
-                body: 'Could not find the PropertyMeta.'
-            })
+                body: 'Problem finding PropertyMeta Info.',
+                error: err
+            }
+
+            return result; 
         }
     });
 };
@@ -137,8 +163,6 @@ module.exports.metadataExists = () => {
 module.exports.ismetadataNew = (lastModified) => {
 
     // Check whether there is data before comparing otherwise store the new data
-    return new Promise(function(resolve, reject) {
-
         try 
         {
             const { PropertyMeta } = await connectToDatabase()
@@ -152,44 +176,48 @@ module.exports.ismetadataNew = (lastModified) => {
                     data.map((propertyMeta) => {
                         //console.log(propertyMeta.propertymeta.LastModified);
                         TimeUtil.istimeANewerthantimeB(lastModified,propertyMeta.propertymeta.LastModified).then(data => {
+
                             if(data.newUpdate)
                             {
-                                resolve({"newUpdate":true});
+                                const result = { newUpdate: true }
+                                return result;
                             }
                             else {
-                                resolve({"newUpdate":false});
+                                const result = { newUpdate: false }
+                                return result;
                             }
                             
                         }).catch(err => {
                             console.log("Catch error after time check")
-                            reject(new Error(err))
+                            const result = { newUpdate: false, error: err }
+                            return result;
                         });
                     })
                 }            
             })
             .catch(err => {
                 console.log("Checking new metadata fail");
-            reject(new Error(err));
-
+                const result = { newUpdate: false, error: err }
+                return result;
             });
         }
 
         catch(err) 
         {
-            reject ({
-                statusCode: err.statusCode || 500,
+            const result = {
+                newUpdate:false,
+                statusCode: 500,
                 headers: { 'Content-Type': 'text/plain' },
-                body: 'Could not check the PropertyMeta.'
-            })
+                body: 'Problem Deleting Property Info.'
+            }
+
+            return result; 
         }
-      });
 }
 
 // Delete all PropertyMetas from the database.
 module.exports.deleteAll = () => {
-
-    return new Promise(function(resolve, reject) {
-        
+       
             try 
             {
                 const { PropertyMeta } = await connectToDatabase()
@@ -199,20 +227,28 @@ module.exports.deleteAll = () => {
                     truncate: false
                 })
                 .then(nums => {
-                    resolve({ message:'Meta was deleted successfully!', deleted:true});
+                    const result = { dataDeleted:true }
+
+                    return result;
                 })
                 .catch(err => {
-                    reject({message:"Some error occurred while removing Property Meta." });
+
+                    const result = { dataDeleted:false, "err":err }
+
+                    return result;
+
                 });
             }
     
             catch(err) 
             {
-                reject ({
-                    statusCode: err.statusCode || 500,
+                const result = {
+                    dataDeleted:false,
+                    statusCode: 500,
                     headers: { 'Content-Type': 'text/plain' },
-                    body: 'Could not delete the PropertyMeta.'
-                })
+                    body: 'Problem Deleting Property Meta.'
+                }
+    
+                return result;
             }
-      });
 };

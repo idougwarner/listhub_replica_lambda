@@ -101,13 +101,13 @@ const newListData = (type) => {
         
         // Get size of file in either B, KB, MB or GB
         const filetoDownloadSize = getSize(type.ContentLength);
-        var chunks = "";
-        var downloadedSize = 0;
-        var chunkSize = 0;
-        var step=0;
-        var remainingDownloadSize=0;
-        var startOfRange;
-        var endOfRange;
+        let chunks = "";
+        let downloadedSize = 0;
+        let chunkSize = 0;
+        let step=0;
+        let remainingDownloadSize=0;
+        let startOfRange;
+        let endOfRange;
                 
         if(fileSize.type == 'MB') {
           // Check if filesize is between 20MB and 30MB and set chunks to be 5

@@ -344,8 +344,8 @@ const newListData = (type) => {
                 const chunkSize = 0;
                 const step=0;
                 const remainingDownloadSize=0;
-                const startOfRange;
-                const endOfRange
+                const startOfRange=0;
+                const endOfRange=0;
                         
                 if(fileSize.type == 'MB') {
                   // Check if between 20 and 30 and set chunks to be 5

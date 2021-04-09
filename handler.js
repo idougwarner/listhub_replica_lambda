@@ -49,16 +49,16 @@ const newListData = async (type) => {
       var teraBytes = marker * gigaBytes; // One TB is 1024 GB
 
       // return bytes if less than a KB
-      if (bytes < kiloBytes) return { "bytes": bytes, "type": "Bytes" };
+      if (bytes < kiloBytes) return { bytes: bytes, type: "Bytes" };
 
       // return KB if less than a MB
-      else if (bytes < megaBytes) return { "bytes": ((bytes / kiloBytes).toFixed(decimal)), "type": "KB" };
+      else if (bytes < megaBytes) return { bytes: ((bytes / kiloBytes).toFixed(decimal)), type: "KB" };
 
       // return MB if less than a GB
-      else if (bytes < gigaBytes) return { "bytes": (bytes / megaBytes).toFixed(decimal), "type": "MB" };
+      else if (bytes < gigaBytes) return { bytes: (bytes / megaBytes).toFixed(decimal), type: "MB" };
 
       // return GB if less than a TB
-      else if (bytes < teraBytes) return { "bytes": (bytes / gigaBytes).toFixed(decimal), "type": "GB" };
+      else if (bytes < teraBytes) return { bytes: (bytes / gigaBytes).toFixed(decimal), type: "GB" };
 
     }
 
@@ -91,15 +91,15 @@ const newListData = async (type) => {
     let startOfRange;
     let endOfRange;
 
-    if (fileSize.type == 'MB') {
+    if (filetoDownloadSize.type == 'MB') {
       // Check if filesize is between 20MB and 30MB and set chunks to be 5
-      if (fileSize <= 30 && fileSize >= 20) {
+      if (filetoDownloadSize.bytes <= 30 && filetoDownloadSize >= 20) {
         chunks = 5;
       }
     }
 
     // If file size is in KB then there is no need to chunk
-    else if (fileSize.type == 'KB') {
+    else if (filetoDownloadSize.type == 'KB') {
       chunks = 1;
     }
 
@@ -113,7 +113,7 @@ const newListData = async (type) => {
       }
 
       else if (chunks == 5) {
-        chunkSize = parseInt(fileSize / chunks) * 1048576;
+        chunkSize = parseInt(filetoDownloadSize.bytes / chunks) * 1048576;
       }
 
 
@@ -315,14 +315,14 @@ const newListData = async (type) => {
         const startOfRange = 0;
         const endOfRange = 0;
 
-        if (fileSize.type == 'MB') {
+        if (filetoDownloadSize.type == 'MB') {
           // Check if between 20 and 30 and set chunks to be 5
-          if (fileSize <= 30 && fileSize >= 20) {
+          if (filetoDownloadSize <= 30 && filetoDownloadSize >= 20) {
             chunks = 5;
           }
         }
 
-        else if (fileSize.type == 'KB') {
+        else if (filetoDownloadSize.type == 'KB') {
           chunks = 1;
         }
 
@@ -337,7 +337,7 @@ const newListData = async (type) => {
           }
 
           else if (chunks == 5) {
-            chunkSize = parseInt(fileSize / chunks) * 1048576;
+            chunkSize = parseInt(filetoDownloadSize.bytes / chunks) * 1048576;
           }
 
 

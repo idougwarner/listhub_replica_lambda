@@ -20,19 +20,20 @@ module.exports.propertyCreate = async (jsonData) => {
   try {
     const { Property } = await connectToDatabase();
 
-    Property.create(property)
-      .then((data) => {
+    const data = await   Property.create(property)
+
+    if(data) {
         console.log("New Property Data is" + data);
 
         const result = { dataAdded: true, data: data };
 
         return result;
-      })
-      .catch((err) => {
-        const result = { dataAdded: false, error: err };
+      }
+      else {
+        const result = { dataAdded: false, error: "Problem Creating Data" };
 
         return result;
-      });
+      }
   } catch (err) {
     const result = {
       dataAdded: false,
@@ -55,17 +56,18 @@ module.exports.propertyBulkCreate = async (jsonData) => {
   try {
     const { Property } = await connectToDatabase();
 
-    Property.bulkCreate(jsonData)
-      .then((data) => {
+    const data = await  Property.bulkCreate(jsonData)
+
+    if(data.length!=0) {
         const result = { dataAdded: true, data: data, error: null };
 
         return result;
-      })
-      .catch((err) => {
-        const result = { dataAdded: false, error: err };
+      }
+      else {
+        const result = { dataAdded: false, error: "Problem creating Listings" };
 
         return result;
-      });
+      }
   } catch (err) {
     const result = {
       dataAdded: false,
@@ -84,27 +86,22 @@ module.exports.propertyFindAll = async () => {
   try {
     const { Property } = await connectToDatabase();
 
-    Property.findAll({ raw: true })
-      .then((data) => {
+    const data = await  Property.findAll({ raw: true })   
+
+    if (data.length !== 0) {
+
+        console.log("Data exists");
         console.log("Property Listing Data " + data.length);
 
-        if (data.length !== 0) {
-          console.log("Data exists");
-
-          const result = { dataExists: true, data: data };
-
-          return result;
-        } else {
-          const result = { dataExists: false, error: "No Data" };
-
-          return result;
-        }
-      })
-      .catch((err) => {
-        const result = { dataExists: false, error: err };
+        const result = { dataExists: true, data: data };
 
         return result;
-      });
+    } else {
+        const result = { dataExists: false, error: "No Data" };
+
+        return result;
+    }
+      
   } catch (err) {
     const result = {
       dataExists: false,
@@ -155,20 +152,21 @@ module.exports.propertyDeleteAll = async () => {
   try {
     const { Property } = await connectToDatabase();
 
-    Property.destroy({
-      where: {},
-      truncate: false,
-    })
-      .then((nums) => {
+    const data = await Property.destroy({
+        where: {},
+        truncate: false,
+      })
+
+    if(data.length==0) {
         const result = { dataDeleted: true, error: null };
 
         return result;
-      })
-      .catch((err) => {
-        const result = { dataDeleted: false, error: err };
+      }
+      else {
+        const result = { dataDeleted: false, error: "No Data to delete" };
 
         return result;
-      });
+      };
   } catch (err) {
     const result = {
       dataDeleted: false,

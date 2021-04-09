@@ -605,44 +605,7 @@ module.exports.fetchListingsData = async (event, context) => {
       console.log("Content Length: " + response.data.ContentLength);
       console.log("Etag Value: " + response.data.Etag);
 
-      // CHECK IF PRODUCT LISTING DATA EXISTS AND IF NOT POPULATE OUR TABLE
-
-      const { dataExists } = await propertyDataExists();
-
-      if (!dataExists) {
-
-        // Pass value to replication function
-        // This replicate function is populating data for the first time
-
-        const data = { storeType: "new", contentLength: response.data.ContentLength }
-
-        const { listdataAdded, listerror } = await newListData(data)
-
-        if (listdataAdded == true) {
-          console.log("Product List Data Added");
-        }
-
-        else {
-          console.log("Problem adding data"+listerror);
-        }
-
-      }
-
-      // CHECK WHETHER PROPERTY METADATA EXISTS AND IF NOT CREATE NEW METADATA
-      const { metadataExists } = await metaDataExists()
-
-
-      // If metadata does not exist then store to database
-      if (!metadataExists) {
-
-        // Store the new Metadata
-        const { metadataAdded } = await metaCreate()
-
-        // Check if meta has been stored
-        if (metadataAdded) {
-          console.log("New metadata has been created");
-        }
-      }
+      // CHECK IF PRODUCT LISTING DATA EXISTS AND IF NOT POPULATE THE LISTINGS TABLE
 
       // Check if Property listing exists and populate if not
       const {dataExists } = await propertyDataExists()
@@ -664,6 +627,22 @@ module.exports.fetchListingsData = async (event, context) => {
 
       else {
         console.log("Product listing data exists");
+      }
+
+      // CHECK WHETHER PROPERTY METADATA EXISTS AND IF NOT CREATE NEW METADATA
+      const { metadataExists } = await metaDataExists()
+
+
+      // If metadata does not exist then store to database
+      if (!metadataExists) {
+
+        // Store the new Metadata
+        const { metadataAdded } = await metaCreate()
+
+        // Check if meta has been stored
+        if (metadataAdded) {
+          console.log("New metadata has been created");
+        }
       }
 
       // Compare stored meta data and new meta data coming in from Metadata URL to see if we have new listings

@@ -122,36 +122,31 @@ module.exports.propertyDataExists = async () => {
   try {
     const { Property } = await connectToDatabase();
 
-    Property.findAll({ raw: true })
-      .then((data) => {
-        console.log("Property Listing Data " + data.length);
+    const data = await Property.findAll({ raw: true })
 
-        if (data.length !== 0) {
-          console.log("Data exists");
+    if (data.length !== 0) {
+          
+        console.log("Data exists");
 
-          const result = { dataExists: true, data: data };
+        const result = { dataExists: true, data: data, error: null }
 
-          return result;
-        } else {
-          const result = { dataExists: false, error: "No Data", data: null };
+        return result
 
-          return result;
-        }
-      })
-      .catch((err) => {
-        const result = { dataExists: false, error: err };
+    } else {
+    
+        const result = { dataExists: false, error: "No Data", data: null }
 
-        return result;
-      });
+        return result
+    }
   } catch (err) {
     const result = {
       dataExists: false,
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },
       body: "Problem finding Property Info.",
-    };
+    }
 
-    return result;
+    return result
   }
 };
 

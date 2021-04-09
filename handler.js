@@ -600,8 +600,6 @@ module.exports.fetchListingsData = async (event, context) => {
 
   if(response)
   {
-    console.log(response.data);
-
       console.log("Last Modified is " + response.data.LastModified);
       console.log("Content Length: " + response.data.ContentLength);
       console.log("Etag Value: " + response.data.ETag);
@@ -612,6 +610,7 @@ module.exports.fetchListingsData = async (event, context) => {
       console.log("Data Exists: "+dataExists);
 
       if (!dataExists) {
+        
         // Call Replicate data to populate new data
         const data = { storeType: "new", contentLength: response.data.ContentLength }
 

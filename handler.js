@@ -592,14 +592,15 @@ module.exports.fetchListingsData = async (event, context) => {
   console.log("Inside FetchListings")
 
   // Call Metadata URL to get necessary data
-  axios.get(metaURL, {
+  let response= await axios.get(metaURL, {
     headers: {
       'Authorization': 'Bearer ' + token
     }
   })
-    .then( (response) => {
 
-      console.log(response.data);
+  if(response)
+  {
+    console.log(response.data);
 
       console.log("Last Modified is " + response.data.LastModified);
       console.log("Content Length: " + response.data.ContentLength);
@@ -687,11 +688,7 @@ module.exports.fetchListingsData = async (event, context) => {
         // Do nothing to existing listings
       }
 
-    })
-    .catch(error => {
+  }
 
-      console.log("This is my error: " + error);
-
-    });
 }
 

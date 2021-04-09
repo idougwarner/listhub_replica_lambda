@@ -167,6 +167,7 @@ const fetchListingData = async (type) => {
     // Download the data
     const streamPromise = util.promisify(getInputStream1(rangeValues));
     const response = await streamPromise();
+    
     console.log('response', response.body);
 
     const inputStream = await getInputStream1(rangeValues);

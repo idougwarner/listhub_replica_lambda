@@ -195,8 +195,6 @@ const fetchListingData = async (type) => {
     var listdataAdded;
     var listError;
 
-    const response=inputStream.response;
-
     console.log("Status code " + response);
     // console.log("Etag value " + response.headers["ETag"]);
 
@@ -214,9 +212,10 @@ const fetchListingData = async (type) => {
       }); // End of Input Stream
     */
       const streamPromise = util.promisify(getInputStream1(rangeValues));
-      const response = await streamPromise();
+
+      const response1 = await streamPromise();
         
-      console.log('response', response.body);
+      console.log('response', response1.body);
   
 
     if (listdataAdded) {

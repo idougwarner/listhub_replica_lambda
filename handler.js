@@ -167,7 +167,7 @@ const fetchListingData = async (type) => {
 
     const inputStream = getInputStream1(rangeValues);
 
-    const writeStream = (data) => {
+    const writeStream = async (data) => {
 
       var myjson = data.toString().split("}{");
 

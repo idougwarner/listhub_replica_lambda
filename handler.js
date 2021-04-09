@@ -92,7 +92,7 @@ const fetchListingData = async (type) => {
           "Accept": "application/json",
           "Authorization": "Bearer " + token,
           "Range": "bytes=" + rangeValues.startOfRange + "-" + rangeValues.endOfRange,
-          'If-Range': type.ETag
+          'If-Match': type.ETag
           },
       });
   };

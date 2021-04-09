@@ -195,7 +195,7 @@ const fetchListingData = async (type) => {
     var listdataAdded;
     var listError;
 
-    console.log("Status code " + response);
+    // console.log("Status code " + response);
     // console.log("Etag value " + response.headers["ETag"]);
 
     /*

@@ -183,8 +183,8 @@ const fetchListingData = async (type) => {
     inputStream
       .on("response", (response) => {
         console.log("Status code " + response.statusCode);
-        console.log("Etag value " + response.headers["Etag"]);
-        Etag = response.headers["Etag"];
+        console.log("Etag value " + response.headers["ETag"]);
+        Etag = response.headers["ETag"];
       })
       .pipe(new JsonLinesTransform())
       .pipe(writeStream)
@@ -380,12 +380,13 @@ module.exports.run = async (event, context) => {
 };
 
 module.exports.fetchListingsData = async (event, context) => {
+  
   console.log("Inside FetchListings");
 
   // Call Metadata URL to get necessary data
   let response = await axios.get(metaURL, {
     headers: {
-      Authorization: "Bearer " + token,
+      Authorization: "Bearer " + token
     },
   });
 

@@ -88,8 +88,8 @@ const fetchListingData = async (type) => {
         headers: {
           Accept: "application/json",
           Authorization: "Bearer " + token,
-          Range:
-            "bytes=" + rangeValues.startOfRange + "-" + rangeValues.endOfRange,
+          Range: "bytes=" + rangeValues.startOfRange + "-" + rangeValues.endOfRange,
+          'If-Range': type.ETag
           },
       });
   };
@@ -178,6 +178,7 @@ const fetchListingData = async (type) => {
     // Download the data
    
     const response1 = await getInputStream1(rangeValues);
+    
 
     console.log("Response using Axios"+response1);
 
@@ -468,6 +469,7 @@ module.exports.fetchListingsData = async (event, context) => {
           const data = {
             storeType: "newDownload",
             ContentLength: response.data.ContentLength,
+            ETag: response.data.ETag
           };
 
           const { listdataAdded, listerror } = await newListData(data);

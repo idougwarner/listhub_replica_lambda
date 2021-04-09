@@ -210,29 +210,29 @@ const fetchListingData = async (type) => {
         // Create All Property Listings at once
 
         const { dataAdded, error } = await propertyBulkCreate(listings1);
-        listdataAdded=dataAdded;
-        listError=error
+        listdataAdded = dataAdded;
+        listError = error;
       }); // End of Input Stream
 
-      if (listdataAdded) {
-        // Data was successfully added therefore add step and downloadedSize and proceed to get next chunk in next loop
-        step = step + 1;
+    if (listdataAdded) {
+      // Data was successfully added therefore add step and downloadedSize and proceed to get next chunk in next loop
+      step = step + 1;
 
-        chunkDownloaded = step + 1; // We want to know how many chunks are downloaded
-        downloadedSize = endOfRange;
-        remainingDownloadSize = filetoDownloadSize - downloadedSize;
+      chunkDownloaded = step + 1; // We want to know how many chunks are downloaded
+      downloadedSize = endOfRange;
+      remainingDownloadSize = filetoDownloadSize - downloadedSize;
 
-        result.listAddError = null;
-        result.listdataAdded = listdataAdded;
-        result.datadownloaded = downloadedSize;
-        result.remainingToDownload = remainingDownloadSize;
-      } else {
-        remainingDownloadSize = filetoDownloadSize - downloadedSize;
-        result.remainingToDownload = remainingDownloadSize;
-        result.listAddError = listError;
+      result.listAddError = null;
+      result.listdataAdded = listdataAdded;
+      result.datadownloaded = downloadedSize;
+      result.remainingToDownload = remainingDownloadSize;
+    } else {
+      remainingDownloadSize = filetoDownloadSize - downloadedSize;
+      result.remainingToDownload = remainingDownloadSize;
+      result.listAddError = listError;
 
-        break;
-      }
+      break;
+    }
   } // End While
 
   return result;

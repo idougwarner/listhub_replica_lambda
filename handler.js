@@ -80,8 +80,8 @@ const fetchListingData = async (type) => {
       headers: {
         Accept: "application/json",
         Authorization: "Bearer " + token,
-        Range:
-          "bytes=" + rangeValues.startOfRange + "-" + rangeValues.endOfRange,
+        "Range": "bytes=" + rangeValues.startOfRange + "-" + rangeValues.endOfRange,
+          'If-Match': type.ETag
       },
     });*/
 
@@ -91,8 +91,6 @@ const fetchListingData = async (type) => {
         headers: {
           "Accept": "application/json",
           "Authorization": "Bearer " + token,
-          "Range": "bytes=" + rangeValues.startOfRange + "-" + rangeValues.endOfRange,
-          'If-Match': type.ETag
           },
       });
   };
@@ -116,7 +114,7 @@ const fetchListingData = async (type) => {
     // Check if filesize is between 20MB and 30MB and set chunks to be 5
     if (
       convertedFileDownloadSize.bytes <= 30 &&
-      convertedFileDownloadSize >= 20
+      convertedFileDownloadSize.bytes >= 20
     ) {
       chunks = 5;
     }
@@ -129,6 +127,7 @@ const fetchListingData = async (type) => {
 
   // while downloadedfilesize!=contentLength keep downloading in specified chunks
   console.log("File to download size "+filetoDownloadSize)
+
   while (
     downloadedSize != filetoDownloadSize &&
     downloadedSize < filetoDownloadSize

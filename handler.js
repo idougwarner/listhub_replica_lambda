@@ -3,6 +3,7 @@ const axios = require("axios");
 const request = require("request");
 const fs = require("fs");
 const stream = require("stream");
+const util = require("util");
 
 const {
   propertyBulkCreate,
@@ -164,6 +165,9 @@ const fetchListingData = async (type) => {
     }
 
     // Download the data
+    const streamPromise = util.promisify(getInputStream1(rangeValues));
+    const response = await streamPromise();
+    console.log('response', response.body);
 
     const inputStream = await getInputStream1(rangeValues);
 
@@ -195,7 +199,7 @@ const fetchListingData = async (type) => {
     var listError;
 
     const response=inputStream.response;
-    
+
     console.log("Status code " + response);
     // console.log("Etag value " + response.headers["ETag"]);
 

@@ -85,7 +85,7 @@ const fetchListingData = async (type) => {
       },
     });*/
 
-    console.log("Type"+JSON.stringify(type)+"\nStart range"+rangeValues.startOfRange+"  end range"+rangeValues.endOfRange+" ");
+    console.log("Type"+JSON.stringify(type)+"\n Start range"+rangeValues.startOfRange+"  end range"+rangeValues.endOfRange+" ");
 
       return axios.get(replicationURL, {
         headers: {
@@ -110,6 +110,8 @@ const fetchListingData = async (type) => {
   let startOfRange;
   let endOfRange;
 
+  console.log("Converted file size"+convertedFileDownloadSize.bytes);
+
   if (convertedFileDownloadSize.type == "MB") {
     // Check if filesize is between 20MB and 30MB and set chunks to be 5
     if (
@@ -126,6 +128,7 @@ const fetchListingData = async (type) => {
   }
 
   // while downloadedfilesize!=contentLength keep downloading in specified chunks
+  console.log("File to download size "+filetoDownloadSize)
   while (
     downloadedSize != filetoDownloadSize &&
     downloadedSize < filetoDownloadSize
@@ -136,6 +139,7 @@ const fetchListingData = async (type) => {
       chunkSize = 1024;
     } else if (chunks == 5) {
       chunkSize = parseInt(filetoDownloadSize / chunks) * 1048576;
+      console.log("Chunk size is"+chunkSize);
     }
 
     /* Download the first part of the data and check if remaining download size is less than the chunk size to 

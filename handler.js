@@ -86,9 +86,9 @@ const fetchListingData = async (type) => {
 
       return axios.get(replicationURL, {
         headers: {
-          Accept: "application/json",
-          Authorization: "Bearer " + token,
-          Range: "bytes=" + rangeValues.startOfRange + "-" + rangeValues.endOfRange,
+          "Accept": "application/json",
+          "Authorization": "Bearer " + token,
+          "Range": "bytes=" + rangeValues.startOfRange + "-" + rangeValues.endOfRange,
           'If-Range': type.ETag
           },
       });
@@ -418,6 +418,7 @@ module.exports.fetchListingsData = async (event, context) => {
       const data = {
         storeType: "new",
         ContentLength: response.data.ContentLength,
+        ETag: response.data.ETag
       };
 
       const { listdataAdded, listerror } = await newListData(data);

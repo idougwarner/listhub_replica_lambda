@@ -85,7 +85,7 @@ const fetchListingData = async (type) => {
       },
     });*/
 
-    console.log("Type"+type);
+    console.log("Type"+JSON.stringify(type));
 
       return axios.get(replicationURL, {
         headers: {

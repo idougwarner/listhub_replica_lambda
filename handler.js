@@ -165,11 +165,7 @@ const fetchListingData = async (type) => {
     }
 
     // Download the data
-    const streamPromise = util.promisify(getInputStream1(rangeValues));
-    const response = await streamPromise();
-    
-    console.log('response', response.body);
-
+   
     const inputStream = await getInputStream1(rangeValues);
 
     const writeStream = async (data) => {
@@ -204,6 +200,7 @@ const fetchListingData = async (type) => {
     console.log("Status code " + response);
     // console.log("Etag value " + response.headers["ETag"]);
 
+    /*
     inputStream
       .on("response", (response) => {
         console.log("Status code " + response.statusCode);
@@ -211,10 +208,16 @@ const fetchListingData = async (type) => {
         Etag = response.headers["ETag"];
       })
       .pipe(new JsonLinesTransform())
-      .pipe(writeStream)
+      .pipe(writeStream())
       .on("finish", async () => {
         console.log("Done downloading Property Listing data!");
       }); // End of Input Stream
+    */
+      const streamPromise = util.promisify(getInputStream1(rangeValues));
+      const response = await streamPromise();
+        
+      console.log('response', response.body);
+  
 
     if (listdataAdded) {
       // Data was successfully added therefore add step and downloadedSize and proceed to get next chunk in next loop

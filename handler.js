@@ -606,8 +606,6 @@ module.exports.fetchListingsData = async (event, context) => {
       console.log("Etag Value: " + response.data.Etag);
 
       // CHECK IF PRODUCT LISTING DATA EXISTS AND IF NOT POPULATE THE LISTINGS TABLE
-
-      // Check if Property listing exists and populate if not
       const {dataExists } = await propertyDataExists()
 
       if (!dataExists) {

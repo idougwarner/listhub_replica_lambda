@@ -597,7 +597,7 @@ module.exports.fetchListingsData = async (event, context) => {
       'Authorization': 'Bearer ' + token
     }
   })
-    .then( async (response) => {
+    .then( (response) => {
 
       console.log(response.data);
 

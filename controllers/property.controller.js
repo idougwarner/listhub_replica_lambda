@@ -133,7 +133,7 @@ module.exports.propertyDataExists = async () => {
 
           return result;
         } else {
-          const result = { dataExists: false, error: "No Data" };
+          const result = { dataExists: false, error: "No Data", data: null };
 
           return result;
         }

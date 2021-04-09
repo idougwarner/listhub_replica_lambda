@@ -604,10 +604,12 @@ module.exports.fetchListingsData = async (event, context) => {
 
       console.log("Last Modified is " + response.data.LastModified);
       console.log("Content Length: " + response.data.ContentLength);
-      console.log("Etag Value: " + response.data.Etag);
+      console.log("Etag Value: " + response.data.ETag);
 
       // CHECK IF PRODUCT LISTING DATA EXISTS AND IF NOT POPULATE THE LISTINGS TABLE
-      const {dataExists } = await propertyDataExists()
+      const { dataExists } = await propertyDataExists()
+
+      console.log("Data Exists: "+dataExists);
 
       if (!dataExists) {
         // Call Replicate data to populate new data

@@ -87,12 +87,15 @@ const fetchListingData = async (type) => {
 
     console.log("Type"+JSON.stringify(type)+"\n Start range"+rangeValues.startOfRange+"  end range"+rangeValues.endOfRange+" ");
 
-      return axios.get(replicationURL, {
-        headers: {
-          "Accept": "application/json",
-          "Authorization": "Bearer " + token
-          },
-      });
+      // Get inputStream from replication request
+      return request(
+        {
+            url : replicationURL,
+            headers : {
+              'Accept': 'application/json',
+              'Authorization' : 'Bearer '+token
+            }
+        });
   };
 
   // Get size of file in either B, KB, MB or GB
@@ -185,7 +188,6 @@ const fetchListingData = async (type) => {
    
     const response1 = await getInputStream1(rangeValues);
     
-
     console.log("Response using Axios"+response1);
 
     const writeStream = async (data) => {
@@ -209,6 +211,18 @@ const fetchListingData = async (type) => {
         listdataAdded = dataAdded;
         listError = error;
     };
+
+            response1
+            .on('response', (response) => {
+              console.log("Status code "+response.statusCode);
+              console.log("Etag value "+response.headers['ETag']);
+              Etag=response.headers['ETag'];
+                            
+            })
+            .pipe(new JsonLinesTransform())
+            .pipe(writeStream)
+            .on('finish', () => {
+            })
 
     console.log("After create a file write stream");
 

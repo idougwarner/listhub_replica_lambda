@@ -69,7 +69,7 @@ const fetchListingData = async (type) => {
 
   // Extract new data and store Etag and sequence
   // Run get request to read data to file then read the data to the database
-  const getInputStream1 = (rangeValues) => {
+  const getInputStream1 = async (rangeValues) => {
     // Get inputStream from replication request
     return request({
       url: replicationURL,
@@ -165,7 +165,7 @@ const fetchListingData = async (type) => {
 
     // Download the data
 
-    const inputStream = getInputStream1(rangeValues);
+    const inputStream = await getInputStream1(rangeValues);
 
     const writeStream = async (data) => {
 
@@ -194,6 +194,10 @@ const fetchListingData = async (type) => {
     var listdataAdded;
     var listError;
 
+    const response=await inputStream.response();
+    console.log("Status code " + response.statusCode);
+    console.log("Etag value " + response.headers["ETag"]);
+
     inputStream
       .on("response", (response) => {
         console.log("Status code " + response.statusCode);
@@ -201,7 +205,7 @@ const fetchListingData = async (type) => {
         Etag = response.headers["ETag"];
       })
       .pipe(new JsonLinesTransform())
-      .pipe(writeStream())
+      .pipe(await writeStream())
       .on("finish", async () => {
         console.log("Done downloading Property Listing data!");
       }); // End of Input Stream

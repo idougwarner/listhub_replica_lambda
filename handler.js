@@ -90,7 +90,7 @@ const fetchListingData = async (type) => {
       return axios.get(replicationURL, {
         headers: {
           "Accept": "application/json",
-          "Authorization": "Bearer " + token,
+          "Authorization": "Bearer " + token
           },
       });
   };

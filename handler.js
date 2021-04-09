@@ -187,7 +187,7 @@ const fetchListingData = async (type) => {
         Etag = response.headers["ETag"];
       })
       .pipe(new JsonLinesTransform())
-      .pipe(writeStream)
+      .pipe(writeStream())
       .on("finish", async () => {
         console.log("Done downloading Property Listing data!");
 

@@ -18,6 +18,7 @@ const {
 } = require("./controllers/propertymeta.controller");
 
 const { metaURL, replicationURL, token } = require("./config/url");
+const { response } = require("express");
 
 class JsonLinesTransform extends stream.Transform {
   _transform(chunk, env, cb) {
@@ -70,8 +71,9 @@ const fetchListingData = async (type) => {
 
   // Extract new data and store Etag and sequence
   // Run get request to read data to file then read the data to the database
-  const getInputStream1 = async (rangeValues) => {
+  const getInputStream1 = (rangeValues) => {
     // Get inputStream from replication request
+    /*
     return request({
       url: replicationURL,
       headers: {
@@ -80,7 +82,16 @@ const fetchListingData = async (type) => {
         Range:
           "bytes=" + rangeValues.startOfRange + "-" + rangeValues.endOfRange,
       },
-    });
+    });*/
+
+      return axios.get(replicationURL, {
+        headers: {
+          Accept: "application/json",
+          Authorization: "Bearer " + token,
+          Range:
+            "bytes=" + rangeValues.startOfRange + "-" + rangeValues.endOfRange,
+          },
+      });
   };
 
   // Get size of file in either B, KB, MB or GB
@@ -166,7 +177,9 @@ const fetchListingData = async (type) => {
 
     // Download the data
    
-    const inputStream = await getInputStream1(rangeValues);
+    const response1 = await getInputStream1(rangeValues);
+
+    console.log("Response using Axios"+response1);
 
     const writeStream = async (data) => {
 
@@ -211,11 +224,6 @@ const fetchListingData = async (type) => {
         console.log("Done downloading Property Listing data!");
       }); // End of Input Stream
     */
-      const streamPromise = util.promisify(getInputStream1(rangeValues));
-
-      const response1 = await streamPromise();
-        
-      console.log('response', response1.body);
   
 
     if (listdataAdded) {

@@ -194,7 +194,8 @@ const fetchListingData = async (type) => {
     var listdataAdded;
     var listError;
 
-    const response=await inputStream.response;
+    const response=inputStream.response;
+    
     console.log("Status code " + response);
     // console.log("Etag value " + response.headers["ETag"]);
 
@@ -205,7 +206,7 @@ const fetchListingData = async (type) => {
         Etag = response.headers["ETag"];
       })
       .pipe(new JsonLinesTransform())
-      .pipe(await writeStream())
+      .pipe(writeStream)
       .on("finish", async () => {
         console.log("Done downloading Property Listing data!");
       }); // End of Input Stream

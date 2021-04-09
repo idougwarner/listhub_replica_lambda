@@ -85,7 +85,7 @@ const fetchListingData = async (type) => {
       },
     });*/
 
-    console.log("Type"+JSON.stringify(type));
+    console.log("Type"+JSON.stringify(type)+"\nStart range"+rangeValues.startOfRange+"  end range"+rangeValues.endOfRange+" ");
 
       return axios.get(replicationURL, {
         headers: {

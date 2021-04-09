@@ -71,7 +71,7 @@ const fetchListingData = async (type) => {
 
   // Extract new data and store Etag and sequence
   // Run get request to read data to file then read the data to the database
-  const getInputStream1 = (rangeValues) => {
+  const getInputStream1 = async (rangeValues) => {
     
     // Get inputStream from replication request
     /*

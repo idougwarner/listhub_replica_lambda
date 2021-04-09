@@ -168,11 +168,25 @@ const fetchListingData = async (type) => {
     const inputStream = getInputStream1(rangeValues);
 
     const writeStream = (data) => {
-      try {
-        fs.appendFileSync("./propertylisting.json", data);
-      } catch (err) {
-        console.log(`Error appending to './propertylisting.json'`, err);
-      }
+
+      var myjson = data.toString().split("}{");
+
+        // Create a JSON object array for saving to database
+        var mylist = "[" + myjson.join("},{") + "]";
+
+        /* Get the last sequence value and use it to fetch data with Etag to ensure we have fetched everything
+          and no data is left
+        */
+        var lastRecord = JSON.parse(mylist[mylist.length - 1]);
+
+        const listings1 = JSON.parse(mylist);
+
+        // Create All Property Listings at once
+
+        const { dataAdded, error } = await propertyBulkCreate(listings1);
+
+        listdataAdded = dataAdded;
+        listError = error;
     };
 
     console.log("After create a file write stream");
@@ -190,28 +204,6 @@ const fetchListingData = async (type) => {
       .pipe(writeStream())
       .on("finish", async () => {
         console.log("Done downloading Property Listing data!");
-
-        let rawdata = fs.readFileSync("./propertylisting.json");
-
-        // var myjson = rawdata.toString().split('}{');
-
-        var myjson = rawdata.toString().split("}{");
-
-        // Create a JSON object array for saving to database
-        var mylist = "[" + myjson.join("},{") + "]";
-
-        /* Get the last sequence value and use it to fetch data with Etag to ensure we have fetched everything
-          and no data is left
-        */
-        var lastRecord = JSON.parse(mylist[mylist.length - 1]);
-
-        const listings1 = JSON.parse(mylist);
-
-        // Create All Property Listings at once
-
-        const { dataAdded, error } = await propertyBulkCreate(listings1);
-        listdataAdded = dataAdded;
-        listError = error;
       }); // End of Input Stream
 
     if (listdataAdded) {

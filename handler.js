@@ -5,16 +5,14 @@ const fs = require("fs");
 const stream = require("stream");
 
 const {
-  propertyCreate,
   propertyBulkCreate,
   propertyDataExists,
   propertyDeleteAll,
-  propertyFindAll,
+  
 } = require("./controllers/property.controller");
 const {
   metaCreate,
   metaDataExists,
-  metaFindAll,
   metaDeleteAll,
   ismetadataNew,
 } = require("./controllers/propertymeta.controller");
@@ -41,8 +39,208 @@ class JsonLinesTransform extends stream.Transform {
   }
 }
 
+const fetchListingData = async (type) => {
+
+  var result = { listdataAdded: false, listAddError: null, datadownloaded:0, remainingToDownload:0 };
+
+  const getSize = (bytes) => {
+    var marker = 1024;
+    var decimal = 3; // Change as required
+    var kiloBytes = marker; // One Kilobyte is 1024 bytes
+    var megaBytes = marker * kiloBytes; // One MB is 1024 KB
+    var gigaBytes = marker * megaBytes; // One GB is 1024 MB
+    var teraBytes = marker * gigaBytes; // One TB is 1024 GB
+
+    // return bytes if less than a KB
+    if (bytes < kiloBytes) return { bytes: bytes, type: "Bytes" };
+    // return KB if less than a MB
+    else if (bytes < megaBytes)
+      return { bytes: (bytes / kiloBytes).toFixed(decimal), type: "KB" };
+    // return MB if less than a GB
+    else if (bytes < gigaBytes)
+      return { bytes: (bytes / megaBytes).toFixed(decimal), type: "MB" };
+    // return GB if less than a TB
+    else if (bytes < teraBytes)
+      return { bytes: (bytes / gigaBytes).toFixed(decimal), type: "GB" };
+  };
+
+  // Extract new data and store Etag and sequence
+  // Run get request to read data to file then read the data to the database
+  const getInputStream1 = (rangeValues) => {
+    // Get inputStream from replication request
+    return request({
+      url: replicationURL,
+      headers: {
+        Accept: "application/json",
+        Authorization: "Bearer " + token,
+        Range:
+          "bytes=" + rangeValues.startOfRange + "-" + rangeValues.endOfRange,
+      },
+    });
+  };
+
+  // Get size of file in either B, KB, MB or GB
+  const filetoDownloadSize = type.ContentLength;
+  const convertedFileDownloadSize = getSize(type.ContentLength);
+  
+  let chunkDownloaded = 0;
+  let chunks = 0;
+  let downloadedSize = 0;
+  let chunkSize = 0;
+  let step = 0;
+  let remainingDownloadSize = 0;
+  let startOfRange;
+  let endOfRange;
+
+  if (convertedFileDownloadSize.type == "MB") {
+    // Check if filesize is between 20MB and 30MB and set chunks to be 5
+    if (
+      convertedFileDownloadSize.bytes <= 30 &&
+      convertedFileDownloadSize >= 20
+    ) {
+      chunks = 5;
+    }
+  }
+
+  // If file size is in KB then there is no need to chunk
+  else if (convertedFileDownloadSize.type == "KB") {
+    chunks = 1;
+  }
+
+  // while downloadedfilesize!=contentLength keep downloading in specified chunks
+  while (
+    downloadedSize != filetoDownloadSize &&
+    downloadedSize < filetoDownloadSize
+  ) {
+    var rangeValues;
+
+    if (chunks == 1) {
+      chunkSize = 1024;
+    } else if (chunks == 5) {
+      chunkSize = parseInt(filetoDownloadSize / chunks) * 1048576;
+    }
+
+    /* Download the first part of the data and check if remaining download size is less than the chunk size to 
+    determine start and end */
+    if (remainingDownloadSize == 0 && step == 0) {
+      // Will be true only the first time
+      // Set Range
+      startOfRange = step === 0 ? 0 + chunkSize * step : 1 + chunkSize * step;
+      endOfRange = startOfRange + chunkSize;
+
+      rangeValues = { startOfRange: startOfRange, endOfRange: endOfRange };
+
+    }
+
+    // Check to see if what is remaining is bigger than the chunk size so that we set next range
+    else if (
+      downloadedSize != 0 &&
+      step != 0 &&
+      filetoDownloadSize - downloadedSize > chunkSize
+    ) {
+      // Set Range
+      startOfRange = step === 0 ? 0 + chunkSize * step : 1 + chunkSize * step;
+      endOfRange = startOfRange + chunkSize;
+
+      rangeValues = {
+        startOfRange: 1 + chunkSize * step,
+        endOfRange: endOfRange,
+      };
+
+    }
+
+    // Check to see if what is remaining is less than chunkSize so as to determine new range limits
+    else if (
+      downloadedSize != 0 &&
+      step != 0 &&
+      filetoDownloadSize - downloadedSize < chunkSize
+    ) {
+      // Set Range
+      startOfRange = step === 0 ? 0 + chunkSize * step : 1 + chunkSize * step;
+      endOfRange = filetoDownloadSize;
+
+      rangeValues = { startOfRange: startOfRange, endOfRange: endOfRange };
+
+    }
+
+    // Download the data
+
+    const inputStream = getInputStream1(rangeValues);
+
+    const writeStream = (data) => {
+      try {
+        fs.appendFileSync("./propertylisting.json", data);
+      } catch (err) {
+        console.log(`Error appending to './propertylisting.json'`, err);
+      }
+    };
+
+    console.log("After create a file write stream");
+
+    inputStream
+      .on("response", (response) => {
+        console.log("Status code " + response.statusCode);
+        console.log("Etag value " + response.headers["Etag"]);
+        Etag = response.headers["Etag"];
+      })
+      .pipe(new JsonLinesTransform())
+      .pipe(writeStream)
+      .on("finish", async () => {
+        
+        console.log("Done downloading Property Listing data!");
+
+        let rawdata = fs.readFileSync("./propertylisting.json");
+
+        // var myjson = rawdata.toString().split('}{');
+
+        var myjson = rawdata.toString().split("}{");
+
+        // Create a JSON object array for saving to database
+        var mylist = "[" + myjson.join("},{") + "]";
+
+        /* Get the last sequence value and use it to fetch data with Etag to ensure we have fetched everything
+          and no data is left
+        */
+        var lastRecord = JSON.parse(mylist[mylist.length - 1]);
+
+        const listings1 = JSON.parse(mylist);
+
+        // Create All Property Listings at once
+
+        const { dataAdded, error } = await propertyBulkCreate(listings1);
+
+        if (dataAdded) {
+
+          // Data was successfully added therefore add step and downloadedSize and proceed to get next chunk in next loop
+          step = step + 1;
+
+          chunkDownloaded = step+1 // We want to know how many chunks are downloaded
+          downloadedSize = endOfRange;
+          remainingDownloadSize = filetoDownloadSize - downloadedSize;
+
+          result.listAddError = null
+          result.listdataAdded = true
+          result.datadownloaded = downloadedSize
+          result.remainingToDownload = remainingDownloadSize
+
+        } else {
+
+          remainingDownloadSize = filetoDownloadSize - downloadedSize;
+          result.remainingToDownload=remainingDownloadSize
+          result.listAddError = error
+
+          break
+         
+        }
+      }); // End of Input Stream
+  }// End While
+
+  return result
+}
+
 // Retrieve new streamed data and store to database
 const newListData = async (type) => {
+
   // Create a time object and store start time we want stream to read data for 7 minutes.
   /* It is possible to finish reading all data in the seven minutes */
   let startTime = new Date();
@@ -50,686 +248,122 @@ const newListData = async (type) => {
   const Etag = "";
 
   if (type.storeType == "new") {
-    const getSize = (bytes) => {
-      var marker = 1024;
-      var decimal = 3; // Change as required
-      var kiloBytes = marker; // One Kilobyte is 1024 bytes
-      var megaBytes = marker * kiloBytes; // One MB is 1024 KB
-      var gigaBytes = marker * megaBytes; // One GB is 1024 MB
-      var teraBytes = marker * gigaBytes; // One TB is 1024 GB
 
-      // return bytes if less than a KB
-      if (bytes < kiloBytes) return { bytes: bytes, type: "Bytes" };
-      // return KB if less than a MB
-      else if (bytes < megaBytes)
-        return { bytes: (bytes / kiloBytes).toFixed(decimal), type: "KB" };
-      // return MB if less than a GB
-      else if (bytes < gigaBytes)
-        return { bytes: (bytes / megaBytes).toFixed(decimal), type: "MB" };
-      // return GB if less than a TB
-      else if (bytes < teraBytes)
-        return { bytes: (bytes / gigaBytes).toFixed(decimal), type: "GB" };
-    };
+    const { listdataAdded, listAddError, datadownloaded, remainingToDownload } = await fetchListingData(type);
+    
+    if(listdataAdded){
 
-    // Extract new data and store Etag and sequence
-    // Run get request to read data to file then read the data to the database
-    const getInputStream1 = (rangeValues) => {
-      // Get inputStream from replication request
-      return request({
-        url: replicationURL,
-        headers: {
-          Accept: "application/json",
-          Authorization: "Bearer " + token,
-          Range:
-            "bytes=" + rangeValues.startOfRange + "-" + rangeValues.endOfRange,
-        },
-      });
-    };
-
-    console.log("Inside Replicate Data");
-
-    // Get size of file in either B, KB, MB or GB
-    const filetoDownloadSize = type.ContentLength;
-    const convertedFileDownloadSize = getSize(type.ContentLength);
-    let chunks = "";
-    let downloadedSize = 0;
-    let chunkSize = 0;
-    let step = 0;
-    let remainingDownloadSize = 0;
-    let startOfRange;
-    let endOfRange;
-
-    if (convertedFileDownloadSize.type == "MB") {
-      // Check if filesize is between 20MB and 30MB and set chunks to be 5
-      if (
-        convertedFileDownloadSize.bytes <= 30 &&
-        convertedFileDownloadSize >= 20
-      ) {
-        chunks = 5;
-      }
-    }
-
-    // If file size is in KB then there is no need to chunk
-    else if (convertedFileDownloadSize.type == "KB") {
-      chunks = 1;
-    }
-
-    // while downloadedfilesize!=contentLength keep downloading in specified chunks
-    while (
-      downloadedSize != filetoDownloadSize &&
-      downloadedSize < filetoDownloadSize
-    ) {
-      var rangeValues;
-
-      if (chunks == 1) {
-        chunkSize = 1024;
-      } else if (chunks == 5) {
-        chunkSize = parseInt(filetoDownloadSize / chunks) * 1048576;
-      }
-
-      /* Download the first part of the data and check if remaining download size is less than the chunk size to 
-      determine start and end */
-      if (remainingDownloadSize == 0 && step == 0) {
-        // Will be true only the first time
-        // Set Range
-        startOfRange = step === 0 ? 0 + chunkSize * step : 1 + chunkSize * step;
-        endOfRange = startOfRange + chunkSize;
-
-        rangeValues = { startOfRange: startOfRange, endOfRange: endOfRange };
-
-        /* This will be done on the finish method of inputstream meaning data has been successfully written to file
-           and there was no interruption
-        step=step+1;
-        
-        downloadedSize=endOfRange;
-        remainingDownloadSize=filetoDownloadSize-downloadedSize
-        */
-      }
-
-      // Check to see if what is remaining is bigger than the chunk size so that we set next range
-      else if (
-        downloadedSize != 0 &&
-        step != 0 &&
-        filetoDownloadSize - downloadedSize > chunkSize
-      ) {
-        // Set Range
-        startOfRange = step === 0 ? 0 + chunkSize * step : 1 + chunkSize * step;
-        endOfRange = startOfRange + chunkSize;
-
-        rangeValues = {
-          startOfRange: 1 + chunkSize * step,
-          endOfRange: endOfRange,
-        };
-
-        /* This will be done on the finish method of inputstream meaning data has been successfully written to file
-           and there was no interruption
-        step=step+1;
-        
-        downloadedSize=endOfRange;
-        */
-      }
-
-      // Check to see if what is remaining is less than chunkSize so as to determine new range limits
-      else if (
-        downloadedSize != 0 &&
-        step != 0 &&
-        filetoDownloadSize - downloadedSize < chunkSize
-      ) {
-        // Set Range
-        startOfRange = step === 0 ? 0 + chunkSize * step : 1 + chunkSize * step;
-        endOfRange = filetoDownloadSize;
-
-        rangeValues = { startOfRange: startOfRange, endOfRange: endOfRange };
-
-        /* This will be done on the finish method of inputstream meaning data has been successfully written to file
-           and there was no interruption
-        step=step+1;
-        
-        downloadedSize=endOfRange;
-        */
-      }
-
-      // Download the data
-
-      const inputStream = getInputStream1(rangeValues);
-
-      const writeStream = (data) => {
-        try {
-          fs.appendFileSync("./propertylisting.json", data);
-          console.log("Data appended to file.");
-        } catch (err) {
-          console.log(`Error appending to './propertylisting.json'`, err);
-        }
+      result = {
+        listDataAdded: true,
+        listAddError: listAddError,
+        listDataDownloaded: datadownloaded,
+        listRemainingToDownload: remainingToDownload
       };
+      
+      return result
 
-      console.log("After create a file write stream");
+    }
+    else {
 
-      inputStream
-        .on("response", (response) => {
-          console.log("Status code " + response.statusCode);
-          console.log("Etag value " + response.headers["Etag"]);
-          Etag = response.headers["Etag"];
-        })
-        .pipe(new JsonLinesTransform())
-        .pipe(writeStream)
-        .on("finish", async () => {
-          // Data was successfully added therefore add step and downloadedSize and proceed to get next chunk in next loop
-          step = step + 1;
+      result = {
+        listDataAdded: true,
+        listAddError: listAddError,
+        listDataDownloaded: datadownloaded,
+        listRemainingToDownload: remainingToDownload
+      }
 
-          downloadedSize = endOfRange;
-          remainingDownloadSize = filetoDownloadSize - downloadedSize;
+      return result
+    }
 
-          console.log("Done downloading Property Listing data!");
-
-          let rawdata = fs.readFileSync("./propertylisting.json");
-
-          // var myjson = rawdata.toString().split('}{');
-
-          var myjson = rawdata.toString().split("}{");
-
-          // Create a JSON object array for saving to database
-          var mylist = "[" + myjson.join("},{") + "]";
-
-          /* Get the last sequence value and use it to fetch data with Etag to ensure we have fetched everything
-            and no data is left
-          */
-          var lastRecord = JSON.parse(mylist[mylist.length() - 1]);
-
-          var metarecords = { Etag: Etag, sequence: lastRecord.sequence };
-
-          // Create a json file that stores Etag and Sequence value
-          try {
-            fs.writeFileSync("./metavalues.json", JSON.stringify(metarecords));
-          } catch (err) {
-            return {
-              listdataAdded: false,
-              listerror: "Failed to store metavalues",
-            };
-          }
-
-          const listings1 = JSON.parse(mylist);
-
-          // Create All Property Listings at once
-
-          const { dataAdded, error } = await propertyBulkCreate();
-
-          if (dataAdded) {
-            const result = { listdataAdded: dataAdded, listerror: error };
-            return result;
-          } else {
-            const result = { listdataAdded: dataAdded, listerror: error };
-            return result;
-          }
-        }); // End of Input Stream
-    } // End while
   } // End of new download
 
   // Fresh listings download
   else if (type.storeType === "newDownload") {
+
+    var result
+
     const { dataExists } = await propertyDataExists();
 
     if (dataExists) {
       // Delete old data and put new data
       const { dataDeleted, error } = await propertyDeleteAll();
 
+      // Old data deleted successfully
       if (dataDeleted) {
-        const getSize = (bytes) => {
-          var marker = 1024;
-          var decimal = 3; // Change as required
-          var kiloBytes = marker; // One Kilobyte is 1024 bytes
-          var megaBytes = marker * kiloBytes; // One MB is 1024 KB
-          var gigaBytes = marker * megaBytes; // One GB is 1024 MB
-          var teraBytes = marker * gigaBytes; // One TB is 1024 GB
+        
+        const { listdataAdded, listAddError, datadownloaded, remainingToDownload } = await fetchListingData(type);
+    
+        if(listdataAdded){
+          
+          result = {
+            listDataAdded: listdataAdded,
+            listAddError: listAddError,
+            listDataDownloaded: datadownloaded,
+            listRemainingToDownload: remainingToDownload
+          };
+          
+          return result
 
-          // return bytes if less than a KB
-          if (bytes < kiloBytes) return { bytes: bytes, type: "Bytes" };
-          // return KB if less than a MB
-          else if (bytes < megaBytes)
-            return { bytes: (bytes / kiloBytes).toFixed(decimal), type: "KB" };
-          // return MB if less than a GB
-          else if (bytes < gigaBytes)
-            return { bytes: (bytes / megaBytes).toFixed(decimal), type: "MB" };
-          // return GB if less than a TB
-          else if (bytes < teraBytes)
-            return { bytes: (bytes / gigaBytes).toFixed(decimal), type: "GB" };
-        };
-
-        // Extract new data and store Etag and sequence
-        // Run get request to read data to file then read the data to the database
-        const getInputStream1 = (rangeValues) => {
-          // Get inputStream from replication request
-          return request({
-            url: replicationURL,
-            headers: {
-              Accept: "application/json",
-              Authorization: "Bearer " + token,
-              Range:
-                "bytes=" +
-                rangeValues.startOfRange +
-                "-" +
-                rangeValues.endOfRange,
-            },
-          });
-        };
-
-        console.log("Inside Re Replicate Data");
-
-        // Get size of file in either B, KB, MB or GB
-        const filetoDownloadSize = type.ContentLength;
-        const convertedFileDownloadSize = getSize(type.ContentLength);
-        const chunks = "";
-        const downloadedSize = 0;
-        const chunkSize = 0;
-        const step = 0;
-        const remainingDownloadSize = 0;
-        const startOfRange = 0;
-        const endOfRange = 0;
-
-        if (convertedFileDownloadSize.type == "MB") {
-          // Check if between 20 and 30 and set chunks to be 5
-          if (
-            convertedFileDownloadSize.bytes <= 30 &&
-            convertedFileDownloadSize.bytes >= 20
-          ) {
-            chunks = 5;
+        }
+        else {
+          
+          result = {
+            listDataAdded: listdataAdded,
+            listAddError: listAddError,
+            listDataDownloaded: datadownloaded,
+            listRemainingToDownload: remainingToDownload
           }
-        } else if (convertedFileDownloadSize.type == "KB") {
-          chunks = 1;
+
+          return result
         }
 
-        // while downloadedfilesize!=contentLength keep downloading in specified chunks
-        while (
-          downloadedSize != filetoDownloadSize &&
-          downloadedSize < filetoDownloadSize
-        ) {
-          // Set the chunk size
-
-          var rangeValues;
-
-          if (chunks == 1) {
-            chunkSize = 1024;
-          } else if (chunks == 5) {
-            chunkSize = parseInt(filetoDownloadSize / chunks) * 1048576;
-          }
-
-          /* Download the first part of the data and check if remaining download size is less than the chunk size to 
-          determine start and end */
-          if (remainingDownloadSize == 0 && step == 0) {
-            // Will be true only the first time
-            // Set Range
-            startOfRange =
-              step === 0 ? 0 + chunkSize * step : 1 + chunkSize * step;
-            endOfRange = startOfRange + chunkSize;
-
-            rangeValues = {
-              startOfRange: startOfRange,
-              endOfRange: endOfRange,
-            };
-
-            /* This will be done on the finish method of inputstream meaning data has been successfully written to file
-               and there was no interruption
-            step=step+1;
-            
-            downloadedSize=endOfRange;
-            */
-          }
-
-          // Check to see if what is remaining is bigger than the chunk size so that we set next range
-          else if (
-            downloadedSize != 0 &&
-            step != 0 &&
-            filetoDownloadSize - downloadedSize > chunkSize
-          ) {
-            // Set Range
-            startOfRange =
-              step === 0 ? 0 + chunkSize * step : 1 + chunkSize * step;
-            endOfRange = startOfRange + chunkSize;
-
-            rangeValues = {
-              startOfRange: 1 + chunkSize * step,
-              endOfRange: endOfRange,
-            };
-
-            /* This will be done on the finish method of inputstream meaning data has been successfully written to file
-               and there was no interruption
-            step=step+1;
-            
-            downloadedSize=endOfRange;
-            */
-          }
-
-          // Check to see if what is remaining is less than chunkSize so as to determine new range limits
-          else if (
-            downloadedSize != 0 &&
-            step != 0 &&
-            filetoDownloadSize - downloadedSize < chunkSize
-          ) {
-            // Set Range
-            startOfRange =
-              step === 0 ? 0 + chunkSize * step : 1 + chunkSize * step;
-            endOfRange = filetoDownloadSize;
-
-            rangeValues = {
-              startOfRange: startOfRange,
-              endOfRange: endOfRange,
-            };
-
-            /* This will be done on the finish method of inputstream meaning data has been successfully written to file
-               and there was no interruption
-            step=step+1;
-            
-            downloadedSize=endOfRange;
-            */
-          }
-
-          // Download the data
-
-          const inputStream = getInputStream1(rangeValues);
-
-          const writeStream = (data) => {
-            try {
-              fs.appendFileSync("./propertylisting.json", data);
-              console.log("Data appended to file.");
-            } catch (err) {
-              console.log(`Error appending to './propertylisting.json'`, err);
-            }
-          };
-
-          console.log("After create a file write stream");
-
-          inputStream
-            .on("response", (response) => {
-              console.log("Status code " + response.statusCode);
-              console.log("Etag value " + response.headers["Etag"]);
-              Etag = response.headers["Etag"];
-            })
-            .pipe(new JsonLinesTransform())
-            .pipe(writeStream)
-            .on("finish", async () => {
-              // Data was successfully added therefore add step and downloadedSize and proceed to get next chunk in next loop
-              step = step + 1;
-
-              downloadedSize = endOfRange;
-
-              remainingDownloadSize = filetoDownloadSize - downloadedSize;
-
-              console.log("Done downloading Property Listing data!");
-
-              let rawdata = fs.readFileSync("./propertylisting.json");
-
-              // var myjson = rawdata.toString().split('}{');
-
-              var myjson = rawdata.toString().split("}{");
-
-              // Create a JSON object array for saving to database
-              var mylist = "[" + myjson.join("},{") + "]";
-
-              /* Get the last sequence value and use it to fetch data with Etag to ensure we have fetched everything
-                and no data is left
-              */
-              var lastRecord = JSON.parse(mylist[mylist.length() - 1]);
-              var metarecords = { Etag: Etag, sequence: lastRecord.sequence };
-
-              // Create a json file that stores Etag and Sequence value
-              try {
-                fs.writeFileSync(
-                  "./metavalues.json",
-                  JSON.stringify(metarecords)
-                );
-              } catch (err) {
-                return {
-                  listerror: "Failed to store metavalues",
-                  listdataAdded: false,
-                };
-              }
-
-              const listings1 = JSON.parse(mylist);
-
-              const { dataAdded, error } = await propertyBulkCreate(listings1);
-
-              if (dataAdded) {
-                const result = { listdataAdded: true, listerror: error };
-                return result;
-              } else {
-                const result = { listdataAdded: dataAdded, listerror: error };
-                return result;
-              }
-            }); // End of Input Stream
-        } // End while
-      } // Data deleted successfully
+      } 
       else {
         result = {
-          listdataDeleted: dataDeleted,
-          listerror: "Problem deleting old data",
+          listDataAdded: false,
+          listAddError: "Problem deleting old data",
+          listDataDownloaded: 0,
+          listRemainingToDownload: type.ContentLength
         };
+
         return result;
       }
+
     } // End of download if Property data already exists
 
     /*************************************************************************************************************************** */
 
-    // Beginning of download when property data does not exist
+    // Beginning of download where there is no Property list
     else {
       console.log("Inside else clause No listing data had been saved before ");
 
-      // Get New Data
-      const getSize = (bytes) => {
-        var marker = 1024;
-        var decimal = 3; // Change as required
-        var kiloBytes = marker; // One Kilobyte is 1024 bytes
-        var megaBytes = marker * kiloBytes; // One MB is 1024 KB
-        var gigaBytes = marker * megaBytes; // One GB is 1024 MB
-        var teraBytes = marker * gigaBytes; // One TB is 1024 GB
-
-        // return bytes if less than a KB
-        if (bytes < kiloBytes) return { bytes: bytes, type: "Bytes" };
-        // return KB if less than a MB
-        else if (bytes < megaBytes)
-          return { bytes: (bytes / kiloBytes).toFixed(decimal), type: "KB" };
-        // return MB if less than a GB
-        else if (bytes < gigaBytes)
-          return { bytes: (bytes / megaBytes).toFixed(decimal), type: "MB" };
-        // return GB if less than a TB
-        else if (bytes < teraBytes)
-          return { bytes: (bytes / gigaBytes).toFixed(decimal), type: "GB" };
-      };
-
-      // Extract new data and store Etag and sequence
-      // Run get request to read data to file then read the data to the database
-      const getInputStream1 = (rangeValues) => {
-        // Get inputStream from replication request
-        return request({
-          url: replicationURL,
-          headers: {
-            Accept: "application/json",
-            Authorization: "Bearer " + token,
-            Range:
-              "bytes=" +
-              rangeValues.startOfRange +
-              "-" +
-              rangeValues.endOfRange,
-          },
-        });
-      };
-
-      console.log("Inside Replicate New Data");
-
-      // Get size of file in either B, KB, MB or GB
-      const filetoDownloadSize = type.ContentLength;
-      const convertedFileDownloadSize = getSize(type.ContentLength);
-      const chunks = "";
-      const downloadedSize = 0;
-      const chunkSize = 0;
-      const step = 0;
-      const remainingDownloadSize = 0;
-      const startOfRange = 0;
-      const endOfRange = 0;
-
-      if (convertedFileDownloadSize.type == "MB") {
-        // Check if between 20 and 30 and set chunks to be 5
-        if (
-          convertedFileDownloadSize.bytes <= 30 &&
-          convertedFileDownloadSize.bytes >= 20
-        ) {
-          chunks = 5;
-        }
-      } else if (convertedFileDownloadSize.type == "KB") {
-        chunks = 1;
-      }
-
-      // while downloadedfilesize!=contentLength keep downloading in specified chunks
-      while (
-        downloadedSize != filetoDownloadSize &&
-        downloadedSize < filetoDownloadSize
-      ) {
-        // Set the chunk size
-
-        var rangeValues;
-
-        if (chunks == 1) {
-          chunkSize = 1024;
-        } else if (chunks == 5) {
-          chunkSize = parseInt(filetoDownloadSize / chunks) * 1048576;
-        }
-
-        /* Download the first part of the data and check if remaining download size is less than the chunk size to 
-          determine start and end */
-        if (remainingDownloadSize == 0 && step == 0) {
-          // Will be true only the first time
-          // Set Range
-          startOfRange =
-            step === 0 ? 0 + chunkSize * step : 1 + chunkSize * step;
-          endOfRange = startOfRange + chunkSize;
-
-          rangeValues = { startOfRange: startOfRange, endOfRange: endOfRange };
-
-          /* This will be done on the finish method of inputstream meaning data has been successfully written to file
-               and there was no interruption
-            step=step+1;
-            
-            downloadedSize=endOfRange;
-            */
-        }
-
-        // Check to see if what is remaining is bigger than the chunk size so that we set next range
-        else if (
-          downloadedSize != 0 &&
-          step != 0 &&
-          filetoDownloadSize - downloadedSize > chunkSize
-        ) {
-          // Set Range
-          startOfRange =
-            step === 0 ? 0 + chunkSize * step : 1 + chunkSize * step;
-          endOfRange = startOfRange + chunkSize;
-
-          rangeValues = {
-            startOfRange: 1 + chunkSize * step,
-            endOfRange: endOfRange,
+      const { listdataAdded, listAddError, datadownloaded, remainingToDownload } = await fetchListingData(type);
+    
+        if(listdataAdded){
+          
+          result = {
+            listDataAdded: listdataAdded,
+            listAddError: listAddError,
+            listDataDownloaded: datadownloaded,
+            listRemainingToDownload: remainingToDownload
           };
+          
+          return result
 
-          /* This will be done on the finish method of inputstream meaning data has been successfully written to file
-               and there was no interruption
-            step=step+1;
-            
-            downloadedSize=endOfRange;
-            */
         }
-
-        // Check to see if what is remaining is less than chunkSize so as to determine new range limits
-        else if (
-          downloadedSize != 0 &&
-          step != 0 &&
-          filetoDownloadSize - downloadedSize < chunkSize
-        ) {
-          // Set Range
-          startOfRange =
-            step === 0 ? 0 + chunkSize * step : 1 + chunkSize * step;
-          endOfRange = filetoDownloadSize;
-
-          rangeValues = { startOfRange: startOfRange, endOfRange: endOfRange };
-
-          /* This will be done on the finish method of inputstream meaning data has been successfully written to file
-               and there was no interruption
-            step=step+1;
-            
-            downloadedSize=endOfRange;
-            */
-        }
-
-        // Download the data
-
-        const inputStream = getInputStream1(rangeValues);
-
-        const writeStream = (data) => {
-          try {
-            fs.appendFileSync("./propertylisting.json", data);
-            console.log("Data appended to file.");
-          } catch (err) {
-            console.log(`Error appending to './propertylisting.json'`, err);
+        else {
+          
+          result = {
+            listDataAdded: listdataAdded,
+            listAddError: listAddError,
+            listDataDownloaded: datadownloaded,
+            listRemainingToDownload: remainingToDownload
           }
-        };
 
-        console.log("After create a file write stream");
+          return result
+        }
 
-        inputStream
-          .on("response", (response) => {
-            console.log("Status code " + response.statusCode);
-            console.log("Etag value " + response.headers["Etag"]);
-            Etag = response.headers["Etag"];
-          })
-          .pipe(new JsonLinesTransform())
-          .pipe(writeStream)
-          .on("finish", async () => {
-            // Data was successfully added therefore add step and downloadedSize and proceed to get next chunk in next loop
-            step = step + 1;
 
-            downloadedSize = endOfRange;
-
-            remainingDownloadSize = filetoDownloadSize - downloadedSize;
-
-            console.log("Done downloading Property Listing data!");
-
-            let rawdata = fs.readFileSync("./propertylisting.json");
-
-            // var myjson = rawdata.toString().split('}{');
-
-            var myjson = rawdata.toString().split("}{");
-
-            // Create a JSON object array for saving to database
-            var mylist = "[" + myjson.join("},{") + "]";
-
-            /* Get the last sequence value and use it to fetch data with Etag to ensure we have fetched everything
-                and no data is left
-              */
-            var lastRecord = JSON.parse(mylist[mylist.length() - 1]);
-            var metarecords = { Etag: Etag, sequence: lastRecord.sequence };
-
-            // Create a json file that stores Etag and Sequence value
-            try {
-              fs.writeFileSync(
-                "./metavalues.json",
-                JSON.stringify(metarecords)
-              );
-            } catch (err) {
-              return {
-                listerror: "Failed to store metavalues",
-                listdataAdded: false,
-              };
-            }
-
-            const listings1 = JSON.parse(mylist);
-
-            const { dataAdded, error } = await propertyBulkCreate(listings1);
-
-            if (dataAdded) {
-              const result = { listdataAdded: true, listerror: error };
-              return result;
-            } else {
-              const result = { listdataAdded: dataAdded, listerror: error };
-              return result;
-            }
-          }); // End of Input Stream
-      } // End while fetching new data
     } // End of fresh data download
   }
 };
@@ -753,6 +387,7 @@ module.exports.run = async (event, context) => {
 };
 
 module.exports.fetchListingsData = async (event, context) => {
+
   console.log("Inside FetchListings");
 
   // Call Metadata URL to get necessary data
@@ -773,10 +408,11 @@ module.exports.fetchListingsData = async (event, context) => {
     console.log("Data Exists: " + dataExists);
 
     if (!dataExists) {
+
       // Call Replicate data to populate new data
       const data = {
         storeType: "new",
-        contentLength: response.data.ContentLength,
+        ContentLength: response.data.ContentLength,
       };
 
       const { listdataAdded, listerror } = await newListData(data);
@@ -804,6 +440,8 @@ module.exports.fetchListingsData = async (event, context) => {
       }
     }
 
+    // NOW THAT WE HAVE POPULATED LISTINGS AND METADATA WE WILL CHECK METADATA TO SEE IF THERE IS NEW UPDATE THAT NEEDS OUR ATTENTION
+
     // Compare stored meta data and new meta data coming in from Metadata URL to see if we have new listings
     const { newUpdate } = await ismetadataNew(response.data.LastModified);
 
@@ -825,13 +463,13 @@ module.exports.fetchListingsData = async (event, context) => {
 
           const data = {
             storeType: "newDownload",
-            contentLength: response.data.ContentLength,
+            ContentLength: response.data.ContentLength,
           };
 
           const { listdataAdded, listerror } = await newListData(data);
 
           if (listdataAdded) {
-            console.log("Product List Data Added");
+            console.log("New Product List Data Added");
           } else {
             console.log("Problem adding data");
           }

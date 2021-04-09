@@ -26,3 +26,6 @@ functions:
     handler: handler.fetchListingsData
     events:
       - schedule: rate(1 hour)
+    lambdaInsights: true #enables Lambda Insights for this function
+plugins:
+  - serverless-plugin-lambda-insights

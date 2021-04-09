@@ -8,7 +8,6 @@ const {
   propertyBulkCreate,
   propertyDataExists,
   propertyDeleteAll,
-  
 } = require("./controllers/property.controller");
 const {
   metaCreate,
@@ -40,8 +39,12 @@ class JsonLinesTransform extends stream.Transform {
 }
 
 const fetchListingData = async (type) => {
-
-  var result = { listdataAdded: false, listAddError: null, datadownloaded:0, remainingToDownload:0 };
+  var result = {
+    listdataAdded: false,
+    listAddError: null,
+    datadownloaded: 0,
+    remainingToDownload: 0,
+  };
 
   const getSize = (bytes) => {
     var marker = 1024;
@@ -82,7 +85,7 @@ const fetchListingData = async (type) => {
   // Get size of file in either B, KB, MB or GB
   const filetoDownloadSize = type.ContentLength;
   const convertedFileDownloadSize = getSize(type.ContentLength);
-  
+
   let chunkDownloaded = 0;
   let chunks = 0;
   let downloadedSize = 0;
@@ -129,7 +132,6 @@ const fetchListingData = async (type) => {
       endOfRange = startOfRange + chunkSize;
 
       rangeValues = { startOfRange: startOfRange, endOfRange: endOfRange };
-
     }
 
     // Check to see if what is remaining is bigger than the chunk size so that we set next range
@@ -146,7 +148,6 @@ const fetchListingData = async (type) => {
         startOfRange: 1 + chunkSize * step,
         endOfRange: endOfRange,
       };
-
     }
 
     // Check to see if what is remaining is less than chunkSize so as to determine new range limits
@@ -160,7 +161,6 @@ const fetchListingData = async (type) => {
       endOfRange = filetoDownloadSize;
 
       rangeValues = { startOfRange: startOfRange, endOfRange: endOfRange };
-
     }
 
     // Download the data
@@ -186,7 +186,6 @@ const fetchListingData = async (type) => {
       .pipe(new JsonLinesTransform())
       .pipe(writeStream)
       .on("finish", async () => {
-        
         console.log("Done downloading Property Listing data!");
 
         let rawdata = fs.readFileSync("./propertylisting.json");
@@ -210,37 +209,32 @@ const fetchListingData = async (type) => {
         const { dataAdded, error } = await propertyBulkCreate(listings1);
 
         if (dataAdded) {
-
           // Data was successfully added therefore add step and downloadedSize and proceed to get next chunk in next loop
           step = step + 1;
 
-          chunkDownloaded = step+1 // We want to know how many chunks are downloaded
+          chunkDownloaded = step + 1; // We want to know how many chunks are downloaded
           downloadedSize = endOfRange;
           remainingDownloadSize = filetoDownloadSize - downloadedSize;
 
-          result.listAddError = null
-          result.listdataAdded = true
-          result.datadownloaded = downloadedSize
-          result.remainingToDownload = remainingDownloadSize
-
+          result.listAddError = null;
+          result.listdataAdded = true;
+          result.datadownloaded = downloadedSize;
+          result.remainingToDownload = remainingDownloadSize;
         } else {
-
           remainingDownloadSize = filetoDownloadSize - downloadedSize;
-          result.remainingToDownload=remainingDownloadSize
-          result.listAddError = error
+          result.remainingToDownload = remainingDownloadSize;
+          result.listAddError = error;
 
-          break
-         
+          break;
         }
       }); // End of Input Stream
-  }// End While
+  } // End While
 
-  return result
-}
+  return result;
+};
 
 // Retrieve new streamed data and store to database
 const newListData = async (type) => {
-
   // Create a time object and store start time we want stream to read data for 7 minutes.
   /* It is possible to finish reading all data in the seven minutes */
   let startTime = new Date();
@@ -248,39 +242,37 @@ const newListData = async (type) => {
   const Etag = "";
 
   if (type.storeType == "new") {
+    const {
+      listdataAdded,
+      listAddError,
+      datadownloaded,
+      remainingToDownload,
+    } = await fetchListingData(type);
 
-    const { listdataAdded, listAddError, datadownloaded, remainingToDownload } = await fetchListingData(type);
-    
-    if(listdataAdded){
-
+    if (listdataAdded) {
       result = {
         listDataAdded: true,
         listAddError: listAddError,
         listDataDownloaded: datadownloaded,
-        listRemainingToDownload: remainingToDownload
+        listRemainingToDownload: remainingToDownload,
       };
-      
-      return result
 
-    }
-    else {
-
+      return result;
+    } else {
       result = {
         listDataAdded: true,
         listAddError: listAddError,
         listDataDownloaded: datadownloaded,
-        listRemainingToDownload: remainingToDownload
-      }
+        listRemainingToDownload: remainingToDownload,
+      };
 
-      return result
+      return result;
     }
-
   } // End of new download
 
   // Fresh listings download
   else if (type.storeType === "newDownload") {
-
-    var result
+    var result;
 
     const { dataExists } = await propertyDataExists();
 
@@ -290,45 +282,42 @@ const newListData = async (type) => {
 
       // Old data deleted successfully
       if (dataDeleted) {
-        
-        const { listdataAdded, listAddError, datadownloaded, remainingToDownload } = await fetchListingData(type);
-    
-        if(listdataAdded){
-          
+        const {
+          listdataAdded,
+          listAddError,
+          datadownloaded,
+          remainingToDownload,
+        } = await fetchListingData(type);
+
+        if (listdataAdded) {
           result = {
             listDataAdded: listdataAdded,
             listAddError: listAddError,
             listDataDownloaded: datadownloaded,
-            listRemainingToDownload: remainingToDownload
+            listRemainingToDownload: remainingToDownload,
           };
-          
-          return result
 
-        }
-        else {
-          
+          return result;
+        } else {
           result = {
             listDataAdded: listdataAdded,
             listAddError: listAddError,
             listDataDownloaded: datadownloaded,
-            listRemainingToDownload: remainingToDownload
-          }
+            listRemainingToDownload: remainingToDownload,
+          };
 
-          return result
+          return result;
         }
-
-      } 
-      else {
+      } else {
         result = {
           listDataAdded: false,
           listAddError: "Problem deleting old data",
           listDataDownloaded: 0,
-          listRemainingToDownload: type.ContentLength
+          listRemainingToDownload: type.ContentLength,
         };
 
         return result;
       }
-
     } // End of download if Property data already exists
 
     /*************************************************************************************************************************** */
@@ -337,33 +326,32 @@ const newListData = async (type) => {
     else {
       console.log("Inside else clause No listing data had been saved before ");
 
-      const { listdataAdded, listAddError, datadownloaded, remainingToDownload } = await fetchListingData(type);
-    
-        if(listdataAdded){
-          
-          result = {
-            listDataAdded: listdataAdded,
-            listAddError: listAddError,
-            listDataDownloaded: datadownloaded,
-            listRemainingToDownload: remainingToDownload
-          };
-          
-          return result
+      const {
+        listdataAdded,
+        listAddError,
+        datadownloaded,
+        remainingToDownload,
+      } = await fetchListingData(type);
 
-        }
-        else {
-          
-          result = {
-            listDataAdded: listdataAdded,
-            listAddError: listAddError,
-            listDataDownloaded: datadownloaded,
-            listRemainingToDownload: remainingToDownload
-          }
+      if (listdataAdded) {
+        result = {
+          listDataAdded: listdataAdded,
+          listAddError: listAddError,
+          listDataDownloaded: datadownloaded,
+          listRemainingToDownload: remainingToDownload,
+        };
 
-          return result
-        }
+        return result;
+      } else {
+        result = {
+          listDataAdded: listdataAdded,
+          listAddError: listAddError,
+          listDataDownloaded: datadownloaded,
+          listRemainingToDownload: remainingToDownload,
+        };
 
-
+        return result;
+      }
     } // End of fresh data download
   }
 };
@@ -387,7 +375,6 @@ module.exports.run = async (event, context) => {
 };
 
 module.exports.fetchListingsData = async (event, context) => {
-
   console.log("Inside FetchListings");
 
   // Call Metadata URL to get necessary data
@@ -408,7 +395,6 @@ module.exports.fetchListingsData = async (event, context) => {
     console.log("Data Exists: " + dataExists);
 
     if (!dataExists) {
-
       // Call Replicate data to populate new data
       const data = {
         storeType: "new",

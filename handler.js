@@ -645,7 +645,7 @@ module.exports.fetchListingsData = async (event, context) => {
       }
 
       // Check if Property listing exists and populate if not
-      const { dataExists } = await propertyDataExists()
+      const {dataExists } = await propertyDataExists()
 
       if (!dataExists) {
         // Call Replicate data to populate new data

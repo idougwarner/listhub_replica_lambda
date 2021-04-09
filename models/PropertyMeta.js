@@ -6,10 +6,33 @@ module.exports = (sequelize, Sequelize) => {
       unique: true,
       primaryKey: true,
     },
-    propertymeta: {
-      type: Sequelize.JSONB,
+    AcceptRanges: {
+      type: Sequelize.TEXT,
+    },
+    LastModified: {
+      type: Sequelize.TEXT,
+    },
+    ContentLength: {
+      type: Sequelize.BIGINT,
+    },
+    Etag: {
+      type: Sequelize.TEXT,
+      unique: true,
+    },
+    ContentType: {
+      type: Sequelize.TEXT,
     },
   });
 
   return PropertyMeta;
 };
+
+/**
+ * {
+  "AcceptRanges": "bytes",
+  "LastModified": "2019-12-18T13:55:20.000Z",
+  "ContentLength": 2866064774,
+  "ETag": "\"d967f79ad57127eacceb7f7e95270ff1\"",
+  "ContentType": "application/octet-stream"
+}
+ */

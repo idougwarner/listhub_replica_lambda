@@ -5,14 +5,29 @@ const TimeUtil = require("../utils/timeFunctions");
 module.exports.metaCreate = async (jsonData) => {
   // Validate request
   if (!jsonData) {
-    const result = { metadataAdded: false, error: "" };
+    const result = { metadataAdded: false, error: "No Data", metadata:null }
 
-    return result;
+    return result
   }
 
-  // Create a Property Listing
+  /**
+   * {
+  /**
+ * {
+  "AcceptRanges": "bytes",
+  "LastModified": "2019-12-18T13:55:20.000Z",
+  "ContentLength": 2866064774,
+  "ETag": "\"d967f79ad57127eacceb7f7e95270ff1\"",
+  "ContentType": "application/octet-stream"
+}
+ */
+
   const propertymeta = {
-    propertymeta: jsonData,
+    AcceptRanges: jsonData.AcceptRanges,
+    LastModified: jsonData.LastModified,
+    ContentLength: jsonData.ContentLength,
+    ETag: jsonData.ETag,
+    ContentType: jsonData.ContentType,
   };
 
   // Save PropertyMeta entry in the property table
@@ -20,67 +35,67 @@ module.exports.metaCreate = async (jsonData) => {
   try {
     const { PropertyMeta } = await connectToDatabase();
 
-    PropertyMeta.create(propertymeta)
-      .then((data) => {
-        console.log("New Meta Data is" + data);
+    const data = await PropertyMeta.create(propertymeta);
 
-        const result = { metadataAdded: true, data: data };
+    if (data) {
+      console.log("New Meta Data is" + data);
 
-        return result;
-      })
-      .catch((err) => {
-        const result = { metadataAdded: false, error: err };
+      const result = { metadataAdded: true, metadata: data, error: null };
 
-        return result;
-      });
+      return result
+
+    } else {
+      const result = {
+        metadataAdded: false,
+        error: "Could Not add Data",
+        metadata: null
+      };
+
+      return result
+    }
   } catch (err) {
     const result = {
       metadataAdded: false,
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },
       body: "Could not create the PropertyMeta.",
+      error: err,
+      metadata:null
     };
 
-    return result;
+    return result
   }
-};
+}
 
 // Retrieve all Propertymeta from the database.
 module.exports.metaFindAll = async () => {
   try {
     const { PropertyMeta } = await connectToDatabase();
 
-    PropertyMeta.findAll({ raw: true })
-      .then((data) => {
-        console.log("Meta Data" + data.length);
+    const data = await PropertyMeta.findAll({ raw: true });
 
-        if (data.length !== 0) {
-          console.log("Data exists");
+    if (data.length > 0) {
+      console.log("Data exists");
 
-          const result = { dataExists: true, data: data };
+      const result = { dataExists: true, metadata: data, error: null };
 
-          return result;
-        } else {
-          const result = { dataExists: false, error: "No Data" };
+      return result
+    } else {
+      const result = { dataExists: false, metadata: null, error: "No Data" };
 
-          return result;
-        }
-      })
-      .catch((err) => {
-        const result = { dataExists: false, error: err };
-
-        return result;
-      });
+      return result
+    }
   } catch (err) {
+
     const result = {
       dataExists: false,
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },
       body: "Problem obtain PropertyMeta Info.",
       error: err,
-    };
+    }
 
-    return result;
+    return result
   }
 };
 
@@ -89,27 +104,19 @@ module.exports.metaDataExists = async () => {
   try {
     const { PropertyMeta } = await connectToDatabase();
 
-    PropertyMeta.findAll({ raw: true })
-      .then((data) => {
-        console.log("Meta Data" + data.length);
+    const data = await PropertyMeta.findAll({ raw: true });
 
-        if (data.length !== 0) {
-          console.log("Data exists");
+    if (data.length > 0) {
+      console.log("Data exists");
 
-          const result = { metadataExists: true, data: data };
+      const result = { dataExists: true, metadata: data, error: null };
 
-          return result;
-        } else {
-          const result = { metadataExists: false, error: "No Data" };
+      return result
+    } else {
+      const result = { dataExists: false, metadata: null, error: "No Data" };
 
-          return result;
-        }
-      })
-      .catch((err) => {
-        const result = { metadataExists: false, error: err };
-
-        return result;
-      });
+      return result
+    }
   } catch (err) {
     const result = {
       metadataExists: false,
@@ -119,7 +126,7 @@ module.exports.metaDataExists = async () => {
       error: err,
     };
 
-    return result;
+    return result
   }
 };
 
@@ -128,47 +135,38 @@ module.exports.ismetadataNew = async (lastModified) => {
   try {
     const { PropertyMeta } = await connectToDatabase();
 
-    PropertyMeta.findAll({})
-      .then((data) => {
-        console.log("IsmetadataNew " + JSON.stringify(data));
-        if (data.length > 0) {
-          data.map((propertyMeta) => {
-            //console.log(propertyMeta.propertymeta.LastModified);
-            TimeUtil.istimeANewerthantimeB(
-              lastModified,
-              propertyMeta.propertymeta.LastModified
-            )
-              .then((data) => {
-                if (data.newUpdate) {
-                  const result = { newUpdate: true };
-                  return result;
-                } else {
-                  const result = { newUpdate: false };
-                  return result;
-                }
-              })
-              .catch((err) => {
-                console.log("Catch error after time check");
-                const result = { newUpdate: false, error: err };
-                return result;
-              });
-          });
-        }
-      })
-      .catch((err) => {
-        console.log("Checking new metadata fail");
-        const result = { newUpdate: false, error: err };
-        return result;
-      });
+    const data = await PropertyMeta.findOne({
+      where: { LastModified: lastModified },
+    });
+
+    if (data.length > 0) {
+      console.log("IsmetadataNew " + JSON.stringify(data));
+
+      //console.log(propertyMeta.propertymeta.LastModified);
+      let timeResult = await TimeUtil.istimeANewerthantimeB(
+        lastModified,
+        data.LastModified
+      );
+
+      if (timeResult.newUpdate) {
+        const result = { newUpdate: true, error: null };
+        return result
+
+      } else {
+        const result = { newUpdate: false, error: "No Update" };
+        return result
+      }
+    }
   } catch (err) {
     const result = {
       newUpdate: false,
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },
       body: "Problem Deleting Property Info.",
-    };
+      error: "Problem checking meta data",
+    }
 
-    return result;
+    return result
   }
 };
 
@@ -177,20 +175,19 @@ module.exports.metaDeleteAll = async () => {
   try {
     const { PropertyMeta } = await connectToDatabase();
 
-    PropertyMeta.destroy({
+    const data = await PropertyMeta.destroy({
       where: {},
       truncate: false,
-    })
-      .then((nums) => {
-        const result = { metadataDeleted: true, error: null };
+    });
+    if (data) {
+      const result = { metadataDeleted: true, error: null }
 
-        return result;
-      })
-      .catch((err) => {
-        const result = { metadataDeleted: false, error: err };
+      return result
+    } else {
+      const result = { metadataDeleted: false, error: "Not deleted" };
 
-        return result;
-      });
+      return result
+    }
   } catch (err) {
     const result = {
       metadataDeleted: false,
@@ -200,6 +197,6 @@ module.exports.metaDeleteAll = async () => {
       error: err,
     };
 
-    return result;
+    return result
   }
 };

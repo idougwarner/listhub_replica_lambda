@@ -220,7 +220,7 @@ const fetchListingData = async (type) => {
                             
             })
             .pipe(new JsonLinesTransform())
-            .pipe(writeStream)
+            .pipe(await writeStream)
             .on('finish', () => {
             })
 

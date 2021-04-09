@@ -20,20 +20,19 @@ module.exports.propertyCreate = async (jsonData) => {
   try {
     const { Property } = await connectToDatabase();
 
-    const data = await   Property.create(property)
+    const data = await Property.create(property);
 
-    if(data) {
-        console.log("New Property Data is" + data);
+    if (data) {
+      console.log("New Property Data is" + data);
 
-        const result = { dataAdded: true, data: data };
+      const result = { dataAdded: true, data: data };
 
-        return result;
-      }
-      else {
-        const result = { dataAdded: false, error: "Problem Creating Data" };
+      return result;
+    } else {
+      const result = { dataAdded: false, error: "Problem Creating Data" };
 
-        return result;
-      }
+      return result;
+    }
   } catch (err) {
     const result = {
       dataAdded: false,
@@ -56,18 +55,17 @@ module.exports.propertyBulkCreate = async (jsonData) => {
   try {
     const { Property } = await connectToDatabase();
 
-    const data = await  Property.bulkCreate(jsonData)
+    const data = await Property.bulkCreate(jsonData);
 
-    if(data.length!=0) {
-        const result = { dataAdded: true, data: data, error: null };
+    if (data.length != 0) {
+      const result = { dataAdded: true, data: data, error: null };
 
-        return result;
-      }
-      else {
-        const result = { dataAdded: false, error: "Problem creating Listings" };
+      return result;
+    } else {
+      const result = { dataAdded: false, error: "Problem creating Listings" };
 
-        return result;
-      }
+      return result;
+    }
   } catch (err) {
     const result = {
       dataAdded: false,
@@ -86,22 +84,20 @@ module.exports.propertyFindAll = async () => {
   try {
     const { Property } = await connectToDatabase();
 
-    const data = await  Property.findAll({ raw: true })   
+    const data = await Property.findAll({ raw: true });
 
     if (data.length !== 0) {
+      console.log("Data exists");
+      console.log("Property Listing Data " + data.length);
 
-        console.log("Data exists");
-        console.log("Property Listing Data " + data.length);
+      const result = { dataExists: true, data: data };
 
-        const result = { dataExists: true, data: data };
-
-        return result;
+      return result;
     } else {
-        const result = { dataExists: false, error: "No Data" };
+      const result = { dataExists: false, error: "No Data" };
 
-        return result;
+      return result;
     }
-      
   } catch (err) {
     const result = {
       dataExists: false,
@@ -119,21 +115,18 @@ module.exports.propertyDataExists = async () => {
   try {
     const { Property } = await connectToDatabase();
 
-    const data = await Property.findAll({ raw: true })
+    const data = await Property.findAll({ raw: true });
 
     if (data.length !== 0) {
-          
-        console.log("Data exists");
+      console.log("Data exists");
 
-        const result = { dataExists: true, data: data, error: null }
+      const result = { dataExists: true, data: data, error: null };
 
-        return result
-
+      return result;
     } else {
-    
-        const result = { dataExists: false, error: "No Data", data: null }
+      const result = { dataExists: false, error: "No Data", data: null };
 
-        return result
+      return result;
     }
   } catch (err) {
     const result = {
@@ -141,9 +134,9 @@ module.exports.propertyDataExists = async () => {
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },
       body: "Problem finding Property Info.",
-    }
+    };
 
-    return result
+    return result;
   }
 };
 
@@ -153,20 +146,19 @@ module.exports.propertyDeleteAll = async () => {
     const { Property } = await connectToDatabase();
 
     const data = await Property.destroy({
-        where: {},
-        truncate: false,
-      })
+      where: {},
+      truncate: false,
+    });
 
-    if(data.length==0) {
-        const result = { dataDeleted: true, error: null };
+    if (data.length == 0) {
+      const result = { dataDeleted: true, error: null };
 
-        return result;
-      }
-      else {
-        const result = { dataDeleted: false, error: "No Data to delete" };
+      return result;
+    } else {
+      const result = { dataDeleted: false, error: "No Data to delete" };
 
-        return result;
-      };
+      return result;
+    }
   } catch (err) {
     const result = {
       dataDeleted: false,

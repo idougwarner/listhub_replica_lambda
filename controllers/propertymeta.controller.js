@@ -5,9 +5,9 @@ const TimeUtil = require("../utils/timeFunctions");
 module.exports.metaCreate = async (jsonData) => {
   // Validate request
   if (!jsonData) {
-    const result = { metadataAdded: false, error: "No Data", metadata:null }
+    const result = { metadataAdded: false, error: "No Data", metadata: null };
 
-    return result
+    return result;
   }
 
   /**
@@ -42,16 +42,15 @@ module.exports.metaCreate = async (jsonData) => {
 
       const result = { metadataAdded: true, metadata: data, error: null };
 
-      return result
-
+      return result;
     } else {
       const result = {
         metadataAdded: false,
         error: "Could Not add Data",
-        metadata: null
+        metadata: null,
       };
 
-      return result
+      return result;
     }
   } catch (err) {
     const result = {
@@ -60,12 +59,12 @@ module.exports.metaCreate = async (jsonData) => {
       headers: { "Content-Type": "text/plain" },
       body: "Could not create the PropertyMeta.",
       error: err,
-      metadata:null
+      metadata: null,
     };
 
-    return result
+    return result;
   }
-}
+};
 
 // Retrieve all Propertymeta from the database.
 module.exports.metaFindAll = async () => {
@@ -79,23 +78,22 @@ module.exports.metaFindAll = async () => {
 
       const result = { dataExists: true, metadata: data, error: null };
 
-      return result
+      return result;
     } else {
       const result = { dataExists: false, metadata: null, error: "No Data" };
 
-      return result
+      return result;
     }
   } catch (err) {
-
     const result = {
       dataExists: false,
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },
       body: "Problem obtain PropertyMeta Info.",
       error: err,
-    }
+    };
 
-    return result
+    return result;
   }
 };
 
@@ -111,11 +109,11 @@ module.exports.metaDataExists = async () => {
 
       const result = { dataExists: true, metadata: data, error: null };
 
-      return result
+      return result;
     } else {
       const result = { dataExists: false, metadata: null, error: "No Data" };
 
-      return result
+      return result;
     }
   } catch (err) {
     const result = {
@@ -126,7 +124,7 @@ module.exports.metaDataExists = async () => {
       error: err,
     };
 
-    return result
+    return result;
   }
 };
 
@@ -150,11 +148,10 @@ module.exports.ismetadataNew = async (lastModified) => {
 
       if (timeResult.newUpdate) {
         const result = { newUpdate: true, error: null };
-        return result
-
+        return result;
       } else {
         const result = { newUpdate: false, error: "No Update" };
-        return result
+        return result;
       }
     }
   } catch (err) {
@@ -164,9 +161,9 @@ module.exports.ismetadataNew = async (lastModified) => {
       headers: { "Content-Type": "text/plain" },
       body: "Problem Deleting Property Info.",
       error: "Problem checking meta data",
-    }
+    };
 
-    return result
+    return result;
   }
 };
 
@@ -180,13 +177,13 @@ module.exports.metaDeleteAll = async () => {
       truncate: false,
     });
     if (data) {
-      const result = { metadataDeleted: true, error: null }
+      const result = { metadataDeleted: true, error: null };
 
-      return result
+      return result;
     } else {
       const result = { metadataDeleted: false, error: "Not deleted" };
 
-      return result
+      return result;
     }
   } catch (err) {
     const result = {
@@ -197,6 +194,6 @@ module.exports.metaDeleteAll = async () => {
       error: err,
     };
 
-    return result
+    return result;
   }
 };

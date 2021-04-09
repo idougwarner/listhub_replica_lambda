@@ -72,6 +72,7 @@ const fetchListingData = async (type) => {
   // Extract new data and store Etag and sequence
   // Run get request to read data to file then read the data to the database
   const getInputStream1 = (rangeValues) => {
+    
     // Get inputStream from replication request
     /*
     return request({
@@ -83,6 +84,8 @@ const fetchListingData = async (type) => {
           "bytes=" + rangeValues.startOfRange + "-" + rangeValues.endOfRange,
       },
     });*/
+
+    console.log("Type"+type);
 
       return axios.get(replicationURL, {
         headers: {

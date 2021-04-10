@@ -238,7 +238,7 @@ module.exports.run = async (event, context) => {
   );
 };
 
-module.exports.fetchListingsData = async (event, context) => {
+module.exports.fetchListingsData = (event, context) => {
   console.log("Inside FetchListings");
 
   // Call Metadata URL to get necessary data
@@ -374,6 +374,9 @@ const getData = async () => {
   inputStream
     .on("data", (response) => {
       console.log("Data: "+response)
+    })
+    .on('error',(err)=>{
+      console.log('Error is'+err)
     })
     .pipe(new JsonLinesTransform())
     .pipe(writeStream);

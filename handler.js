@@ -190,35 +190,25 @@ const newListData = async (type) => {
   }
 };
 
-module.exports.run = async (event, context) => {
-  const time = new Date();
+const metaStream = async () => {
 
-  const db = {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    name: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-  };
+  // Get inputStream from replication request with range headers
+  return request(
+    {
+      url: metaURL,
 
-  console.log(
-    `Your cron function "${
-      context.functionName
-    }" ran at ${time} with db ${JSON.stringify(db, null, 2)}`
-  );
-};
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + token
+      }
+    })
+}
 
-module.exports.fetchListingsData = (event, context) => {
+const fetchData = async () => {
+
   console.log("Inside FetchListings");
 
-  // Call Metadata URL to get necessary data
-  let response = await axios({
-    method: "get",
-    url: metaURL,
-    headers: {
-      Authorization: "Bearer " + token,
-    },
-  });
+  const response=await metaStream();
 
   if (response) {
     console.log("Last Modified is " + response.data.LastModified);
@@ -317,6 +307,29 @@ module.exports.fetchListingsData = (event, context) => {
       // Do nothing to existing listings
     }
   }
+
+}
+
+module.exports.run = async (event, context) => {
+  const time = new Date();
+
+  const db = {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    name: process.env.DB_NAME,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+  };
+
+  console.log(
+    `Your cron function "${
+      context.functionName
+    }" ran at ${time} with db ${JSON.stringify(db, null, 2)}`
+  );
+}
+
+module.exports.fetchListingsData = (event, context) => {
+  fetchData();  
 }
 
 const testInputStream = async () => {

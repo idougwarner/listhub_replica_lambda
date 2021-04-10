@@ -352,7 +352,7 @@ module.exports.fetchListingsData = async (event, context) => {
             storeType: "newDownload",
             ContentLength: response.data.ContentLength,
             ETag: response.data.ETag,
-            sequence= key
+            sequence: key
           };
 
           const { listDataAdded, listAddError } = await newListData(data);

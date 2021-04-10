@@ -75,8 +75,9 @@ const fetchListingData = async (type) => {
 
   const response1 = await getInputStream1(type);
     
-    console.log("Response using Axios "+JSON.stringify(response1));
+    console.log("Response using Axios "+response1);
 
+    /*
     response1
         .on('response', (response) => {
           console.log("Status code "+response.statusCode);
@@ -111,7 +112,7 @@ const fetchListingData = async (type) => {
               result.listAddError = true
               result.listdataAdded = false
             }
-        })
+        })*/
 
         console.log("After input stream");
 

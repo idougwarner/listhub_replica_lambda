@@ -391,7 +391,6 @@ module.exports.testfetchListingsData = async (event, context) => {
       Authorization: "Bearer " + token,
     },
   });
-
   
    const readData = async () => {
       
@@ -428,8 +427,10 @@ module.exports.testfetchListingsData = async (event, context) => {
           //no need to call the reject here, as it will have been called in the
           //'error' stream;
         });
+
       });
     });
+    
   }
 
   readData()
@@ -437,4 +438,5 @@ module.exports.testfetchListingsData = async (event, context) => {
   let rawdata = fs.readFileSync("/tmp/propertylisting.json");
 
   console.log(rawdata);
+
 };

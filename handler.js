@@ -402,12 +402,7 @@ const readData = async () => {
 
   inputStream
     .pipe(new JsonLinesTransform())
-    .pipe(writeStream)
-    .on('finish', () => {
-
-      console.log('Done downloading Property Listing data!')
-
-    })
+    .pipe(writeStream);
 }
 
 module.exports.testfetchListingsData = async (event, context) => {

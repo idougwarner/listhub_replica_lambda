@@ -42,17 +42,28 @@ class JsonLinesTransform extends stream.Transform {
 
 const getInputStream1 = async (values) => {
 
-  // Get inputStream from replication request
-  return request(
-    {
-        url : replicationURL,
-        headers : {
-          'Accept': 'application/json',
-          'Authorization' : 'Bearer '+token,
-          'If-Range': values.ETag,
-          'Range': values.sequence+'-'
-        }
-    });
+  const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
+
+  let response = await axios({
+    method: 'get',
+    url: metaURL,
+    headers: {
+      'Accept': 'application/json',
+      'Authorization' : 'Bearer '+token,
+      'If-Range': values.ETag,
+      'Range': values.sequence+'-'
+    },
+    responseType: 'stream'
+  })
+
+  response.data.pipe(new JsonLinesTransform())
+  response.data.pipe(writeStream)
+
+  return new Promise((resolve, reject) => {
+    writer.on('finish', resolve)
+    writer.on('error', reject)
+  })
+
 };
 
 const fetchListingData = async (type) => {
@@ -64,9 +75,7 @@ const fetchListingData = async (type) => {
 
   const response1 = await getInputStream1(type);
     
-    console.log("Response using Axios"+JSON.stringify(response1));
-
-    const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
+    console.log("Response using Axios "+JSON.stringify(response1));
 
     response1
         .on('response', (response) => {
@@ -236,11 +245,13 @@ module.exports.fetchListingsData = async (event, context) => {
   console.log("Inside FetchListings");
 
   // Call Metadata URL to get necessary data
-  let response = await axios.get(metaURL, {
+  let response = await axios({
+    method: 'get',
+    url: metaURL,
     headers: {
-      'Authorization': "Bearer " + token
-    },
-  });
+      Authorization: 'Bearer ' + token
+    }
+  })
 
   if (response) {
     console.log("Last Modified is " + response.data.LastModified);

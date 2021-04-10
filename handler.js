@@ -64,7 +64,7 @@ const fetchListingData = async (type) => {
 
   const response1 = await getInputStream1(type);
     
-    console.log("Response using Axios"+response1);
+    console.log("Response using Axios"+JSON.stringify(response1));
 
     const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 

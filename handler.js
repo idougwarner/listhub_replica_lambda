@@ -413,8 +413,6 @@ module.exports.testfetchListingsData = async (event, context) => {
 
       // console.log(response.headers['content-length']);
 
-      total_bytes = parseInt(response.headers['content-length']);
-
     })
     .on('data', (chunk) => {
 

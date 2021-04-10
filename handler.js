@@ -407,6 +407,7 @@ module.exports.testfetchListingsData = async (event, context) => {
     const callback = (response) => {
       var str = ''
       response.on('data', function (chunk) {
+        console.log("Data Here"+chunk)
         str += chunk;
       });
 
@@ -416,9 +417,9 @@ module.exports.testfetchListingsData = async (event, context) => {
     }
 
     var req = http.request(options, callback);
-    req.end();
+    //req.end();
 
-  let rawdata = fs.readFileSync("/tmp/propertylisting.json");
+    //let rawdata = fs.readFileSync("/tmp/propertylisting.json");
 
   console.log(rawdata);
 

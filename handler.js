@@ -92,21 +92,15 @@ const fetchListingData = async (type) => {
       var mylist = '[' + myjson.join('},{') + ']';
 
       const listings1 = JSON.parse(mylist);
-                        
-      properties.bulkCreate(listings1).then(data => {
+      
+      const { dataAdded, error} = await propertyBulkCreate(listings1)
                   
-        if(data.dataAdded) {
-          resolve({ dataAdded:true, })
+        if(dataAdded) {
+          result.listdataAdded=true
+        } else {
+          result.listAddError = true
+          result.listdataAdded = false
         }
-
-      }).catch(err => {
-
-        reject(new Error("Erro Adding Product Listing data"+err));
-
-      });
-
-      result.listAddError = false
-      result.listdataAdded = true
 
     })
 

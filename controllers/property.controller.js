@@ -2,9 +2,11 @@ const connectToDatabase = require("../models");
 
 // Create and Save a new Property Listing
 module.exports.propertyCreate = async (jsonData) => {
+
   // Validate request
   if (!jsonData) {
-    const result = { dataAdded: false, error: "Empty Property" };
+    
+    const result = { dataAdded: false,  listdata: null, statusCode: 500, error: "Empty Property" };
 
     return result;
   }
@@ -25,26 +27,30 @@ module.exports.propertyCreate = async (jsonData) => {
     if (data) {
       console.log("New Property Data is" + data);
 
-      const result = { dataAdded: true, data: data };
+      const result = { dataAdded: true, listdata: data, statusCode: 200, error: null };
 
       return result;
     } else {
-      const result = { dataAdded: false, error: "Problem Creating Data" };
+      const result = { dataAdded: false, listdata: null, statusCode: 500, error: "Problem Creating Data" };
 
       return result;
     }
   } catch (err) {
     const result = {
       dataAdded: false,
+      listdata: null,
       statusCode: 500,
+      error: err,
       headers: { "Content-Type": "text/plain" },
       body: "Could not create the Property.",
     };
+
     return result;
   }
 };
 
 module.exports.propertyBulkCreate = async (jsonData) => {
+  
   // Validate request
   if (!jsonData) {
     const result = { dataAdded: false, data: null, error: "No Data to Add" };

@@ -3,7 +3,7 @@ const axios = require("axios");
 const request = require("request");
 const fs = require("fs");
 const stream = require("stream");
-const util = require("util");
+const http = require("http");
 
 const {
   propertyBulkCreate,
@@ -391,47 +391,32 @@ module.exports.testfetchListingsData = async (event, context) => {
       Authorization: "Bearer " + token,
     },
   });
-  
-   const readData = async () => {
-      
-    axios({
-      method: 'get',
-      url: replicationURL,
+            
+    var http = require('http');
+
+    var options = {
+      host: 'api.listhub.com',
+      path: '/public_sandbox/replication/query?select=ListingKey',
+      //This is the only line that is new. `headers` is an object with the headers to request
       headers: {
         Accept: "application/json",
         Authorization: "Bearer " + token,
-      },
-      responseType: 'stream'
-    }).then(response => {
-  
-      //ensure that the user can call `then()` only when the file has
-      //been downloaded entirely.
+      }
+    };
 
-        console.log("Response using Axios " + response);
-
-        response.data.pipe(writeStream);
-
-        let error = null;
-        
-        writeStream.on('error', err => {
-          error = err;
-          writer.close();
-          reject(err);
-        });
-
-        writeStream.on('close', () => {
-          if (!error) {
-            resolve(true);
-          }
-          // no need to call the reject here, as it will have been called in the
-          //'error' stream;
-        });
-
+    callback = function(response) {
+      var str = ''
+      response.on('data', function (chunk) {
+        str += chunk;
       });
 
-  }
+      response.on('end', function () {
+        console.log(str);
+      });
+    }
 
-  await readData()
+    var req = http.request(options, callback);
+    req.end();
 
   let rawdata = fs.readFileSync("/tmp/propertylisting.json");
 

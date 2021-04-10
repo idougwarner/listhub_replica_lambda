@@ -57,35 +57,6 @@ const getInputStream1 = async (values) => {
     },
   });
 
-  
-  let response = axios({
-    method: "get",
-    url: replicationURL,
-    headers: {
-      Accept: "application/json",
-      Authorization: "Bearer " + token,
-    },
-    responseType: "stream",
-  });
-
-  // response.data.pipe(new JsonLinesTransform())
-  
-    response.data
-          .on('data', chunk => {
-            downloadedSize += chunk.length;
-
-            console.log('Downloading ', downloadedSize)
-          })
-          .pipe(new JsonLinesTransform())
-          .pipe(writeStream)
-
-          /*return new Promise((resolve, reject) => {
-
-            writeStream.on('end', resolve({writtenData:true}))
-            writeStream.on('error', reject({writtenData:false}))
-
-          })
-
   inputStream
         .pipe(new JsonLinesTransform())
         .pipe(writeStream)
@@ -96,7 +67,7 @@ const getInputStream1 = async (values) => {
           //response.on('end', resolve({writtenData:true}))
           //writeStream.on('error', reject({writtenData:false}))
         });
-  });*/
+  })
 };
 
 const fetchListingData = async (type) => {
@@ -378,7 +349,7 @@ module.exports.fetchListingsData = async (event, context) => {
   }
 }
 
-const getInputStream2 = () => {
+const getInputStream2 = async () => {
 
   // Get inputStream from replication request with range headers
   return request(
@@ -389,18 +360,20 @@ const getInputStream2 = () => {
         'Accept': 'application/json',
         'Authorization': 'Bearer ' + token
       }
-    });
-
+    })
 }
 
 const readData = async () => {
   
-  const inputStream = getInputStream2();
+  const inputStream = await getInputStream2();
   const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
   console.log("After create a file write stream");
 
   inputStream
+    .on("data", (response) => {
+      console.log("Data: "+response)
+    })
     .pipe(new JsonLinesTransform())
     .pipe(writeStream);
 }
@@ -409,7 +382,7 @@ module.exports.testfetchListingsData = async (event, context) => {
   
   console.log("Inside Test FetchListings");
 
-  await readData();
+  readData();
 
   // create a readjson
   const jsonfile = fs.createReadStream('/tmp/propertylisting.json');
@@ -427,7 +400,5 @@ module.exports.testfetchListingsData = async (event, context) => {
   var mylist = '[' + myjson.join('},{') + ']';
 
   const listings1 = JSON.parse(mylist);
-
   
-
 };

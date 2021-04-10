@@ -71,8 +71,7 @@ const fetchListingData = async (type) => {
     response1
         .on('response', (response) => {
           console.log("Status code "+response.statusCode);
-          console.log("Etag value "+response.headers['ETag']);
-          Etag=response.headers['ETag'];
+          console.log("ETag value "+response.headers['ETag']);
                         
         })
         .on('data', ()=> {

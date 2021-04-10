@@ -76,13 +76,16 @@ const fetchListingData = async (type) => {
           Etag=response.headers['ETag'];
                         
         })
+        .on('data', ()=> {
+          console.log("Inside Data get")
+        })
         .pipe(new JsonLinesTransform())
         .pipe(writeStream)
         .on('finish', async () => {
 
           console.log("Done creating a file write stream");
 
-          let rawdata = fs.readFileSync('./propertylisting.json');
+          let rawdata = fs.readFileSync('/tmp/propertylisting.json');
                             
           // var myjson = rawdata.toString().split('}{'); 
           

@@ -60,8 +60,8 @@ const getInputStream1 = async (values) => {
   response.data.pipe(writeStream)
 
   return new Promise((resolve, reject) => {
-    writer.on('finish', resolve)
-    writer.on('error', reject)
+    writeStream.on('finish', resolve)
+    writeStream.on('error', reject)
   })
 
 };

@@ -363,7 +363,7 @@ const getInputStream2 = async () => {
     })
 }
 
-module.exports.testfetchListingsData = async (event, context) => {
+module.exports.testfetchListingsData = (event, context) => {
   
   console.log("Inside Test FetchListings");
 

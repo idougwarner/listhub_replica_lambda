@@ -65,7 +65,6 @@ const getInputStream1 = async (values) => {
 
                 console.log('Downloading ', downloadedSize)
               })
-              .pipe(JsonLinesTransform)
               .pipe(writeStream)
 
   return new Promise((resolve, reject) => {

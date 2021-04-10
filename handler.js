@@ -42,32 +42,13 @@ class JsonLinesTransform extends stream.Transform {
 
 const getInputStream1 = async (values) => {
 
-  /*
-      "If-Range": values.ETag,
-      Range: "sequence="+values.sequence + "-"
-  */
-
-  const writeStream = fs.createWriteStream("/tmp/propertylisting.json");
-
-  const inputStream = request({
+   request({
     url: replicationURL,
     headers: {
       Accept: "application/json",
       Authorization: "Bearer " + token,
     },
   });
-
-  inputStream
-        .pipe(new JsonLinesTransform())
-        .pipe(writeStream)
-        .on("finish", () => {
-        return new Promise((resolve, reject) => {
-          resolve({ writtenData: true });
-
-          //response.on('end', resolve({writtenData:true}))
-          //writeStream.on('error', reject({writtenData:false}))
-        });
-  })
 };
 
 const fetchListingData = async (type) => {
@@ -76,50 +57,39 @@ const fetchListingData = async (type) => {
     listAddError: null,
   };
 
-  const response1 = await getInputStream1(type);
+  console.log("Inside Test FetchListings");
 
-  console.log("Response using Axios " + JSON.stringify(response1));
+  const inputStream = await getInputStream1(type);
+  const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
-  let rawdata = fs.readFileSync("/tmp/propertylisting.json");
+  console.log("After create a file write stream");
 
-  console.log(rawdata);
+  inputStream
+    .on("data", (response) => {
+      console.log("Data: "+response)
+    })
+    .on('error',(err)=>{
+      console.log('Error is'+err)
+    })
+    .pipe(new JsonLinesTransform())
+    .pipe(writeStream);
 
-  /*
-    response1
-        .on('response', (response) => {
-          console.log("Status code "+response.statusCode);
-          console.log("ETag value "+response.headers['ETag']);
-                        
-        })
-        .on('data', ()=> {
-          console.log("Inside Data get")
-        })
-        .pipe(new JsonLinesTransform())
-        .pipe(writeStream)
-        .on('finish', async () => {
+  // create a readjson
+  const jsonfile = fs.createReadStream('/tmp/propertylisting.json');
 
-          console.log("Done creating a file write stream");
+  let rawdata = fs.readFileSync('/tmp/propertylisting.json');
 
-          let rawdata = fs.readFileSync('/tmp/propertylisting.json');
-                            
-          // var myjson = rawdata.toString().split('}{'); 
-          
-          var myjson = rawdata.toString().split('}{');
+  // console.log("RAW Data "+rawdata);
 
-          // Create a JSON object array for saving to database
-          var mylist = '[' + myjson.join('},{') + ']';
+  var myjson = rawdata.toString().split("}{");
 
-          const listings1 = JSON.parse(mylist);
-          
-          const { dataAdded, error} = await propertyBulkCreate(listings1)
-                      
-            if(dataAdded) {
-              result.listdataAdded=true
-            } else {
-              result.listAddError = true
-              result.listdataAdded = false
-            }
-        })*/
+  console.log(" Myjson"+myjson)
+
+  // Create a JSON object array
+  // [myjson.join('},{')]
+  var mylist = '[' + myjson.join('},{') + ']';
+
+  const listings1 = JSON.parse(mylist);
 
   console.log("After input stream");
 
@@ -349,7 +319,7 @@ module.exports.fetchListingsData = (event, context) => {
   }
 }
 
-const getInputStream2 = async () => {
+const testInputStream = async () => {
 
   // Get inputStream from replication request with range headers
   return request(
@@ -366,7 +336,7 @@ const getInputStream2 = async () => {
 const getData = async () => {
   console.log("Inside Test FetchListings");
 
-  const inputStream = await getInputStream2();
+  const inputStream = await testInputStream();
   const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
   console.log("After create a file write stream");

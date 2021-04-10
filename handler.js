@@ -363,8 +363,7 @@ const getInputStream2 = async () => {
     })
 }
 
-module.exports.testfetchListingsData = (event, context) => {
-  
+const getData = async () => {
   console.log("Inside Test FetchListings");
 
   const inputStream = await getInputStream2();
@@ -395,5 +394,10 @@ module.exports.testfetchListingsData = (event, context) => {
   var mylist = '[' + myjson.join('},{') + ']';
 
   const listings1 = JSON.parse(mylist);
+} 
+
+module.exports.testfetchListingsData = (event, context) => {
+  
+  getData();
 
 };

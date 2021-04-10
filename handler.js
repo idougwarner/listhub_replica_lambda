@@ -41,25 +41,29 @@ class JsonLinesTransform extends stream.Transform {
 }
 
 const getInputStream1 = async (values) => {
+
+  /*
+      "If-Range": values.ETag,
+      Range: "sequence="+values.sequence + "-"
+  */
+ 
   const writeStream = fs.createWriteStream("/tmp/propertylisting.json");
 
   const inputStream = await request({
     url: replicationURL,
     headers: {
       Accept: "application/json",
-      Authorization: "Bearer " + token 
+      Authorization: "Bearer " + token,
     },
   });
 
-  /*
+  
   let response = await axios({
     method: "get",
     url: replicationURL,
     headers: {
       Accept: "application/json",
       Authorization: "Bearer " + token,
-      "If-Range": values.ETag,
-      Range: "sequence="+values.sequence + "-"
     },
     responseType: "stream",
   });
@@ -81,7 +85,6 @@ const getInputStream1 = async (values) => {
             writeStream.on('error', reject({writtenData:false}))
 
           })
-    */
 
   inputStream
         .pipe(new JsonLinesTransform())

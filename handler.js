@@ -49,7 +49,7 @@ const getInputStream1 = async (values) => {
 
   const writeStream = fs.createWriteStream("/tmp/propertylisting.json");
 
-  const inputStream = await request({
+  const inputStream = request({
     url: replicationURL,
     headers: {
       Accept: "application/json",
@@ -58,7 +58,7 @@ const getInputStream1 = async (values) => {
   });
 
   
-  let response = await axios({
+  let response = axios({
     method: "get",
     url: replicationURL,
     headers: {
@@ -421,7 +421,7 @@ module.exports.testfetchListingsData = async (event, context) => {
 
           })*/
 
-  const response=await inputStream
+  const response1=await inputStream
         .pipe(new JsonLinesTransform())
         .pipe(writeStream)
         .on("finish", () => {
@@ -433,7 +433,7 @@ module.exports.testfetchListingsData = async (event, context) => {
         });
   });
 
-  console.log("Response using Axios " + JSON.stringify(response));
+  console.log("Response using Axios " + JSON.stringify(response1));
 
   let rawdata = fs.readFileSync("/tmp/propertylisting.json");
 

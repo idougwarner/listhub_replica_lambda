@@ -41,34 +41,32 @@ class JsonLinesTransform extends stream.Transform {
 }
 
 const getInputStream1 = async (values) => {
+  const writeStream = fs.createWriteStream("/tmp/propertylisting.json");
 
-  const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
-
-  const inputStream= await request(
-    {
-        url : replicationURL,
-        headers : {
-          'Accept': 'application/json',
-          'Authorization' : 'Bearer '+token,
-          'If-Range': values.ETag,
-          'Range': values.sequence+'-'
-        }
-    });
-
-  let response = await axios({
-    method: 'get',
+  const inputStream = await request({
     url: replicationURL,
     headers: {
-      'Accept': 'application/json',
-      'Authorization' : 'Bearer '+token,
-      'If-Range': values.ETag,
-      'Range': values.sequence+'-'
+      Accept: "application/json",
+      Authorization: "Bearer " + token,
+      "If-Range": values.ETag,
+      Range: values.sequence + "-",
     },
-    responseType: 'stream'
-  })
+  });
 
-    // response.data.pipe(new JsonLinesTransform())
-    /*
+  let response = await axios({
+    method: "get",
+    url: replicationURL,
+    headers: {
+      Accept: "application/json",
+      Authorization: "Bearer " + token,
+      "If-Range": values.ETag,
+      Range: values.sequence + "-",
+    },
+    responseType: "stream",
+  });
+
+  // response.data.pipe(new JsonLinesTransform())
+  /*
     response.data
           .on('data', chunk => {
             downloadedSize += chunk.length;
@@ -84,40 +82,33 @@ const getInputStream1 = async (values) => {
             writeStream.on('error', reject({writtenData:false}))
 
           })
-    */          
+    */
 
-    
-        inputStream
-          .pipe(writeStream)
-          .on('finish', () => {
-            return new Promise((resolve, reject) => {
+  inputStream.pipe(writeStream).on("finish", () => {
+    return new Promise((resolve, reject) => {
+      resolve({ writtenData: true });
 
-              resolve({writtenData:true})
-
-              //response.on('end', resolve({writtenData:true}))
-              //writeStream.on('error', reject({writtenData:false}))
-
-            })          
-        })
-
+      //response.on('end', resolve({writtenData:true}))
+      //writeStream.on('error', reject({writtenData:false}))
+    });
+  });
 };
 
 const fetchListingData = async (type) => {
-
   var result = {
     listdataAdded: false,
-    listAddError: null
-  };  
+    listAddError: null,
+  };
 
   const response1 = await getInputStream1(type);
-    
-    console.log("Response using Axios "+JSON.stringify(response1));
 
-    let rawdata = fs.readFileSync('/tmp/propertylisting.json');
+  console.log("Response using Axios " + JSON.stringify(response1));
 
-    console.log(rawdata);
+  let rawdata = fs.readFileSync("/tmp/propertylisting.json");
 
-    /*
+  console.log(rawdata);
+
+  /*
     response1
         .on('response', (response) => {
           console.log("Status code "+response.statusCode);
@@ -154,9 +145,9 @@ const fetchListingData = async (type) => {
             }
         })*/
 
-        console.log("After input stream");
+  console.log("After input stream");
 
-    return result;  
+  return result;
 };
 
 // Retrieve new streamed data and store to database
@@ -168,22 +159,19 @@ const newListData = async (type) => {
   const Etag = "";
 
   if (type.storeType == "new") {
-    const {
-      listdataAdded,
-      listAddError
-    } = await fetchListingData(type);
+    const { listdataAdded, listAddError } = await fetchListingData(type);
 
     if (listdataAdded) {
       result = {
         listDataAdded: true,
-        listAddError: listAddError
+        listAddError: listAddError,
       };
 
       return result;
     } else {
       result = {
         listDataAdded: true,
-        listAddError: listAddError
+        listAddError: listAddError,
       };
 
       return result;
@@ -202,22 +190,19 @@ const newListData = async (type) => {
 
       // Old data deleted successfully
       if (dataDeleted) {
-        const {
-          listdataAdded,
-          listAddError
-        } = await fetchListingData(type);
+        const { listdataAdded, listAddError } = await fetchListingData(type);
 
         if (listdataAdded) {
           result = {
             listDataAdded: listdataAdded,
-            listAddError: listAddError
+            listAddError: listAddError,
           };
 
           return result;
         } else {
           result = {
             listDataAdded: listdataAdded,
-            listAddError: listAddError
+            listAddError: listAddError,
           };
 
           return result;
@@ -225,7 +210,7 @@ const newListData = async (type) => {
       } else {
         result = {
           listDataAdded: false,
-          listAddError: "Problem deleting old data"
+          listAddError: "Problem deleting old data",
         };
 
         return result;
@@ -238,23 +223,19 @@ const newListData = async (type) => {
     else {
       console.log("Inside else clause No listing data had been saved before ");
 
-      const {
-        listdataAdded,
-        listAddError
-
-      } = await fetchListingData(type);
+      const { listdataAdded, listAddError } = await fetchListingData(type);
 
       if (listdataAdded) {
         result = {
           listDataAdded: listdataAdded,
-          listAddError: listAddError
+          listAddError: listAddError,
         };
 
         return result;
       } else {
         result = {
           listDataAdded: listdataAdded,
-          listAddError: listAddError
+          listAddError: listAddError,
         };
 
         return result;
@@ -282,17 +263,16 @@ module.exports.run = async (event, context) => {
 };
 
 module.exports.fetchListingsData = async (event, context) => {
-  
   console.log("Inside FetchListings");
 
   // Call Metadata URL to get necessary data
   let response = await axios({
-    method: 'get',
+    method: "get",
     url: metaURL,
     headers: {
-      Authorization: 'Bearer ' + token
-    }
-  })
+      Authorization: "Bearer " + token,
+    },
+  });
 
   if (response) {
     console.log("Last Modified is " + response.data.LastModified);
@@ -305,7 +285,7 @@ module.exports.fetchListingsData = async (event, context) => {
 
     var key = date.getTime().toString().padEnd(19, 0);
 
-    console.log("KEY is: "+key);
+    console.log("KEY is: " + key);
 
     // CHECK IF PRODUCT LISTING DATA EXISTS AND IF NOT POPULATE THE LISTINGS TABLE
     const { dataExists } = await propertyDataExists();
@@ -318,13 +298,13 @@ module.exports.fetchListingsData = async (event, context) => {
         storeType: "new",
         ContentLength: response.data.ContentLength,
         ETag: response.data.ETag,
-        sequence: key
+        sequence: key,
       };
 
       const { listDataAdded, listAddError } = await newListData(data);
 
       if (listDataAdded) {
-        console.log("Product List Data Added"+listDataAdded);
+        console.log("Product List Data Added" + listDataAdded);
       } else {
         console.log("Problem adding data");
       }
@@ -370,7 +350,7 @@ module.exports.fetchListingsData = async (event, context) => {
           const data = {
             storeType: "newDownload",
             ContentLength: response.data.ContentLength,
-            ETag: response.data.ETag
+            ETag: response.data.ETag,
           };
 
           const { listDataAdded, listAddError } = await newListData(data);

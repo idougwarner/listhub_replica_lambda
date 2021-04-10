@@ -412,6 +412,7 @@ module.exports.testfetchListingsData = async (event, context) => {
         console.log("Response using Axios " + JSON.stringify(response));
 
         response.data.pipe(writeStream);
+
         let error = null;
         
         writer.on('error', err => {
@@ -429,6 +430,7 @@ module.exports.testfetchListingsData = async (event, context) => {
         });
 
       });
+      
     });
 
   }

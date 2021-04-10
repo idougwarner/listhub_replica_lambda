@@ -46,27 +46,6 @@ const fetchListingData = async (type) => {
     listAddError: null
   };
 
-  const getSize = (bytes) => {
-    var marker = 1024;
-    var decimal = 3; // Change as required
-    var kiloBytes = marker; // One Kilobyte is 1024 bytes
-    var megaBytes = marker * kiloBytes; // One MB is 1024 KB
-    var gigaBytes = marker * megaBytes; // One GB is 1024 MB
-    var teraBytes = marker * gigaBytes; // One TB is 1024 GB
-
-    // return bytes if less than a KB
-    if (bytes < kiloBytes) return { bytes: bytes, type: "Bytes" };
-    // return KB if less than a MB
-    else if (bytes < megaBytes)
-      return { bytes: (bytes / kiloBytes).toFixed(decimal), type: "KB" };
-    // return MB if less than a GB
-    else if (bytes < gigaBytes)
-      return { bytes: (bytes / megaBytes).toFixed(decimal), type: "MB" };
-    // return GB if less than a TB
-    else if (bytes < teraBytes)
-      return { bytes: (bytes / gigaBytes).toFixed(decimal), type: "GB" };
-  };
-
   // Extract new data and store Etag and sequence
   // Run get request to read data to file then read the data to the database
   const getInputStream1 = async (values) => {
@@ -131,7 +110,7 @@ const fetchListingData = async (type) => {
 
     })
 
-  return result;
+    return result;  
 };
 
 // Retrieve new streamed data and store to database

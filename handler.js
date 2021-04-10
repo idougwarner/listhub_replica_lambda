@@ -49,7 +49,7 @@ const getInputStream1 = async (values) => {
       Accept: "application/json",
       Authorization: "Bearer " + token,
       "If-Range": values.ETag,
-      Range: values.sequence + "-",
+      Range: "sequence="+values.sequence + "-",
     },
   });
 
@@ -60,7 +60,7 @@ const getInputStream1 = async (values) => {
       Accept: "application/json",
       Authorization: "Bearer " + token,
       "If-Range": values.ETag,
-      Range: values.sequence + "-",
+      Range: "sequence="+values.sequence + "-",
     },
     responseType: "stream",
   });

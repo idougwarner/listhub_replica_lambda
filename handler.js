@@ -44,6 +44,17 @@ const getInputStream1 = async (values) => {
 
   const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
+  const inputStream= await request(
+    {
+        url : replicationURL,
+        headers : {
+          'Accept': 'application/json',
+          'Authorization' : 'Bearer '+token,
+          'If-Range': values.ETag,
+          'Range': values.sequence+'-'
+        }
+    });
+
   let response = await axios({
     method: 'get',
     url: metaURL,
@@ -58,19 +69,30 @@ const getInputStream1 = async (values) => {
 
   let downloadedSize = 0;
 
-  // response.data.pipe(new JsonLinesTransform())
-  response.data
-              .on('data', chunk => {
-                downloadedSize += chunk.length;
+    // response.data.pipe(new JsonLinesTransform())
+    /*
+    response.data
+          .on('data', chunk => {
+            downloadedSize += chunk.length;
 
-                console.log('Downloading ', downloadedSize)
-              })
-              .pipe(writeStream)
+            console.log('Downloading ', downloadedSize)
+          })
+          .pipe(writeStream)*/
 
-  return new Promise((resolve, reject) => {
-    response.on('end', resolve({writtenData:true}))
-    writeStream.on('error', reject({writtenData:false}))
-  })
+
+        inputStream
+          .on('response', (response) => {
+            console.log("Status code "+response.statusCode);
+            console.log("Etag value "+response.headers['Etag']);                          
+          })
+          .pipe(new JsonLinesTransform())
+          .pipe(writeStream)
+          .on('finish', () => {
+            return new Promise((resolve, reject) => {
+              response.on('end', resolve({writtenData:true}))
+              writeStream.on('error', reject({writtenData:false}))
+            })          
+        })
 
 };
 

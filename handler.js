@@ -376,70 +376,63 @@ module.exports.fetchListingsData = async (event, context) => {
       // Do nothing to existing listings
     }
   }
-};
+}
 
-module.exports.testfetchListingsData = async (event, context) => {
+const getInputStream2 = () => {
+
+  // Get inputStream from replication request with range headers
+  return request(
+    {
+      url: replicationURL,
+
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + token
+      }
+    });
+
+}
+
+const readData = async () => {
   
-  console.log("Inside Test FetchListings");
-
-  const getInputStream1 = () => {
-
-    // Get inputStream from replication request with range headers
-    return request(
-      {
-        url: replicationURL,
-
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ' + token
-        }
-      });
-
-  }
-
-  console.log("Inside Replicate Data");
-
-  const inputStream = getInputStream1();
+  const inputStream = getInputStream2();
   const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
   console.log("After create a file write stream");
 
   inputStream
-    .on('response', (response) => {
-
-      // Get 
-
-      console.log(response.statusCode); // 200
-
-      // console.log(response.headers['content-length']);
-
-    })
-    .on('data', (chunk) => {
-
-    })
     .pipe(new JsonLinesTransform())
     .pipe(writeStream)
     .on('finish', () => {
 
-      console.log('Done downloading Property Listing data!');
-
-      // create a readjson
-      const jsonfile = fs.createReadStream('/tmp/propertylisting.json');
-
-      let rawdata = fs.readFileSync('/tmp/propertylisting.json');
-
-      // console.log("RAW Data "+rawdata);
-
-      var myjson = rawdata.toString().split("}{");
-
-      console.log(" Myjson"+myjson)
-
-      // Create a JSON object array
-      // [myjson.join('},{')]
-      var mylist = '[' + myjson.join('},{') + ']';
-
-      const listings1 = JSON.parse(mylist);
+      console.log('Done downloading Property Listing data!')
 
     })
+}
+
+module.exports.testfetchListingsData = async (event, context) => {
+  
+  console.log("Inside Test FetchListings");
+
+  await readData();
+
+  // create a readjson
+  const jsonfile = fs.createReadStream('/tmp/propertylisting.json');
+
+  let rawdata = fs.readFileSync('/tmp/propertylisting.json');
+
+  // console.log("RAW Data "+rawdata);
+
+  var myjson = rawdata.toString().split("}{");
+
+  console.log(" Myjson"+myjson)
+
+  // Create a JSON object array
+  // [myjson.join('},{')]
+  var mylist = '[' + myjson.join('},{') + ']';
+
+  const listings1 = JSON.parse(mylist);
+
+  
 
 };

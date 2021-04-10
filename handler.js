@@ -60,8 +60,8 @@ const getInputStream1 = async (values) => {
   response.data.pipe(writeStream)
 
   return new Promise((resolve, reject) => {
-    writeStream.on('finish', resolve)
-    writeStream.on('error', reject)
+    writeStream.on('finish', resolve({writterData:true}))
+    writeStream.on('error', reject({writterData:false}))
   })
 
 };
@@ -75,7 +75,7 @@ const fetchListingData = async (type) => {
 
   const response1 = await getInputStream1(type);
     
-    console.log("Response using Axios "+response1);
+    console.log("Response using Axios "+JSON.stringify(response1));
 
     /*
     response1

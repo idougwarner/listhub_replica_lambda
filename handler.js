@@ -101,7 +101,6 @@ const fetchListingData = async (type) => {
           result.listAddError = true
           result.listdataAdded = false
         }
-
     })
 
     return result;  

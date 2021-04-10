@@ -404,7 +404,7 @@ module.exports.testfetchListingsData = async (event, context) => {
       }
     };
 
-    callback = function(response) {
+    const callback = (response) => {
       var str = ''
       response.on('data', function (chunk) {
         str += chunk;

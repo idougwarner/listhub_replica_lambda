@@ -56,7 +56,7 @@ const getInputStream1 = async (values) => {
     responseType: 'stream'
   })
 
-  response.data.pipe(new JsonLinesTransform())
+  //response.data.pipe(new JsonLinesTransform())
   response.data.pipe(writeStream)
 
   return new Promise((resolve, reject) => {

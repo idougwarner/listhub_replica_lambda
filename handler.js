@@ -382,45 +382,66 @@ module.exports.testfetchListingsData = async (event, context) => {
   
   console.log("Inside Test FetchListings");
 
-  const writeStream = fs.createWriteStream("/tmp/propertylisting.json");
+  const getInputStream1 = () => {
 
-  const inputStream = request({
-    url: replicationURL,
-    headers: {
-      Accept: "application/json",
-      Authorization: "Bearer " + token,
-    },
-  });
-            
-    var http = require('http');
+    // Get inputStream from replication request with range headers
+    return request(
+      {
+        url: replicationURL,
 
-    var options = {
-      host: 'api.listhub.com',
-      path: '/public_sandbox/replication/query?select=ListingKey',
-      //This is the only line that is new. `headers` is an object with the headers to request
-      headers: {
-        Accept: "application/json",
-        Authorization: "Bearer " + token,
-      }
-    };
-
-    const callback = (response) => {
-      var str = ''
-      response.on('data', function (chunk) {
-        console.log("Data Here"+chunk)
-        str += chunk;
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + token
+        }
       });
 
-      response.on('end', function () {
-        console.log(str);
-      });
-    }
+  }
 
-    var req = http.request(options, callback);
-    //req.end();
+  console.log("Inside Replicate Data");
 
-    //let rawdata = fs.readFileSync("/tmp/propertylisting.json");
+  const inputStream = getInputStream1();
+  const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
-  console.log(rawdata);
+  console.log("After create a file write stream");
+
+  inputStream
+    .on('response', (response) => {
+
+      // Get 
+
+      console.log(response.statusCode); // 200
+
+      // console.log(response.headers['content-length']);
+
+      total_bytes = parseInt(response.headers['content-length']);
+
+    })
+    .on('data', (chunk) => {
+
+    })
+    .pipe(new JsonLinesTransform())
+    .pipe(writeStream)
+    .on('finish', () => {
+
+      console.log('Done downloading Property Listing data!');
+
+      // create a readjson
+      const jsonfile = fs.createReadStream('/tmp/propertylisting.json');
+
+      let rawdata = fs.readFileSync('/tmp/propertylisting.json');
+
+      // console.log("RAW Data "+rawdata);
+
+      var myjson = rawdata.toString().split("}{");
+
+      console.log(" Myjson"+myjson)
+
+      // Create a JSON object array
+      // [myjson.join('},{')]
+      var mylist = '[' + myjson.join('},{') + ']';
+
+      const listings1 = JSON.parse(mylist);
+
+    })
 
 };

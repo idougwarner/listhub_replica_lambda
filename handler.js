@@ -77,6 +77,10 @@ const fetchListingData = async (type) => {
     
     console.log("Response using Axios "+JSON.stringify(response1));
 
+    let rawdata = fs.readFileSync('/tmp/propertylisting.json');
+
+    console.log(rawdata);
+
     /*
     response1
         .on('response', (response) => {

@@ -69,39 +69,39 @@ const fetchListingData = async (type) => {
 
     const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
-    response1
-    .on('response', (response) => {
-      console.log("Status code "+response.statusCode);
-      console.log("Etag value "+response.headers['ETag']);
-      Etag=response.headers['ETag'];
-                    
-    })
-    .pipe(new JsonLinesTransform())
-    .pipe(writeStream)
-    .on('finish', () => {
-
-      console.log("Done creating a file write stream");
-
-      let rawdata = fs.readFileSync('./propertylisting.json');
+    const requestData= await response1
+        .on('response', (response) => {
+          console.log("Status code "+response.statusCode);
+          console.log("Etag value "+response.headers['ETag']);
+          Etag=response.headers['ETag'];
                         
-      // var myjson = rawdata.toString().split('}{'); 
-      
-      var myjson = rawdata.toString().split('}{');
+        })
+        .pipe(new JsonLinesTransform())
+        .pipe(writeStream)
+        .on('finish', async () => {
 
-      // Create a JSON object array for saving to database
-      var mylist = '[' + myjson.join('},{') + ']';
+          console.log("Done creating a file write stream");
 
-      const listings1 = JSON.parse(mylist);
-      
-      const { dataAdded, error} = await propertyBulkCreate(listings1)
-                  
-        if(dataAdded) {
-          result.listdataAdded=true
-        } else {
-          result.listAddError = true
-          result.listdataAdded = false
-        }
-    })
+          let rawdata = fs.readFileSync('./propertylisting.json');
+                            
+          // var myjson = rawdata.toString().split('}{'); 
+          
+          var myjson = rawdata.toString().split('}{');
+
+          // Create a JSON object array for saving to database
+          var mylist = '[' + myjson.join('},{') + ']';
+
+          const listings1 = JSON.parse(mylist);
+          
+          const { dataAdded, error} = await propertyBulkCreate(listings1)
+                      
+            if(dataAdded) {
+              result.listdataAdded=true
+            } else {
+              result.listAddError = true
+              result.listdataAdded = false
+            }
+        })
 
     return result;  
 };

@@ -377,3 +377,65 @@ module.exports.fetchListingsData = async (event, context) => {
     }
   }
 };
+
+module.exports.testfetchListingsData = async (event, context) => {
+  
+  console.log("Inside Test FetchListings");
+
+  const writeStream = fs.createWriteStream("/tmp/propertylisting.json");
+
+  const inputStream = request({
+    url: replicationURL,
+    headers: {
+      Accept: "application/json",
+      Authorization: "Bearer " + token,
+    },
+  });
+
+  
+  let response = axios({
+    method: "get",
+    url: replicationURL,
+    headers: {
+      Accept: "application/json",
+      Authorization: "Bearer " + token,
+    },
+    responseType: "stream",
+  });
+
+  // response.data.pipe(new JsonLinesTransform())
+  
+    /*response.data
+          .on('data', chunk => {
+            downloadedSize += chunk.length;
+
+            console.log('Downloading ', downloadedSize)
+          })
+          .pipe(new JsonLinesTransform())
+          .pipe(writeStream)
+
+          return new Promise((resolve, reject) => {
+
+            writeStream.on('end', resolve({writtenData:true}))
+            writeStream.on('error', reject({writtenData:false}))
+
+          })*/
+
+  const response=await inputStream
+        .pipe(new JsonLinesTransform())
+        .pipe(writeStream)
+        .on("finish", () => {
+        return new Promise((resolve, reject) => {
+          resolve({ writtenData: true });
+
+          //response.on('end', resolve({writtenData:true}))
+          //writeStream.on('error', reject({writtenData:false}))
+        });
+  });
+
+  console.log("Response using Axios " + JSON.stringify(response));
+
+  let rawdata = fs.readFileSync("/tmp/propertylisting.json");
+
+  console.log(rawdata);
+};

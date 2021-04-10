@@ -239,7 +239,7 @@ module.exports.fetchListingsData = async (event, context) => {
   // Call Metadata URL to get necessary data
   let response = await axios.get(metaURL, {
     headers: {
-      Authorization: "Bearer " + token
+      'Authorization': "Bearer " + token
     },
   });
 

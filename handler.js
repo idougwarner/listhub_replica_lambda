@@ -409,7 +409,7 @@ module.exports.testfetchListingsData = async (event, context) => {
   
       return new Promise((resolve, reject) => {
 
-        console.log("Response using Axios " + JSON.stringify(response));
+        console.log("Response using Axios " + response);
 
         response.data.pipe(writeStream);
 

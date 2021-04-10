@@ -40,28 +40,27 @@ class JsonLinesTransform extends stream.Transform {
   }
 }
 
+const getInputStream1 = async (values) => {
+
+  // Get inputStream from replication request
+  return request(
+    {
+        url : replicationURL,
+        headers : {
+          'Accept': 'application/json',
+          'Authorization' : 'Bearer '+token,
+          'If-Range': values.ETag,
+          'Range': values.sequence+'-'
+        }
+    });
+};
+
 const fetchListingData = async (type) => {
+
   var result = {
     listdataAdded: false,
     listAddError: null
-  };
-
-  // Extract new data and store Etag and sequence
-  // Run get request to read data to file then read the data to the database
-  const getInputStream1 = async (values) => {
-
-      // Get inputStream from replication request
-      return request(
-        {
-            url : replicationURL,
-            headers : {
-              'Accept': 'application/json',
-              'Authorization' : 'Bearer '+token,
-              'If-Range': values.ETag,
-              'Range': values.sequence+'-'
-            }
-        });
-  };
+  };  
 
   const response1 = await getInputStream1(type);
     
@@ -69,7 +68,7 @@ const fetchListingData = async (type) => {
 
     const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
-    const requestData= await response1
+    response1
         .on('response', (response) => {
           console.log("Status code "+response.statusCode);
           console.log("Etag value "+response.headers['ETag']);
@@ -105,6 +104,8 @@ const fetchListingData = async (type) => {
               result.listdataAdded = false
             }
         })
+
+        console.log(" After input stream");
 
     return result;  
 };
@@ -272,7 +273,7 @@ module.exports.fetchListingsData = async (event, context) => {
       const { listDataAdded, listAddError } = await newListData(data);
 
       if (listDataAdded) {
-        console.log("Product List Data Added");
+        console.log("Product List Data Added"+listDataAdded);
       } else {
         console.log("Problem adding data");
       }

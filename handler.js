@@ -105,9 +105,9 @@ const fetchListingData = async (type) => {
             }
         })
 
-        console.log(" After input stream");
+        console.log("After input stream");
 
-    return result;  
+    // return result;  
 };
 
 // Retrieve new streamed data and store to database

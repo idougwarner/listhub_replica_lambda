@@ -394,7 +394,7 @@ module.exports.testfetchListingsData = async (event, context) => {
   
    const readData = async () => {
       
-    return axios({
+    axios({
       method: 'get',
       url: replicationURL,
       headers: {
@@ -406,8 +406,6 @@ module.exports.testfetchListingsData = async (event, context) => {
   
       //ensure that the user can call `then()` only when the file has
       //been downloaded entirely.
-  
-      return new Promise((resolve, reject) => {
 
         console.log("Response using Axios " + response);
 
@@ -430,8 +428,6 @@ module.exports.testfetchListingsData = async (event, context) => {
         });
 
       });
-
-    });
 
   }
 

@@ -47,7 +47,9 @@ const getInputStream1 = async (values) => {
     url: replicationURL,
     headers: {
       Accept: "application/json",
-      Authorization: "Bearer " + token
+      Authorization: "Bearer " + token,
+      "If-Range": values.ETag,
+      Range: "sequence="+values.sequence + "-"      
     },
   });
 
@@ -58,7 +60,7 @@ const getInputStream1 = async (values) => {
       Accept: "application/json",
       Authorization: "Bearer " + token,
       "If-Range": values.ETag,
-      Range: "sequence="+values.sequence + "-",
+      Range: "sequence="+values.sequence + "-"
     },
     responseType: "stream",
   });
@@ -277,7 +279,7 @@ module.exports.fetchListingsData = async (event, context) => {
     console.log("Content Length: " + response.data.ContentLength);
     console.log("Etag Value: " + response.data.ETag);
 
-    var date = new Date(response.data.LastModified);
+    var date = new Date();
     date.setSeconds(0);
     date.setMilliseconds(0);
 

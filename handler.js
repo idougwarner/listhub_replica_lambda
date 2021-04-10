@@ -430,12 +430,12 @@ module.exports.testfetchListingsData = async (event, context) => {
         });
 
       });
-      
+
     });
 
   }
 
-  readData()
+  await readData()
 
   let rawdata = fs.readFileSync("/tmp/propertylisting.json");
 

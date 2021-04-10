@@ -67,8 +67,6 @@ const getInputStream1 = async (values) => {
     responseType: 'stream'
   })
 
-  let downloadedSize = 0;
-
     // response.data.pipe(new JsonLinesTransform())
     /*
     response.data
@@ -89,8 +87,12 @@ const getInputStream1 = async (values) => {
           .pipe(writeStream)
           .on('finish', () => {
             return new Promise((resolve, reject) => {
-              response.on('end', resolve({writtenData:true}))
-              writeStream.on('error', reject({writtenData:false}))
+
+              resolve({writtenData:true})
+
+              //response.on('end', resolve({writtenData:true}))
+              //writeStream.on('error', reject({writtenData:false}))
+
             })          
         })
 

@@ -424,7 +424,7 @@ module.exports.testfetchListingsData = async (event, context) => {
           if (!error) {
             resolve(true);
           }
-          //no need to call the reject here, as it will have been called in the
+          // no need to call the reject here, as it will have been called in the
           //'error' stream;
         });
 

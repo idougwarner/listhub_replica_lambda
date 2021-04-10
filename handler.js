@@ -128,6 +128,7 @@ const fetchListingData = async (type) => {
   else if(convertedFileDownloadSize.type == "GB") {
     
     console.log("I am in GB")
+    
   }
 
   // If file size is in KB then there is no need to chunk

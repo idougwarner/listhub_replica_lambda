@@ -114,13 +114,20 @@ const fetchListingData = async (type) => {
   console.log("Converted file size "+convertedFileDownloadSize.bytes+" "+convertedFileDownloadSize.type);
 
   if (convertedFileDownloadSize.type == "MB") {
-    // Check if filesize is between 20MB and 30MB and set chunks to be 5
+
+    // Check if filesize is between 20MB and 30MB and set per download size to be 5
     if (
       convertedFileDownloadSize.bytes <= 30 &&
       convertedFileDownloadSize.bytes >= 20
     ) {
       chunks = 5;
     }
+
+  }
+
+  else if(convertedFileDownloadSize.type == "GB") {
+    
+    console.log("I am in GB")
   }
 
   // If file size is in KB then there is no need to chunk

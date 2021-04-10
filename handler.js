@@ -79,10 +79,6 @@ const getInputStream1 = async (values) => {
 
 
         inputStream
-          .on('response', (response) => {
-            console.log("Status code "+response.statusCode);
-            console.log("Etag value "+response.headers['Etag']);                          
-          })
           .pipe(new JsonLinesTransform())
           .pipe(writeStream)
           .on('finish', () => {

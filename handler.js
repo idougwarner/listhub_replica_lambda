@@ -394,7 +394,7 @@ module.exports.testfetchListingsData = async (event, context) => {
   
    const readData = async () => {
       
-    return Axios({
+    return axios({
       method: 'get',
       url: replicationURL,
       headers: {
@@ -430,7 +430,7 @@ module.exports.testfetchListingsData = async (event, context) => {
 
       });
     });
-    
+
   }
 
   readData()

@@ -43,9 +43,7 @@ class JsonLinesTransform extends stream.Transform {
 const fetchListingData = async (type) => {
   var result = {
     listdataAdded: false,
-    listAddError: null,
-    datadownloaded: 0,
-    remainingToDownload: 0,
+    listAddError: null
   };
 
   const getSize = (bytes) => {
@@ -71,7 +69,7 @@ const fetchListingData = async (type) => {
 
   // Extract new data and store Etag and sequence
   // Run get request to read data to file then read the data to the database
-  const getInputStream1 = async (rangeValues) => {
+  const getInputStream1 = async (values) => {
     
     // Get inputStream from replication request
     /*
@@ -85,7 +83,11 @@ const fetchListingData = async (type) => {
       },
     });*/
 
-    console.log("Type"+JSON.stringify(type)+"\n Start range"+rangeValues.startOfRange+"  end range"+rangeValues.endOfRange+" ");
+    // console.log("Type"+JSON.stringify(type)+"\n Start range"+rangeValues.startOfRange+"  end range"+rangeValues.endOfRange+" ");
+    /**
+     * If-Range: <ETag value of previous response>
+       Range: sequence=<Last sequence value>-
+     */
 
       // Get inputStream from replication request
       return request(
@@ -93,7 +95,9 @@ const fetchListingData = async (type) => {
             url : replicationURL,
             headers : {
               'Accept': 'application/json',
-              'Authorization' : 'Bearer '+token
+              'Authorization' : 'Bearer '+token,
+              'If-Range': values.ETag,
+              'Range': values.sequence+'-'
             }
         });
   };
@@ -193,26 +197,6 @@ const fetchListingData = async (type) => {
     }
 
     // Download the data
-   
-    const response1 = await getInputStream1(rangeValues);
-    
-    console.log("Response using Axios"+response1);
-
-    const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
-
-    response1
-    .on('response', (response) => {
-      console.log("Status code "+response.statusCode);
-      console.log("Etag value "+response.headers['ETag']);
-      Etag=response.headers['ETag'];
-                    
-    })
-    .pipe(new JsonLinesTransform())
-    .pipe(writeStream)
-    .on('finish', () => {
-      console.log("After create a file write stream");
-    })
-
     var listdataAdded;
     var listError;
 
@@ -256,6 +240,27 @@ const fetchListingData = async (type) => {
     }
   } // End While
 
+  const response1 = await getInputStream1(type);
+    
+    console.log("Response using Axios"+response1);
+
+    const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
+
+    response1
+    .on('response', (response) => {
+      console.log("Status code "+response.statusCode);
+      console.log("Etag value "+response.headers['ETag']);
+      Etag=response.headers['ETag'];
+                    
+    })
+    .pipe(new JsonLinesTransform())
+    .pipe(writeStream)
+    .on('finish', () => {
+      console.log("Done creating a file write stream");
+      result.listAddError = false
+      result.listdataAdded = true
+    })
+
   return result;
 };
 
@@ -270,26 +275,20 @@ const newListData = async (type) => {
   if (type.storeType == "new") {
     const {
       listdataAdded,
-      listAddError,
-      datadownloaded,
-      remainingToDownload,
+      listAddError
     } = await fetchListingData(type);
 
     if (listdataAdded) {
       result = {
         listDataAdded: true,
-        listAddError: listAddError,
-        listDataDownloaded: datadownloaded,
-        listRemainingToDownload: remainingToDownload,
+        listAddError: listAddError
       };
 
       return result;
     } else {
       result = {
         listDataAdded: true,
-        listAddError: listAddError,
-        listDataDownloaded: datadownloaded,
-        listRemainingToDownload: remainingToDownload,
+        listAddError: listAddError
       };
 
       return result;
@@ -310,26 +309,20 @@ const newListData = async (type) => {
       if (dataDeleted) {
         const {
           listdataAdded,
-          listAddError,
-          datadownloaded,
-          remainingToDownload,
+          listAddError
         } = await fetchListingData(type);
 
         if (listdataAdded) {
           result = {
             listDataAdded: listdataAdded,
-            listAddError: listAddError,
-            listDataDownloaded: datadownloaded,
-            listRemainingToDownload: remainingToDownload,
+            listAddError: listAddError
           };
 
           return result;
         } else {
           result = {
             listDataAdded: listdataAdded,
-            listAddError: listAddError,
-            listDataDownloaded: datadownloaded,
-            listRemainingToDownload: remainingToDownload,
+            listAddError: listAddError
           };
 
           return result;
@@ -337,9 +330,7 @@ const newListData = async (type) => {
       } else {
         result = {
           listDataAdded: false,
-          listAddError: "Problem deleting old data",
-          listDataDownloaded: 0,
-          listRemainingToDownload: type.ContentLength,
+          listAddError: "Problem deleting old data"
         };
 
         return result;
@@ -354,26 +345,21 @@ const newListData = async (type) => {
 
       const {
         listdataAdded,
-        listAddError,
-        datadownloaded,
-        remainingToDownload,
+        listAddError
+
       } = await fetchListingData(type);
 
       if (listdataAdded) {
         result = {
           listDataAdded: listdataAdded,
-          listAddError: listAddError,
-          listDataDownloaded: datadownloaded,
-          listRemainingToDownload: remainingToDownload,
+          listAddError: listAddError
         };
 
         return result;
       } else {
         result = {
           listDataAdded: listdataAdded,
-          listAddError: listAddError,
-          listDataDownloaded: datadownloaded,
-          listRemainingToDownload: remainingToDownload,
+          listAddError: listAddError
         };
 
         return result;
@@ -434,12 +420,13 @@ module.exports.fetchListingsData = async (event, context) => {
       const data = {
         storeType: "new",
         ContentLength: response.data.ContentLength,
-        ETag: response.data.ETag
+        ETag: response.data.ETag,
+        sequence: key
       };
 
-      const { listdataAdded, listerror } = await newListData(data);
+      const { listDataAdded, listAddError } = await newListData(data);
 
-      if (listdataAdded) {
+      if (listDataAdded) {
         console.log("Product List Data Added");
       } else {
         console.log("Problem adding data");
@@ -489,9 +476,9 @@ module.exports.fetchListingsData = async (event, context) => {
             ETag: response.data.ETag
           };
 
-          const { listdataAdded, listerror } = await newListData(data);
+          const { listDataAdded, listAddError } = await newListData(data);
 
-          if (listdataAdded) {
+          if (listDataAdded) {
             console.log("New Product List Data Added");
           } else {
             console.log("Problem adding data");

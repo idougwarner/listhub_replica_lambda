@@ -128,7 +128,7 @@ const fetchListingData = async (type) => {
   else if(convertedFileDownloadSize.type == "GB") {
     
     console.log("I am in GB")
-    
+
   }
 
   // If file size is in KB then there is no need to chunk
@@ -198,41 +198,20 @@ const fetchListingData = async (type) => {
     
     console.log("Response using Axios"+response1);
 
-    const writeStream = async (data) => {
+    const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
-      var myjson = data.toString().split("}{");
-
-        // Create a JSON object array for saving to database
-        var mylist = "[" + myjson.join("},{") + "]";
-
-        /* Get the last sequence value and use it to fetch data with Etag to ensure we have fetched everything
-          and no data is left
-        */
-        var lastRecord = JSON.parse(mylist[mylist.length - 1]);
-
-        const listings1 = JSON.parse(mylist);
-
-        // Create All Property Listings at once
-
-        const { dataAdded, error } = await propertyBulkCreate(listings1);
-
-        listdataAdded = dataAdded;
-        listError = error;
-    };
-
-            response1
-            .on('response', (response) => {
-              console.log("Status code "+response.statusCode);
-              console.log("Etag value "+response.headers['ETag']);
-              Etag=response.headers['ETag'];
-                            
-            })
-            .pipe(new JsonLinesTransform())
-            .pipe(await writeStream)
-            .on('finish', () => {
-            })
-
-    console.log("After create a file write stream");
+    response1
+    .on('response', (response) => {
+      console.log("Status code "+response.statusCode);
+      console.log("Etag value "+response.headers['ETag']);
+      Etag=response.headers['ETag'];
+                    
+    })
+    .pipe(new JsonLinesTransform())
+    .pipe(writeStream)
+    .on('finish', () => {
+      console.log("After create a file write stream");
+    })
 
     var listdataAdded;
     var listError;

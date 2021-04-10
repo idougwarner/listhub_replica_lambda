@@ -256,9 +256,35 @@ const fetchListingData = async (type) => {
     .pipe(new JsonLinesTransform())
     .pipe(writeStream)
     .on('finish', () => {
+
       console.log("Done creating a file write stream");
+
+      let rawdata = fs.readFileSync('./propertylisting.json');
+                        
+      // var myjson = rawdata.toString().split('}{'); 
+      
+      var myjson = rawdata.toString().split('}{');
+
+      // Create a JSON object array for saving to database
+      var mylist = '[' + myjson.join('},{') + ']';
+
+      const listings1 = JSON.parse(mylist);
+                        
+      properties.bulkCreate(listings1).then(data => {
+                  
+        if(data.dataAdded) {
+          resolve({ dataAdded:true, })
+        }
+
+      }).catch(err => {
+
+        reject(new Error("Erro Adding Product Listing data"+err));
+
+      });
+
       result.listAddError = false
       result.listdataAdded = true
+
     })
 
   return result;

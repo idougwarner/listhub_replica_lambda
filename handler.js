@@ -363,8 +363,10 @@ const getInputStream2 = async () => {
     })
 }
 
-const readData = async () => {
+module.exports.testfetchListingsData = async (event, context) => {
   
+  console.log("Inside Test FetchListings");
+
   const inputStream = await getInputStream2();
   const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
@@ -376,13 +378,6 @@ const readData = async () => {
     })
     .pipe(new JsonLinesTransform())
     .pipe(writeStream);
-}
-
-module.exports.testfetchListingsData = async (event, context) => {
-  
-  console.log("Inside Test FetchListings");
-
-  readData();
 
   // create a readjson
   const jsonfile = fs.createReadStream('/tmp/propertylisting.json');
@@ -400,5 +395,5 @@ module.exports.testfetchListingsData = async (event, context) => {
   var mylist = '[' + myjson.join('},{') + ']';
 
   const listings1 = JSON.parse(mylist);
-  
+
 };

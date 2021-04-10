@@ -51,6 +51,7 @@ const getInputStream1 = async (values) => {
     },
   });
 
+  /*
   let response = await axios({
     method: "get",
     url: replicationURL,
@@ -64,7 +65,7 @@ const getInputStream1 = async (values) => {
   });
 
   // response.data.pipe(new JsonLinesTransform())
-  /*
+  
     response.data
           .on('data', chunk => {
             downloadedSize += chunk.length;

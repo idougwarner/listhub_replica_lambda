@@ -68,7 +68,7 @@ const getInputStream1 = async (values) => {
   })
 
     // response.data.pipe(new JsonLinesTransform())
-    
+    /*
     response.data
           .on('data', chunk => {
             downloadedSize += chunk.length;
@@ -83,11 +83,11 @@ const getInputStream1 = async (values) => {
             writeStream.on('end', resolve({writtenData:true}))
             writeStream.on('error', reject({writtenData:false}))
 
-          })          
+          })
+    */          
 
-    /*
+    
         inputStream
-          .pipe(new JsonLinesTransform())
           .pipe(writeStream)
           .on('finish', () => {
             return new Promise((resolve, reject) => {
@@ -98,7 +98,7 @@ const getInputStream1 = async (values) => {
               //writeStream.on('error', reject({writtenData:false}))
 
             })          
-        })*/
+        })
 
 };
 

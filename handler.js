@@ -47,9 +47,7 @@ const getInputStream1 = async (values) => {
     url: replicationURL,
     headers: {
       Accept: "application/json",
-      Authorization: "Bearer " + token,
-      "If-Range": values.ETag,
-      Range: "sequence="+values.sequence + "-"      
+      Authorization: "Bearer " + token 
     },
   });
 
@@ -84,13 +82,16 @@ const getInputStream1 = async (values) => {
           })
     */
 
-  inputStream.pipe(writeStream).on("finish", () => {
-    return new Promise((resolve, reject) => {
-      resolve({ writtenData: true });
+  inputStream
+        .pipe(new JsonLinesTransform())
+        .pipe(writeStream)
+        .on("finish", () => {
+        return new Promise((resolve, reject) => {
+          resolve({ writtenData: true });
 
-      //response.on('end', resolve({writtenData:true}))
-      //writeStream.on('error', reject({writtenData:false}))
-    });
+          //response.on('end', resolve({writtenData:true}))
+          //writeStream.on('error', reject({writtenData:false}))
+        });
   });
 };
 

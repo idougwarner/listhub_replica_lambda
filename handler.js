@@ -46,7 +46,7 @@ const getInputStream1 = async (values) => {
       "If-Range": values.ETag,
       Range: "sequence="+values.sequence + "-"
   */
- 
+
   const writeStream = fs.createWriteStream("/tmp/propertylisting.json");
 
   const inputStream = await request({
@@ -79,7 +79,7 @@ const getInputStream1 = async (values) => {
           .pipe(new JsonLinesTransform())
           .pipe(writeStream)
 
-          return new Promise((resolve, reject) => {
+          /*return new Promise((resolve, reject) => {
 
             writeStream.on('end', resolve({writtenData:true}))
             writeStream.on('error', reject({writtenData:false}))
@@ -96,7 +96,7 @@ const getInputStream1 = async (values) => {
           //response.on('end', resolve({writtenData:true}))
           //writeStream.on('error', reject({writtenData:false}))
         });
-  });
+  });*/
 };
 
 const fetchListingData = async (type) => {

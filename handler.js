@@ -415,13 +415,13 @@ module.exports.testfetchListingsData = async (event, context) => {
 
         let error = null;
         
-        writer.on('error', err => {
+        writeStream.on('error', err => {
           error = err;
           writer.close();
           reject(err);
         });
 
-        writer.on('close', () => {
+        writeStream.on('close', () => {
           if (!error) {
             resolve(true);
           }

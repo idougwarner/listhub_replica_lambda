@@ -220,21 +220,22 @@ const fetchListingData = async (type) => {
     // console.log("Etag value " + response.headers["ETag"]);
 
     /*
-    inputStream
-      .on("response", (response) => {
-        console.log("Status code " + response.statusCode);
-        console.log("Etag value " + response.headers["ETag"]);
-        Etag = response.headers["ETag"];
-      })
-      .pipe(new JsonLinesTransform())
-      .pipe(writeStream())
-      .on("finish", async () => {
-        console.log("Done downloading Property Listing data!");
-      }); // End of Input Stream
+      inputStream
+        .on("response", (response) => {
+          console.log("Status code " + response.statusCode);
+          console.log("Etag value " + response.headers["ETag"]);
+          Etag = response.headers["ETag"];
+        })
+        .pipe(new JsonLinesTransform())
+        .pipe(writeStream())
+        .on("finish", async () => {
+          console.log("Done downloading Property Listing data!");
+        }); // End of Input Stream
     */
   
 
     if (listdataAdded) {
+
       // Data was successfully added therefore add step and downloadedSize and proceed to get next chunk in next loop
       step = step + 1;
 
@@ -414,6 +415,14 @@ module.exports.fetchListingsData = async (event, context) => {
     console.log("Last Modified is " + response.data.LastModified);
     console.log("Content Length: " + response.data.ContentLength);
     console.log("Etag Value: " + response.data.ETag);
+
+    var date = new Date(response.data.LastModified);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+
+    var key = date.getTime().toString().padEnd(19, 0);
+
+    console.log("KEY is: "+key);
 
     // CHECK IF PRODUCT LISTING DATA EXISTS AND IF NOT POPULATE THE LISTINGS TABLE
     const { dataExists } = await propertyDataExists();

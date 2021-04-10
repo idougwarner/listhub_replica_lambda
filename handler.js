@@ -111,7 +111,7 @@ const fetchListingData = async (type) => {
   let startOfRange;
   let endOfRange;
 
-  console.log("Converted file size "+convertedFileDownloadSize.bytes+""+convertedFileDownloadSize.type);
+  console.log("Converted file size "+convertedFileDownloadSize.bytes+" "+convertedFileDownloadSize.type);
 
   if (convertedFileDownloadSize.type == "MB") {
     // Check if filesize is between 20MB and 30MB and set chunks to be 5

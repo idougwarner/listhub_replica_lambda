@@ -393,47 +393,46 @@ module.exports.testfetchListingsData = async (event, context) => {
   });
 
   
-  let response = axios({
-    method: "get",
-    url: replicationURL,
-    headers: {
-      Accept: "application/json",
-      Authorization: "Bearer " + token,
-    },
-    responseType: "stream",
-  });
-
-  // response.data.pipe(new JsonLinesTransform())
+   const readData = async () => {
+      
+    return Axios({
+      method: 'get',
+      url: replicationURL,
+      headers: {
+        Accept: "application/json",
+        Authorization: "Bearer " + token,
+      },
+      responseType: 'stream'
+    }).then(response => {
   
-    /*response.data
-          .on('data', chunk => {
-            downloadedSize += chunk.length;
+      //ensure that the user can call `then()` only when the file has
+      //been downloaded entirely.
+  
+      return new Promise((resolve, reject) => {
 
-            console.log('Downloading ', downloadedSize)
-          })
-          .pipe(new JsonLinesTransform())
-          .pipe(writeStream)
+        console.log("Response using Axios " + JSON.stringify(response));
 
-          return new Promise((resolve, reject) => {
-
-            writeStream.on('end', resolve({writtenData:true}))
-            writeStream.on('error', reject({writtenData:false}))
-
-          })*/
-
-  const response1=await inputStream
-        .pipe(new JsonLinesTransform())
-        .pipe(writeStream)
-        .on("finish", () => {
-        return new Promise((resolve, reject) => {
-          resolve({ writtenData: true });
-
-          //response.on('end', resolve({writtenData:true}))
-          //writeStream.on('error', reject({writtenData:false}))
+        response.data.pipe(writeStream);
+        let error = null;
+        
+        writer.on('error', err => {
+          error = err;
+          writer.close();
+          reject(err);
         });
-  });
 
-  console.log("Response using Axios " + JSON.stringify(response1));
+        writer.on('close', () => {
+          if (!error) {
+            resolve(true);
+          }
+          //no need to call the reject here, as it will have been called in the
+          //'error' stream;
+        });
+      });
+    });
+  }
+
+  readData()
 
   let rawdata = fs.readFileSync("/tmp/propertylisting.json");
 

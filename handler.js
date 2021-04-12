@@ -426,12 +426,14 @@ const getData = async () => {
   });
 
   if (values.withRanges) {
+    
     console.log("Downloading with Ranges");
     // Call stream with Ranges
     const withRanges = await testInputStreamWithRanges(values);
+
     withRanges
       .on("data", (response) => {
-        console.log("With Range DataStream: " + response.toString);
+        console.log("With Range DataStream: " + response.statusCode);
       })
       .on("error", (err) => {
         console.log("Error is" + err);

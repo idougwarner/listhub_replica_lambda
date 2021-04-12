@@ -40,14 +40,14 @@ class JsonLinesTransform extends stream.Transform {
   }
 }
 
-const getInputStream1 = async (values) => {
+const getInputStream1 = async (type) => {
 
-   request({
+   return request({
     url: replicationURL,
     headers: {
       Accept: "application/json",
       Authorization: "Bearer " + token,
-    },
+    }
   });
 };
 

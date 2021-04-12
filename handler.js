@@ -193,10 +193,9 @@ const newListData = async (type) => {
 const metaStream = async () => {
 
   // Get inputStream from replication request with range headers
-  return request(
-    {
+  return axios({
       url: metaURL,
-
+      method: 'get',
       headers: {
         'Accept': 'application/json',
         'Authorization': 'Bearer ' + token
@@ -350,17 +349,9 @@ const getData = async () => {
 
   console.log("Fetch meta Data")
 
-  const metastream = await metaStream();
-  
-  metastream
-  .on("data", (response) => {
-    console.log("Meta Data: "+response)
-  })
-  .on('error',(err)=>{
-    console.log('Error is'+err)
-  })
+  const metaResponse = await metaStream();
 
-  console.log("MetaData is"+response.data)
+  console.log("MetaData is"+metaResponse)
 
   console.log("Inside Test FetchListings");
 

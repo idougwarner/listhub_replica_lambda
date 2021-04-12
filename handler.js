@@ -417,12 +417,15 @@ const getData = async () => {
 
       console.log(" Myjson"+myjson)
 
+      console.log("After my JSON file reading");
+
       // Create a JSON object array
       // [myjson.join('},{')]
       var mylist = '[' + myjson.join('},{') + ']';
 
       const listings1 = JSON.parse(mylist);
     })
+    
 } 
 
 module.exports.testfetchListingsData = (event, context) => {

@@ -360,7 +360,6 @@ const testInputStream = async (values) => {
       headers: {
         'Accept': 'application/json',
         'Authorization': 'Bearer ' + token,
-        
       }
     })
 }
@@ -383,7 +382,7 @@ const getData = async () => {
 
   console.log("Inside Test FetchListings");
 
-  const inputStream = await testInputStream(values);
+  const inputStream = await testInputStream();
   const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
   var date = new Date();

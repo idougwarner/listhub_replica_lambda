@@ -392,6 +392,6 @@ const getData = async () => {
 
 module.exports.testfetchListingsData = async (event, context) => {
   
-  await getData();
+  getData();
 
 };

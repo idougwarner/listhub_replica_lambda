@@ -364,7 +364,7 @@ const getData = async () => {
   const sequence=lastSequence-metaResponse.data.Metadata.totallinecount
   const ETag = metaResponse.data.ETag;
 
-  const values={ETage:ETag, sequence:sequence}
+  const values={ETag:ETag, sequence:sequence}
 
   console.log("Inside Test FetchListings");
 

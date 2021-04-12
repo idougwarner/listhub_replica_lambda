@@ -322,7 +322,7 @@ const fetchData = async () => {
   }
 };
 
-module.exports.run = async (event, context) => {
+module.exports.run = (event, context) => {
 
   getData();
   

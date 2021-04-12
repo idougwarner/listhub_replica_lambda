@@ -413,7 +413,7 @@ const getData = async () => {
 
       // console.log("RAW Data "+rawdata);
 
-      var myjson = rawdata.toString().split("}{");
+      var myjson = jsonfile.toString().split("}{");
 
       console.log(" Myjson"+myjson)
 
@@ -431,5 +431,11 @@ const getData = async () => {
 module.exports.testfetchListingsData = (event, context) => {
   
     getData();
+
+    console.log(
+      `Your cron function "${
+        context.functionName
+      }" ran at ${time}`
+    );
 
 };

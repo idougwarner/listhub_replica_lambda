@@ -380,7 +380,7 @@ const getData = async () => {
 
   const values={ETag:ETag, sequence:sequence, totallinecount:metaResponse.data.Metadata.totallinecount}
 
-  console.log("ETag: "+values.ETag+" Sequence: "+values.sequence+"First take end:"+values.sequence+((totallinecount-1)/2))
+  console.log("ETag: "+values.ETag+" Sequence: "+values.sequence+"First take end:"+values.sequence+((values.totallinecount-1)/2))
 
   console.log("Inside Test FetchListings");
 

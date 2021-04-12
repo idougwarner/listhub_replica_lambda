@@ -360,11 +360,13 @@ const getData = async () => {
 
   console.log("MetaData is"+JSON.stringify(metaResponse.data))
 
-  const lastSequence=metaResponse.data.Metadata.lastsequence+1
+  const lastSequence=metaResponse.data.Metadata.lastsequence
   const sequence=lastSequence-metaResponse.data.Metadata.totallinecount
   const ETag = metaResponse.data.ETag;
 
   const values={ETag:ETag, sequence:sequence}
+
+  console.log("ETag: "+values.ETag+" Sequence: "+values.sequence)
 
   console.log("Inside Test FetchListings");
 

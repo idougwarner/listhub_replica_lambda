@@ -352,6 +352,14 @@ const getData = async () => {
   const inputStream = await testInputStream();
   const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
+  var date = new Date();
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+
+    var key = date.getTime().toString().padEnd(19, 0);
+
+  console.log("Sequence Key is: "+key)
+
   console.log("After create a file write stream");
 
   inputStream

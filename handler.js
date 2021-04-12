@@ -347,6 +347,13 @@ const testInputStream = async () => {
 }
 
 const getData = async () => {
+
+  console.log("Fetch meta Data")
+
+  const response=await metaStream();
+
+  console.log("MetaData is"+JSON.stringify(response))
+
   console.log("Inside Test FetchListings");
 
   const inputStream = await testInputStream();
@@ -358,7 +365,7 @@ const getData = async () => {
 
     var key = date.getTime().toString().padEnd(19, 0);
 
-  console.log("Sequence Key is: "+key)
+  console.log("Sequence Key is "+key)
 
   console.log("After create a file write stream");
 
@@ -392,6 +399,6 @@ const getData = async () => {
 
 module.exports.testfetchListingsData = async (event, context) => {
   
-  getData();
+    getData();
 
 };

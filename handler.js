@@ -378,7 +378,7 @@ const getData = async () => {
   const sequence=lastSequence-metaResponse.data.Metadata.totallinecount
   const ETag = metaResponse.data.ETag;
 
-  const values={ETag:ETag, startSequence:sequence, totallinecount:metaResponse.data.Metadata.totallinecount, endSequence:6000}
+  const values={ETag:ETag, startSequence:sequence, endSequence:6000}
 
   console.log("ETag: "+values.ETag+" Sequence: "+values.startSequence+"First take end:"+(values.startSequence+6000))
 
@@ -397,11 +397,30 @@ const getData = async () => {
 
   console.log("After create a file write stream");
 
+
   inputStream
+    .on("data", (response) => {
+      console.log("Data: "+response)
+      if(response.statusCode==416)
+      {
+        console.log("We need a fresh Download without Ranges")
+        values={ETag:ETag, rangeValues:""}       
+      }
+      else {
+        console.log("We need a fresh Download with Ranges")
+        values={ETag:ETag, rangeValues:{"If-Range":ETag,'Range': 'sequence='+values.sequence+"-"+6000}}
+      }
+
+    })
+
+  const secondStream= await testInputStream(values)
+
+  secondStream
     .on("data", (response) => {
       console.log("Data: "+response)
       if(response.statusCode=='416')
       {
+        console.log()
         getData();
       }
     })

@@ -343,7 +343,7 @@ const testInputStream = async () => {
   return request(
     {
       url: replicationURL,
-
+      timeout: 20,
       headers: {
         'Accept': 'application/json',
         'Authorization': 'Bearer ' + token

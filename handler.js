@@ -361,7 +361,7 @@ const testInputStream = async (values) => {
         'Accept': 'application/json',
         'Authorization': 'Bearer ' + token,
         'If-Range': values.ETag,
-        'Range': 'sequence='+values.sequence+"-"+values.sequence+((values.totallinecount-1)/2)
+        'Range': 'sequence='+values.sequence+"-"+(values.sequence+((values.totallinecount-1)/2))
       }
     })
 }
@@ -380,7 +380,7 @@ const getData = async () => {
 
   const values={ETag:ETag, sequence:sequence, totallinecount:metaResponse.data.Metadata.totallinecount}
 
-  console.log("ETag: "+values.ETag+" Sequence: "+values.sequence+"First take end:"+values.sequence+((values.totallinecount-1)/2))
+  console.log("ETag: "+values.ETag+" Sequence: "+values.sequence+"First take end:"+(values.sequence+((values.totallinecount-1)/2)))
 
   console.log("Inside Test FetchListings");
 

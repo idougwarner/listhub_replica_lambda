@@ -322,27 +322,6 @@ const fetchData = async () => {
   }
 };
 
-module.exports.run = (event, context) => {
-
-  getData();
-  
-  /*const time = new Date();
-
-  const db = {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    name: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-  };
-
-  console.log(
-    `Your cron function "${
-      context.functionName
-    }" ran at ${time} with db ${JSON.stringify(db, null, 2)}`
-  );*/
-};
-
 module.exports.fetchListingsData = (event, context) => {
   fetchData();
 };
@@ -439,4 +418,25 @@ const getData = async () => {
 
 module.exports.testfetchListingsData = (event, context) => {
   getData();
+};
+
+module.exports.run = (event, context) => {
+
+  getData();
+  
+  /*const time = new Date();
+
+  const db = {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    name: process.env.DB_NAME,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+  };
+
+  console.log(
+    `Your cron function "${
+      context.functionName
+    }" ran at ${time} with db ${JSON.stringify(db, null, 2)}`
+  );*/
 };

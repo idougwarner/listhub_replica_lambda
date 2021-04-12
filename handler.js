@@ -378,7 +378,7 @@ const getData = async () => {
   const sequence=lastSequence-metaResponse.data.Metadata.totallinecount
   const ETag = metaResponse.data.ETag;
 
-  const values={ETag:ETag, startSequence:sequence, endSequence:6000}
+  var values={ETag:ETag, startSequence:sequence, endSequence:6000}
 
   console.log("ETag: "+values.ETag+" Sequence: "+values.startSequence+"First take end:"+(values.startSequence+6000))
 

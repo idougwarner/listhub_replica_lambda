@@ -40,13 +40,15 @@ class JsonLinesTransform extends stream.Transform {
   }
 }
 
-const getInputStream1 = async () => {
+const getInputStream1 = async (values) => {
 
    return request({
     url: replicationURL,
     headers: {
-      Accept: "application/json",
-      Authorization: "Bearer " + token,
+      'Accept': 'application/json',
+      'Authorization': 'Bearer ' + token,
+      'If-Range': values.ETag,
+      'Range': 'sequence='+values.sequence+"-"
     }
   })
 };
@@ -59,7 +61,7 @@ const fetchListingData = async (type) => {
 
   console.log("Inside Test FetchListings");
 
-  const inputStream = await getInputStream1();
+  const inputStream = await getInputStream1(type);
   const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
   console.log("After create a file write stream");
@@ -226,6 +228,18 @@ const fetchData = async () => {
 
     var key = date.getTime().toString().padEnd(19, 0);
 
+    const metaResponse = await metaStream();
+
+    console.log("MetaData is"+JSON.stringify(metaResponse.data))
+
+    const lastSequence=metaResponse.data.Metadata.lastsequence
+    const sequence=lastSequence-metaResponse.data.Metadata.totallinecount
+    const ETag = metaResponse.data.ETag;
+
+    const values={ETag:ETag, sequence:sequence}
+
+    console.log("ETag: "+values.ETag+" Sequence: "+values.sequence)
+
     console.log("KEY is: " + key);
 
     // CHECK IF PRODUCT LISTING DATA EXISTS AND IF NOT POPULATE THE LISTINGS TABLE
@@ -238,8 +252,8 @@ const fetchData = async () => {
       const data = {
         storeType: "new",
         ContentLength: response.data.ContentLength,
-        ETag: response.data.ETag,
-        sequence: key,
+        ETag: ETag,
+        sequence: sequence,
       };
 
       const { listDataAdded, listAddError } = await newListData(data);

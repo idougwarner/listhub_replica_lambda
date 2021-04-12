@@ -408,12 +408,10 @@ const getData = async () => {
 
   console.log("Sequence Key is "+key)
 
-  console.log("After create a file write stream");
-
   inputStream
     .on("data", (response) => {
       
-      console.log("Data: "+response)
+      console.log("DataStream: "+response)
 
       if(response.statusCode==416)
       {
@@ -433,12 +431,7 @@ const getData = async () => {
       const withRanges = await testInputStreamWithRanges(values)
       withRanges
       .on("data", (response) => {
-        console.log("Data: "+response)
-        if(response.statusCode=='416')
-        {
-          console.log()
-          getData();
-        }
+
       })
       .on('error',(err)=>{
         console.log('Error is'+err)
@@ -454,9 +447,9 @@ const getData = async () => {
 
         var myjson = jsonfile.toString().split("}{");
 
-        console.log(" Myjson"+myjson)
+        console.log(" Myjson with Ranges"+myjson)
 
-        console.log("After my JSON file reading");
+        console.log("After my JSON file reading A");
 
         // Create a JSON object array
         // [myjson.join('},{')]
@@ -492,7 +485,7 @@ const getData = async () => {
 
         var myjson = jsonfile.toString().split("}{");
 
-        console.log(" Myjson"+myjson)
+        console.log(" Myjson without "+myjson)
 
         console.log("After my JSON file reading");
 

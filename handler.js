@@ -352,7 +352,7 @@ const getData = async () => {
 
   const response=await metaStream();
 
-  console.log("MetaData is"+JSON.stringify(response.data))
+  console.log("MetaData is"+response.data)
 
   console.log("Inside Test FetchListings");
 

@@ -397,9 +397,15 @@ const getData = async () => {
 
   console.log("After create a file write stream");
 
+  if()
+
   inputStream
     .on("data", (response) => {
       console.log("Data: "+response)
+      if(response.statusCode=='416')
+      {
+        getData();
+      }
     })
     .on('error',(err)=>{
       console.log('Error is'+err)

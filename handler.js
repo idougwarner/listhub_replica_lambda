@@ -433,8 +433,10 @@ const getData = async () => {
     
     console.log("Downloading with Ranges");
 
+    console.log("Request Data values: "+JSON.stringify(values))
+
     // Call stream with Ranges
-    const withRanges = await testInputStreamWithRanges(values);
+    const withRanges = await testInputStreamWithRanges(values); 
 
     withRanges
       .on("data", (response) => {

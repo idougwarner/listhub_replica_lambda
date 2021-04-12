@@ -48,7 +48,7 @@ const getInputStream1 = async () => {
       Accept: "application/json",
       Authorization: "Bearer " + token,
     }
-  });
+  })
 };
 
 const fetchListingData = async (type) => {

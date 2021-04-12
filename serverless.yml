@@ -16,6 +16,8 @@ provider:
     DB_USER: ${param:DB_USER}
     DB_PASSWORD: ${param:DB_PASSWORD}
     DB_DIALECT: ${param:DB_DIALECT}
+  memorySize: 1024
+  timeout: 900
 
 functions:
   rateHandler:
@@ -30,8 +32,8 @@ functions:
     timeout: 900
   testfetchListingsData:
     handler: handler.testfetchListingsData
+    timeout: 900
     events:
       - schedule: rate(1 hour)
-    timeout: 900
 plugins:
   - serverless-plugin-lambda-insights

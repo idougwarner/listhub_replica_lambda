@@ -390,8 +390,8 @@ const getData = async () => {
   const listings1 = JSON.parse(mylist);
 } 
 
-module.exports.testfetchListingsData = (event, context) => {
+module.exports.testfetchListingsData = async (event, context) => {
   
-  getData();
+  await getData();
 
 };

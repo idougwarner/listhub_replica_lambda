@@ -350,7 +350,15 @@ const getData = async () => {
 
   console.log("Fetch meta Data")
 
-  const response=await metaStream();
+  const metastream = await metaStream();
+  
+  metastream
+  .on("data", (response) => {
+    console.log("Meta Data: "+response)
+  })
+  .on('error',(err)=>{
+    console.log('Error is'+err)
+  })
 
   console.log("MetaData is"+response.data)
 

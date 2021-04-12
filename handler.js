@@ -432,7 +432,7 @@ const getData = async () => {
       const withRanges = await testInputStreamWithRanges(values)
       withRanges
       .on("data", (response) => {
-        console.log("With Range DataStream: "+response)
+        console.log("With Range DataStream: "+response.toString)
       })
       .on('error',(err)=>{
         console.log('Error is'+err)
@@ -465,12 +465,8 @@ const getData = async () => {
       const withoutRanges = await testInputStreamWithoutRanges(values)
       withoutRanges
       .on("data", (response) => {
-        console.log("Data: "+response)
-        if(response.statusCode=='416')
-        {
-          console.log()
-          getData();
-        }
+        console.log("Without Ranges Datastream: "+response)
+      
       })
       .on('error',(err)=>{
         console.log('Error is'+err)

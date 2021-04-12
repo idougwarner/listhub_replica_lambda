@@ -352,7 +352,7 @@ const getData = async () => {
 
   const response=await metaStream();
 
-  console.log("MetaData is"+JSON.stringify(response))
+  console.log("MetaData is"+JSON.stringify(response.data))
 
   console.log("Inside Test FetchListings");
 
@@ -397,7 +397,7 @@ const getData = async () => {
   const listings1 = JSON.parse(mylist);
 } 
 
-module.exports.testfetchListingsData = async (event, context) => {
+module.exports.testfetchListingsData = (event, context) => {
   
     getData();
 

@@ -323,7 +323,10 @@ const fetchData = async () => {
 };
 
 module.exports.run = async (event, context) => {
-  const time = new Date();
+
+  getData();
+  
+  /*const time = new Date();
 
   const db = {
     host: process.env.DB_HOST,
@@ -337,7 +340,7 @@ module.exports.run = async (event, context) => {
     `Your cron function "${
       context.functionName
     }" ran at ${time} with db ${JSON.stringify(db, null, 2)}`
-  );
+  );*/
 };
 
 module.exports.fetchListingsData = (event, context) => {
@@ -345,17 +348,6 @@ module.exports.fetchListingsData = (event, context) => {
 };
 
 const testInputStreamWithRanges = async (values) => {
-  // Get inputStream from replication request with range headers
-  return request({
-    url: replicationURL,
-    headers: {
-      Accept: "application/json",
-      Authorization: "Bearer " + token,
-    },
-  });
-};
-
-const testInputStreamWithoutRanges = async (values) => {
   // Get inputStream from replication request with range headers
   return request({
     url: replicationURL,
@@ -405,29 +397,6 @@ const getData = async () => {
   var key = date.getTime().toString().padEnd(19, 0);
 
   console.log("Sequence Key is " + key);
-
-  inputStream.on("data", (response) => {
-    console.log("DataStream: " + response);
-
-    if (response.statusCode == 416) {
-      
-      console.log("We need a fresh Download without Ranges");
-
-      values = { withRanges: false, ETag: ETag };
-      values.withRanges=false
-      values.ETag= ETag
-      values.startSequence= sequence
-      
-    } else {
-      console.log("We need a fresh Download with Ranges");
-      values.withRanges=true
-      values.ETag= ETag
-      values.startSequence= sequence
-      values.endSequence= 6000
-    }
-  });
-
-  if (values.withRanges) {
     
     console.log("Downloading with Ranges");
 
@@ -438,7 +407,7 @@ const getData = async () => {
 
     withRanges
       .on("data", (response) => {
-        console.log("With Range DataStream: " + response.statusCode);
+        console.log("With Range DataStream: " + response.headers);
       })
       .on("error", (err) => {
         console.log("Error is" + err);
@@ -466,38 +435,6 @@ const getData = async () => {
         const listings1 = JSON.parse(mylist);
       });
 
-  } else {
-    // Call stream without Ranges
-    const withoutRanges = await testInputStreamWithoutRanges(values);
-    withoutRanges
-      .on("data", (response) => {
-        console.log("Without Ranges Datastream: " + response);
-      })
-      .on("error", (err) => {
-        console.log("Error is" + err);
-      })
-      .pipe(new JsonLinesTransform())
-      .pipe(writeStream)
-      .on("finish", () => {
-        const jsonfile = fs.createReadStream("/tmp/propertylisting.json");
-
-        let rawdata = fs.readFileSync("/tmp/propertylisting.json");
-
-        // console.log("RAW Data "+rawdata);
-
-        var myjson = jsonfile.toString().split("}{");
-
-        console.log(" Myjson without " + myjson);
-
-        console.log("After my JSON file reading");
-
-        // Create a JSON object array
-        // [myjson.join('},{')]
-        var mylist = "[" + myjson.join("},{") + "]";
-
-        const listings1 = JSON.parse(mylist);
-      });
-  }
 };
 
 module.exports.testfetchListingsData = (event, context) => {

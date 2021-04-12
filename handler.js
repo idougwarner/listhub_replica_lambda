@@ -397,8 +397,6 @@ const getData = async () => {
 
   console.log("After create a file write stream");
 
-  if()
-
   inputStream
     .on("data", (response) => {
       console.log("Data: "+response)

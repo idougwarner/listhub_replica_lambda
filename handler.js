@@ -432,12 +432,4 @@ module.exports.testfetchListingsData = (event, context) => {
   
     getData();
 
-    const time = new Date();
-
-    console.log(
-      `Your cron function "${
-        context.functionName
-      }" ran at ${time}`
-    );
-
 };

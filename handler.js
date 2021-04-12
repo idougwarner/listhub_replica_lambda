@@ -412,22 +412,27 @@ const getData = async () => {
     console.log("DataStream: " + response);
 
     if (response.statusCode == 416) {
+      
       console.log("We need a fresh Download without Ranges");
+
       values = { withRanges: false, ETag: ETag };
+      values.withRanges=false
+      values.ETag= ETag
+      values.startSequence= sequence
+      
     } else {
       console.log("We need a fresh Download with Ranges");
-      values = {
-        withRanges: true,
-        ETag: ETag,
-        startSequence: sequence,
-        endSequence: 6000,
-      };
+      values.withRanges=true
+      values.ETag= ETag
+      values.startSequence= sequence
+      values.endSequence= 6000
     }
   });
 
   if (values.withRanges) {
     
     console.log("Downloading with Ranges");
+
     // Call stream with Ranges
     const withRanges = await testInputStreamWithRanges(values);
 
@@ -441,6 +446,7 @@ const getData = async () => {
       .pipe(new JsonLinesTransform())
       .pipe(writeStream)
       .on("finish", () => {
+        
         const jsonfile = fs.createReadStream("/tmp/propertylisting.json");
 
         let rawdata = fs.readFileSync("/tmp/propertylisting.json");
@@ -459,6 +465,7 @@ const getData = async () => {
 
         const listings1 = JSON.parse(mylist);
       });
+
   } else {
     // Call stream without Ranges
     const withoutRanges = await testInputStreamWithoutRanges(values);

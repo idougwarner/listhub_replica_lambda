@@ -351,7 +351,7 @@ module.exports.fetchListingsData = (event, context) => {
   fetchData();  
 }
 
-const testInputStream = async (values) => {
+const testInputStreamWithRanges = async (values) => {
 
   // Get inputStream from replication request with range headers
   return request(
@@ -360,8 +360,21 @@ const testInputStream = async (values) => {
       headers: {
         'Accept': 'application/json',
         'Authorization': 'Bearer ' + token,
-        'If-Range': values.ETag,
-        'Range': 'sequence='+values.startSequence+"-"+values.endSequence
+        'If-Range':values.ETag,
+        'Range':'sequence='+values.startSequence+'-'+values.endSequence
+      }
+    })
+}
+
+const testInputStreamWithoutRanges = async (values) => {
+
+  // Get inputStream from replication request with range headers
+  return request(
+    {
+      url: replicationURL,
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + token,
       }
     })
 }
@@ -378,13 +391,13 @@ const getData = async () => {
   const sequence=lastSequence-metaResponse.data.Metadata.totallinecount
   const ETag = metaResponse.data.ETag;
 
-  var values={ETag:ETag, startSequence:sequence, endSequence:6000}
+  var values={ withRanges: true, ETag:ETag, startSequence:sequence, endSequence:6000 }
 
   console.log("ETag: "+values.ETag+" Sequence: "+values.startSequence+"First take end:"+(values.startSequence+6000))
 
   console.log("Inside Test FetchListings");
 
-  const inputStream = await testInputStream(values);
+  const inputStream = await testInputStreamWithRanges(values);
   const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
   var date = new Date();
@@ -397,58 +410,99 @@ const getData = async () => {
 
   console.log("After create a file write stream");
 
-
   inputStream
     .on("data", (response) => {
+      
       console.log("Data: "+response)
+
       if(response.statusCode==416)
       {
         console.log("We need a fresh Download without Ranges")
-        values={ETag:ETag, rangeValues:""}       
+        values={ withRanges:false, ETag:ETag }       
       }
       else {
         console.log("We need a fresh Download with Ranges")
-        values={ETag:ETag, rangeValues:{"If-Range":ETag,'Range': 'sequence='+values.sequence+"-"+6000}}
+        values = { withRanges: true, ETag:ETag, startSequence:sequence, endSequence: 6000}
       }
 
     })
 
-  const secondStream= await testInputStream(values)
+    if(values.withRanges)
+    {
+      // Call stream with Ranges
+      const withRanges = await testInputStreamWithRanges(values)
+      withRanges
+      .on("data", (response) => {
+        console.log("Data: "+response)
+        if(response.statusCode=='416')
+        {
+          console.log()
+          getData();
+        }
+      })
+      .on('error',(err)=>{
+        console.log('Error is'+err)
+      })
+      .pipe(new JsonLinesTransform())
+      .pipe(writeStream)
+      .on("finish", () => {
+        const jsonfile = fs.createReadStream('/tmp/propertylisting.json');
 
-  secondStream
-    .on("data", (response) => {
-      console.log("Data: "+response)
-      if(response.statusCode=='416')
-      {
-        console.log()
-        getData();
-      }
-    })
-    .on('error',(err)=>{
-      console.log('Error is'+err)
-    })
-    .pipe(new JsonLinesTransform())
-    .pipe(writeStream)
-    .on("finish", () => {
-      const jsonfile = fs.createReadStream('/tmp/propertylisting.json');
+        let rawdata = fs.readFileSync('/tmp/propertylisting.json');
 
-      let rawdata = fs.readFileSync('/tmp/propertylisting.json');
+        // console.log("RAW Data "+rawdata);
 
-      // console.log("RAW Data "+rawdata);
+        var myjson = jsonfile.toString().split("}{");
 
-      var myjson = jsonfile.toString().split("}{");
+        console.log(" Myjson"+myjson)
 
-      console.log(" Myjson"+myjson)
+        console.log("After my JSON file reading");
 
-      console.log("After my JSON file reading");
+        // Create a JSON object array
+        // [myjson.join('},{')]
+        var mylist = '[' + myjson.join('},{') + ']';
 
-      // Create a JSON object array
-      // [myjson.join('},{')]
-      var mylist = '[' + myjson.join('},{') + ']';
+        const listings1 = JSON.parse(mylist);
+      }) 
 
-      const listings1 = JSON.parse(mylist);
-    })
-    
+    }
+    else {
+      // Call stream without Ranges
+      const withoutRanges = await testInputStreamWithoutRanges(values)
+      withoutRanges
+      .on("data", (response) => {
+        console.log("Data: "+response)
+        if(response.statusCode=='416')
+        {
+          console.log()
+          getData();
+        }
+      })
+      .on('error',(err)=>{
+        console.log('Error is'+err)
+      })
+      .pipe(new JsonLinesTransform())
+      .pipe(writeStream)
+      .on("finish", () => {
+        const jsonfile = fs.createReadStream('/tmp/propertylisting.json');
+
+        let rawdata = fs.readFileSync('/tmp/propertylisting.json');
+
+        // console.log("RAW Data "+rawdata);
+
+        var myjson = jsonfile.toString().split("}{");
+
+        console.log(" Myjson"+myjson)
+
+        console.log("After my JSON file reading");
+
+        // Create a JSON object array
+        // [myjson.join('},{')]
+        var mylist = '[' + myjson.join('},{') + ']';
+
+        const listings1 = JSON.parse(mylist);
+      })
+    }    
 } 
 
 module.exports.testfetchListingsData = (event, context) => {

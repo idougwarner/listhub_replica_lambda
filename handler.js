@@ -40,7 +40,7 @@ class JsonLinesTransform extends stream.Transform {
   }
 }
 
-const getInputStream1 = async (type) => {
+const getInputStream1 = async () => {
 
    return request({
     url: replicationURL,
@@ -59,7 +59,7 @@ const fetchListingData = async (type) => {
 
   console.log("Inside Test FetchListings");
 
-  const inputStream = await getInputStream1(type);
+  const inputStream = await getInputStream1();
   const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
   console.log("After create a file write stream");
@@ -72,24 +72,30 @@ const fetchListingData = async (type) => {
       console.log('Error is'+err)
     })
     .pipe(new JsonLinesTransform())
-    .pipe(writeStream);
+    .pipe(writeStream)
+    .on("finish",() => {
+      // create a readjson
+      const jsonfile = fs.createReadStream('/tmp/propertylisting.json');
 
-  // create a readjson
-  const jsonfile = fs.createReadStream('/tmp/propertylisting.json');
+      let rawdata = fs.readFileSync('/tmp/propertylisting.json');
 
-  let rawdata = fs.readFileSync('/tmp/propertylisting.json');
+      // console.log("RAW Data "+rawdata);
 
-  // console.log("RAW Data "+rawdata);
+      var myjson = rawdata.toString().split("}{");
 
-  var myjson = rawdata.toString().split("}{");
+      console.log(" Myjson"+myjson)
 
-  console.log(" Myjson"+myjson)
+      // Create a JSON object array
+      // [myjson.join('},{')]
+      var mylist = '[' + myjson.join('},{') + ']';
 
-  // Create a JSON object array
-  // [myjson.join('},{')]
-  var mylist = '[' + myjson.join('},{') + ']';
+      const listings1 = JSON.parse(mylist);
 
-  const listings1 = JSON.parse(mylist);
+    })
+
+  
+
+  // Bulk create the data to database
 
   console.log("After input stream");
 
@@ -376,24 +382,24 @@ const getData = async () => {
       console.log('Error is'+err)
     })
     .pipe(new JsonLinesTransform())
-    .pipe(writeStream);
+    .pipe(writeStream)
+    .on("finish", () => {
+      const jsonfile = fs.createReadStream('/tmp/propertylisting.json');
 
-  // create a readjson
-  const jsonfile = fs.createReadStream('/tmp/propertylisting.json');
+      let rawdata = fs.readFileSync('/tmp/propertylisting.json');
 
-  let rawdata = fs.readFileSync('/tmp/propertylisting.json');
+      // console.log("RAW Data "+rawdata);
 
-  // console.log("RAW Data "+rawdata);
+      var myjson = rawdata.toString().split("}{");
 
-  var myjson = rawdata.toString().split("}{");
+      console.log(" Myjson"+myjson)
 
-  console.log(" Myjson"+myjson)
+      // Create a JSON object array
+      // [myjson.join('},{')]
+      var mylist = '[' + myjson.join('},{') + ']';
 
-  // Create a JSON object array
-  // [myjson.join('},{')]
-  var mylist = '[' + myjson.join('},{') + ']';
-
-  const listings1 = JSON.parse(mylist);
+      const listings1 = JSON.parse(mylist);
+    })
 } 
 
 module.exports.testfetchListingsData = (event, context) => {

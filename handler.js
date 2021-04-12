@@ -386,7 +386,7 @@ const getData = async () => {
 
     withRanges
       .on("data", (response) => {
-        console.log("With Range DataStream: " + response.headers);
+        console.log("Data: " + response);
       })
       .on("error", (err) => {
         console.log("Error is" + err);
@@ -399,7 +399,7 @@ const getData = async () => {
 
         let rawdata = fs.readFileSync("/tmp/propertylisting.json");
 
-        // console.log("RAW Data "+rawdata);
+        console.log("RAW Data "+rawdata);
 
         var myjson = jsonfile.toString().split("}{");
 

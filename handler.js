@@ -360,8 +360,7 @@ const testInputStream = async (values) => {
       headers: {
         'Accept': 'application/json',
         'Authorization': 'Bearer ' + token,
-        'If-Range': values.ETag,
-        'Range': 'sequence='+values.sequence+"-"+(values.sequence+43000)
+        
       }
     })
 }

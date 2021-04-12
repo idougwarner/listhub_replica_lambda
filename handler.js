@@ -351,8 +351,6 @@ const testInputStreamWithRanges = async (values) => {
     headers: {
       Accept: "application/json",
       Authorization: "Bearer " + token,
-      "If-Range": values.ETag,
-      Range: "sequence=" + values.startSequence + "-" + values.endSequence,
     },
   });
 };
@@ -436,7 +434,7 @@ const getData = async () => {
     console.log("Request Data values: "+JSON.stringify(values))
 
     // Call stream with Ranges
-    const withRanges = await testInputStreamWithRanges(values); 
+    const withRanges = await testInputStreamWithRanges(); 
 
     withRanges
       .on("data", (response) => {

@@ -337,7 +337,7 @@ module.exports.fetchListingsData = (event, context) => {
   fetchData();  
 }
 
-const testInputStream = async () => {
+const testInputStream = async (values) => {
 
   // Get inputStream from replication request with range headers
   return request(
@@ -345,7 +345,9 @@ const testInputStream = async () => {
       url: replicationURL,
       headers: {
         'Accept': 'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': 'Bearer ' + token,
+        'If-Range': values.ETag,
+        'Range': 'sequence='+values.sequence
       }
     })
 }
@@ -358,9 +360,15 @@ const getData = async () => {
 
   console.log("MetaData is"+JSON.stringify(metaResponse.data))
 
+  const lastSequence=metaResponse.data.Metadata.lastsequence+1
+  const sequence=lastSequence-metaResponse.data.Metadata.totallinecount
+  const ETag = metaResponse.data.ETag;
+
+  const values={ETage:ETag, sequence:sequence}
+
   console.log("Inside Test FetchListings");
 
-  const inputStream = await testInputStream();
+  const inputStream = await testInputStream(values);
   const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
   var date = new Date();

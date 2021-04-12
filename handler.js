@@ -360,6 +360,8 @@ const testInputStream = async (values) => {
       headers: {
         'Accept': 'application/json',
         'Authorization': 'Bearer ' + token,
+        'If-Range': values.ETag,
+        'Range': 'sequence='+values.startSequence+"-"+values.endSequence
       }
     })
 }
@@ -376,13 +378,13 @@ const getData = async () => {
   const sequence=lastSequence-metaResponse.data.Metadata.totallinecount
   const ETag = metaResponse.data.ETag;
 
-  const values={ETag:ETag, sequence:sequence, totallinecount:metaResponse.data.Metadata.totallinecount}
+  const values={ETag:ETag, startSequence:sequence, totallinecount:metaResponse.data.Metadata.totallinecount, endSequence:6000}
 
   console.log("ETag: "+values.ETag+" Sequence: "+values.sequence+"First take end:"+(values.sequence+6000))
 
   console.log("Inside Test FetchListings");
 
-  const inputStream = await testInputStream();
+  const inputStream = await testInputStream(values);
   const writeStream = fs.createWriteStream('/tmp/propertylisting.json');
 
   var date = new Date();

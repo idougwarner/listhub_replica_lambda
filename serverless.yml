@@ -17,7 +17,7 @@ provider:
     DB_PASSWORD: ${param:DB_PASSWORD}
     DB_DIALECT: ${param:DB_DIALECT}
   memorySize: 1024
-  timeout: 900
+  timeout: 90
 
 functions:
   rateHandler:
@@ -29,10 +29,10 @@ functions:
     events:
       - schedule: rate(1 hour)
     lambdaInsights: true #enables Lambda Insights for this function
-    timeout: 900
+    timeout: 90
   testfetchListingsData:
     handler: handler.testfetchListingsData
-    timeout: 900
+    timeout: 90
     events:
       - schedule: rate(1 hour)
 plugins:

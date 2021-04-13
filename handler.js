@@ -462,43 +462,47 @@ module.exports.testfetchListingsData = (event, context, callback) => {
 
 module.exports.run = (event, context) => {
 
-  request({
-    url: replicationURL,
-    headers: {
-      Accept: "application/json",
-      Authorization: "Bearer " + token,
-    },
-  })
-  .on("data", (response) => {
-    console.log("Data: " + response);
+  setInterval(() => { 
+    request({
+      url: replicationURL,
+      headers: {
+        Accept: "application/json",
+        Authorization: "Bearer " + token,
+      },
+    })
+    .on("data", (response) => {
+      console.log("Data: " + response);
+  
+    })
+    .on("error", (err) => {
+      console.log("Error is" + err);
+      context.done(null, 'FAILURE');
+    })
+    .on("finish", () => {
+  
+      context.succeed("Sucess")
+      /*
+      const jsonfile = fs.createReadStream("/tmp/propertylisting.json");
+  
+      let rawdata = fs.readFileSync("/tmp/propertylisting.json");
+  
+      console.log("RAW Data "+rawdata);
+  
+      var myjson = jsonfile.toString().split("}{");
+  
+      console.log(" Myjson with Ranges" + myjson);
+  
+      console.log("After my JSON file reading A");
+  
+      // Create a JSON object array
+      // [myjson.join('},{')]
+      var mylist = "[" + myjson.join("},{") + "]";
+  
+      const listings1 = JSON.parse(mylist);*/
+    }); 
+    }, 500)
 
-  })
-  .on("error", (err) => {
-    console.log("Error is" + err);
-    context.done(null, 'FAILURE');
-  })
-  .on("finish", () => {
-
-    context.succeed("Sucess")
-    /*
-    const jsonfile = fs.createReadStream("/tmp/propertylisting.json");
-
-    let rawdata = fs.readFileSync("/tmp/propertylisting.json");
-
-    console.log("RAW Data "+rawdata);
-
-    var myjson = jsonfile.toString().split("}{");
-
-    console.log(" Myjson with Ranges" + myjson);
-
-    console.log("After my JSON file reading A");
-
-    // Create a JSON object array
-    // [myjson.join('},{')]
-    var mylist = "[" + myjson.join("},{") + "]";
-
-    const listings1 = JSON.parse(mylist);*/
-  });
+  
 
   console.log("After fetch function")
 
@@ -525,7 +529,7 @@ module.exports.testFunction = async (event, context) => {
 
   var time=1;
   setInterval(() => { 
-    console.log("Hello"+time);
+    console.log("Hello "+time);
     time=time+1 
     }, 50000)
 };

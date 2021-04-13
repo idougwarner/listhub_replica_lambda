@@ -3,7 +3,7 @@ const axios = require("axios");
 const request = require("request");
 const fs = require("fs");
 const stream = require("stream");
-const http = require("http");
+const https = require("https");
 
 const {
   propertyBulkCreate,

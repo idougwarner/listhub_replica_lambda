@@ -391,6 +391,7 @@ const getData = async () => {
       .on("error", (err) => {
         console.log("Error is" + err);
       })
+      /*
       .pipe(new JsonLinesTransform())
       .pipe(writeStream)
       .on("finish", () => {
@@ -412,7 +413,7 @@ const getData = async () => {
         var mylist = "[" + myjson.join("},{") + "]";
 
         const listings1 = JSON.parse(mylist);
-      });
+      });*/
 
 };
 

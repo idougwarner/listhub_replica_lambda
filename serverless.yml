@@ -22,10 +22,12 @@ provider:
 functions:
   rateHandler:
     handler: handler.run
+    timeout: 900
     events:
       - schedule: rate(1 hour)
   run2:
     handler: handler.run2
+    timeout: 900
     events:
       - schedule: rate(1 hour)
   

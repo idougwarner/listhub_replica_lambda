@@ -27,7 +27,7 @@ functions:
       - schedule: rate(1 hour)
   testFunction:
     handler: handler.testFunction
-    timeout: 900
+    timeout: 890
     events:
       - schedule: rate(1 hour)
   

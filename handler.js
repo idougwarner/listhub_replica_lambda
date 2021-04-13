@@ -527,5 +527,5 @@ module.exports.testFunction = async (event, context) => {
   setInterval(() => { 
     console.log("Hello"+time);
     time=time+1 
-    }, 60000)
+    }, 50000)
 };

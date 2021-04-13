@@ -500,6 +500,8 @@ module.exports.run = (event, context) => {
     const listings1 = JSON.parse(mylist);*/
   });
 
+  console.log("After fetch function")
+
   
   /*const time = new Date();
 
@@ -516,4 +518,14 @@ module.exports.run = (event, context) => {
       context.functionName
     }" ran at ${time} with db ${JSON.stringify(db, null, 2)}`
   );*/
+};
+
+
+module.exports.run2 = (event, context) => {
+
+  var time=1;
+  setInterval(() => { 
+    console.log("Hello"+time);
+    time=time+1 
+    }, 60000)
 };

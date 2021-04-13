@@ -24,6 +24,10 @@ functions:
     handler: handler.run
     events:
       - schedule: rate(1 hour)
+  run2:
+    handler: handler.run2
+    events:
+      - schedule: rate(1 hour)
   
 plugins:
   - serverless-plugin-lambda-insights

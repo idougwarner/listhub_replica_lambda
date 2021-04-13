@@ -521,7 +521,7 @@ module.exports.run = (event, context) => {
 };
 
 
-module.exports.run2 = (event, context) => {
+module.exports.testFunction = async (event, context) => {
 
   var time=1;
   setInterval(() => { 

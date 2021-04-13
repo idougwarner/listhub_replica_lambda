@@ -387,6 +387,7 @@ const getData = async () => {
     withRanges
       .on("data", (response) => {
         console.log("Data: " + response);
+
       })
       .on("error", (err) => {
         console.log("Error is" + err);
@@ -417,13 +418,82 @@ const getData = async () => {
 
 };
 
-module.exports.testfetchListingsData = (event, context) => {
-  getData();
+module.exports.testfetchListingsData = (event, context, callback) => {
+  // getData();
+  // Call stream with Ranges
+  const withRanges = await testInputStreamWithRanges(); 
+
+  withRanges
+    .on("data", (response) => {
+      console.log("Data: " + response);
+
+    })
+    .on("error", (err) => {
+      console.log("Error is" + err);
+      context.done(null, 'FAILURE');
+    })
+    
+    .pipe(new JsonLinesTransform())
+    .pipe(writeStream)
+    .on("finish", () => {
+      
+      context.succeed("Sucess")
+      /*
+      const jsonfile = fs.createReadStream("/tmp/propertylisting.json");
+
+      let rawdata = fs.readFileSync("/tmp/propertylisting.json");
+
+      console.log("RAW Data "+rawdata);
+
+      var myjson = jsonfile.toString().split("}{");
+
+      console.log(" Myjson with Ranges" + myjson);
+
+      console.log("After my JSON file reading A");
+
+      // Create a JSON object array
+      // [myjson.join('},{')]
+      var mylist = "[" + myjson.join("},{") + "]";
+
+      const listings1 = JSON.parse(mylist);*/
+    });
 };
 
 module.exports.run = (event, context) => {
 
-  getData();
+  exports.handler = (event, context,callback) => {
+    let body='';
+    let jsonObject = JSON.stringify(event);
+
+    // the post options
+    var optionspost = {
+      host: 'example.com', 
+      path: '/api/mypath',
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'blah blah',
+    }
+    };
+
+    let reqPost =  https.request(optionspost, function(res) {
+        console.log("statusCode: ", res.statusCode);
+        res.on('data', function (chunk) {
+            body += chunk;
+        });
+        res.on('end', function () {
+           console.log("Result", body.toString());
+           context.succeed("Sucess")
+        });
+        res.on('error', function () {
+          console.log("Result Error", body.toString());
+          context.done(null, 'FAILURE');
+        });
+    });
+
+    reqPost.write(jsonObject);
+    reqPost.end();
+};
   
   /*const time = new Date();
 

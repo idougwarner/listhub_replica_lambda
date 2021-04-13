@@ -24,17 +24,6 @@ functions:
     handler: handler.run
     events:
       - schedule: rate(1 hour)
-  fetchListingsData:
-    handler: handler.fetchListingsData
-    timeout: 900
-    events:
-      - schedule: rate(1 hour)
-    lambdaInsights: true #enables Lambda Insights for this function
   
-  testfetchListingsData:
-    handler: handler.testfetchListingsData
-    timeout: 900
-    events:
-      - schedule: rate(1 hour)
 plugins:
   - serverless-plugin-lambda-insights

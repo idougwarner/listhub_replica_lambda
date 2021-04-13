@@ -462,38 +462,43 @@ module.exports.testfetchListingsData = (event, context, callback) => {
 
 module.exports.run = (event, context) => {
 
-    let body='';
-    let jsonObject = JSON.stringify(event);
+  request({
+    url: replicationURL,
+    headers: {
+      Accept: "application/json",
+      Authorization: "Bearer " + token,
+    },
+  })
+  .on("data", (response) => {
+    console.log("Data: " + response);
 
-    // the post options
-    var optionspost = {
-      host: 'api.listhub.com', 
-      path: '/public_sandbox/replication/query?select=ListingKey',
-      method: 'GET',
-      headers: {
-      'Accept': 'application/json',
-      'Authorization': "Bearer " + token,
-      }
-    };
+  })
+  .on("error", (err) => {
+    console.log("Error is" + err);
+    context.done(null, 'FAILURE');
+  })
+  .on("finish", () => {
 
-    let reqPost =  https.request(optionspost, function(res) {
-        console.log("statusCode: ", res.statusCode);
-        res.on('data', function (chunk) {
-            body += chunk;
-            console.log(chunk)
-        });
-        res.on('end', function () {
-           console.log("Result", body.toString());
-           context.succeed("Sucess")
-        });
-        res.on('error', function () {
-          console.log("Result Error", body.toString());
-          context.done(null, 'FAILURE');
-        });
-    });
+    context.succeed("Sucess")
+    /*
+    const jsonfile = fs.createReadStream("/tmp/propertylisting.json");
 
-    reqPost.write(jsonObject);
-    reqPost.end();
+    let rawdata = fs.readFileSync("/tmp/propertylisting.json");
+
+    console.log("RAW Data "+rawdata);
+
+    var myjson = jsonfile.toString().split("}{");
+
+    console.log(" Myjson with Ranges" + myjson);
+
+    console.log("After my JSON file reading A");
+
+    // Create a JSON object array
+    // [myjson.join('},{')]
+    var mylist = "[" + myjson.join("},{") + "]";
+
+    const listings1 = JSON.parse(mylist);*/
+  });
 
   
   /*const time = new Date();

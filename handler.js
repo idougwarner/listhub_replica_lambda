@@ -421,9 +421,7 @@ const getData = async () => {
 module.exports.testfetchListingsData = (event, context, callback) => {
   // getData();
   // Call stream with Ranges
-  const withRanges = testInputStreamWithRanges(); 
-
-  withRanges
+  testInputStreamWithRanges()
     .on("data", (response) => {
       console.log("Data: " + response);
 

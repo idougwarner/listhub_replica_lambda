@@ -421,7 +421,13 @@ const getData = async () => {
 module.exports.testfetchListingsData = (event, context, callback) => {
   // getData();
   // Call stream with Ranges
-  testInputStreamWithRanges()
+    request({
+      url: replicationURL,
+      headers: {
+        Accept: "application/json",
+        Authorization: "Bearer " + token,
+      },
+    })
     .on("data", (response) => {
       console.log("Data: " + response);
 

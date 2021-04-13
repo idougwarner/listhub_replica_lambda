@@ -421,7 +421,7 @@ const getData = async () => {
 module.exports.testfetchListingsData = (event, context, callback) => {
   // getData();
   // Call stream with Ranges
-  const withRanges = await testInputStreamWithRanges(); 
+  const withRanges = testInputStreamWithRanges(); 
 
   withRanges
     .on("data", (response) => {
@@ -436,7 +436,7 @@ module.exports.testfetchListingsData = (event, context, callback) => {
     .pipe(new JsonLinesTransform())
     .pipe(writeStream)
     .on("finish", () => {
-      
+
       context.succeed("Sucess")
       /*
       const jsonfile = fs.createReadStream("/tmp/propertylisting.json");
@@ -467,13 +467,13 @@ module.exports.run = (event, context) => {
 
     // the post options
     var optionspost = {
-      host: 'example.com', 
-      path: '/api/mypath',
-      method: 'POST',
+      host: 'api.listhub.com', 
+      path: '/public_sandbox/replication/query?select=ListingKey',
+      method: 'GET',
       headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'blah blah',
-    }
+      'Accept': 'application/json',
+      'Authorization': "Bearer " + token,
+      }
     };
 
     let reqPost =  https.request(optionspost, function(res) {

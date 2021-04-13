@@ -436,9 +436,6 @@ module.exports.testfetchListingsData = (event, context, callback) => {
       console.log("Error is" + err);
       context.done(null, 'FAILURE');
     })
-    
-    .pipe(new JsonLinesTransform())
-    .pipe(writeStream)
     .on("finish", () => {
 
       context.succeed("Sucess")
@@ -465,7 +462,6 @@ module.exports.testfetchListingsData = (event, context, callback) => {
 
 module.exports.run = (event, context) => {
 
-  exports.handler = (event, context,callback) => {
     let body='';
     let jsonObject = JSON.stringify(event);
 
@@ -497,7 +493,7 @@ module.exports.run = (event, context) => {
 
     reqPost.write(jsonObject);
     reqPost.end();
-};
+
   
   /*const time = new Date();
 

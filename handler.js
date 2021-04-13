@@ -480,6 +480,7 @@ module.exports.run = (event, context) => {
         console.log("statusCode: ", res.statusCode);
         res.on('data', function (chunk) {
             body += chunk;
+            console.log(chunk)
         });
         res.on('end', function () {
            console.log("Result", body.toString());

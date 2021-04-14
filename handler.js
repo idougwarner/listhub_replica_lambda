@@ -77,7 +77,7 @@ const getListingStream = async (values) => {
         var parsedListings = JSON.parse(mylist);
         // BULK SAVE TO DATABASE
 
-        const { dataAdded, data, error  } = await propertyBulkCreate(parsedListings);
+        const { dataAdded, data, error  } =  propertyBulkCreate(parsedListings);
 
         if(dataAdded) {
           // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller

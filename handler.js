@@ -345,6 +345,8 @@ const fetchData = async () => {
         console.log("Problem deleting Meta Data " + error);
       }
     } else {
+
+      console.log("New Update: "+newUpdate)
       // Do nothing to existing listings
     }
   }

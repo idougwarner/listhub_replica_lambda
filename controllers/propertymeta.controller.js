@@ -161,6 +161,9 @@ module.exports.ismetadataNew = async (lastModified) => {
 
       }
     }
+    else {
+      console.log("No New MetaData")
+    }
   } catch (err) {
     const result = {
       newUpdate: false,

@@ -20,161 +20,9 @@ const {
 const { metaURL, replicationURL, token } = require("./config/url");
 const { response } = require("express");
 
-const getInputStream1 = async (values) => {
-  return request({
-    url: replicationURL,
-    headers: {
-      Accept: "application/json",
-      Authorization: "Bearer " + token,
-      "If-Range": values.ETag,
-      Range: "sequence=" + values.sequence + "-",
-    },
-  });
-};
+// Fetch MetaData
+const getMetaDataStream = async () => {
 
-const fetchListingData = async (type) => {
-  var result = {
-    listdataAdded: false,
-    listAddError: null,
-  };
-
-  console.log("Inside Test FetchListings");
-
-  const inputStream = await getInputStream1(type);
-  const writeStream = fs.createWriteStream("/tmp/propertylisting.json");
-
-  console.log("After create a file write stream");
-
-  inputStream
-    .on("data", (response) => {
-      console.log("Data: " + response);
-    })
-    .on("error", (err) => {
-      console.log("Error is" + err);
-    })
-    .pipe(new JsonLinesTransform())
-    .pipe(writeStream)
-    .on("finish", () => {
-      // create a readjson
-      const jsonfile = fs.createReadStream("/tmp/propertylisting.json");
-
-      let rawdata = fs.readFileSync("/tmp/propertylisting.json");
-
-      // console.log("RAW Data "+rawdata);
-
-      var myjson = rawdata.toString().split("}{");
-
-      console.log(" Myjson" + myjson);
-
-      // Create a JSON object array
-      // [myjson.join('},{')]
-      var mylist = "[" + myjson.join("},{") + "]";
-
-      const listings1 = JSON.parse(mylist);
-    });
-
-  // Bulk create the data to database
-
-  console.log("After input stream");
-
-  return result;
-};
-
-// Retrieve new streamed data and store to database
-const newListData = async (type) => {
-  // Create a time object and store start time we want stream to read data for 7 minutes.
-  /* It is possible to finish reading all data in the seven minutes */
-  let startTime = new Date();
-
-  const Etag = "";
-
-  if (type.storeType == "new") {
-    const { listdataAdded, listAddError } = await fetchListingData(type);
-
-    if (listdataAdded) {
-      result = {
-        listDataAdded: true,
-        listAddError: listAddError,
-      };
-
-      return result;
-    } else {
-      result = {
-        listDataAdded: true,
-        listAddError: listAddError,
-      };
-
-      return result;
-    }
-  } // End of new download
-
-  // Fresh listings download
-  else if (type.storeType === "newDownload") {
-    var result;
-
-    const { dataExists } = await propertyDataExists();
-
-    if (dataExists) {
-      // Delete old data and put new data
-      const { dataDeleted, error } = await propertyDeleteAll();
-
-      // Old data deleted successfully
-      if (dataDeleted) {
-        const { listdataAdded, listAddError } = await fetchListingData(type);
-
-        if (listdataAdded) {
-          result = {
-            listDataAdded: listdataAdded,
-            listAddError: listAddError,
-          };
-
-          return result;
-        } else {
-          result = {
-            listDataAdded: listdataAdded,
-            listAddError: listAddError,
-          };
-
-          return result;
-        }
-      } else {
-        result = {
-          listDataAdded: false,
-          listAddError: "Problem deleting old data",
-        };
-
-        return result;
-      }
-    } // End of download if Property data already exists
-
-    /*************************************************************************************************************************** */
-
-    // Beginning of download where there is no Property list
-    else {
-      console.log("Inside else clause No listing data had been saved before ");
-
-      const { listdataAdded, listAddError } = await fetchListingData(type);
-
-      if (listdataAdded) {
-        result = {
-          listDataAdded: listdataAdded,
-          listAddError: listAddError,
-        };
-
-        return result;
-      } else {
-        result = {
-          listDataAdded: listdataAdded,
-          listAddError: listAddError,
-        };
-
-        return result;
-      }
-    } // End of fresh data download
-  }
-};
-
-const metaStream = async () => {
   // Get inputStream from replication request with range headers
   return axios({
     url: metaURL,
@@ -183,14 +31,14 @@ const metaStream = async () => {
       Accept: "application/json",
       Authorization: "Bearer " + token,
     },
-  });
+  })
+
 };
 
 // Get the List Data and save to Database
 const getListingStream = async (values) => {
 
   var listings = ""
-  var listingsArray = []
 
   return new Promise((resolve, reject) => {
 
@@ -226,8 +74,25 @@ const getListingStream = async (values) => {
         
         var mylist = "[" + myjson.toString() + "]";
 
-        const listings1 = JSON.parse(mylist);
-        // SAVE TO DATABASE
+        var parsedListings = JSON.parse(mylist);
+        // BULK SAVE TO DATABASE
+
+        const { dataAdded, data, error  } = await propertyBulkCreate(parsedListings);
+
+        if(dataAdded) {
+          // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
+          console.log("Finished reading data\n")
+        
+          console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
+
+          resolve({ downloaded: true, error:null, startSequence: values.startSequence, endSequence: values.endSequence })
+
+        }
+        else {
+
+          resolve({ downloaded: false, error:error, startSequence: values.startSequence, endSequence: values.endSequence })
+
+        }
 
         //console.log(mylist.toString())
 
@@ -236,13 +101,6 @@ const getListingStream = async (values) => {
 
         //console.log("Listing Data...\n"+listings)
         
-        // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
-        console.log("Finished reading data\n")
-       
-        console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
-
-        resolve({ downloaded: true, error:null, startSequence: values.startSequence, endSequence: values.endSequence })
-
       })
       .on("error", (err) => {
         
@@ -270,6 +128,10 @@ const saveNewListData = async () => {
   var count = 0;
   var endSequence = 0;
   var secondStart = 0 ;
+  var listDataAdded = "";
+  var listAddError = "";
+
+  return new Promise((resolve, reject) => {
 
   try {
 
@@ -287,6 +149,9 @@ const saveNewListData = async () => {
 
   catch(err) {
 
+    listDataAdded = false; 
+    listAddError = err;
+
     console.log("Error is: "+err)
 
   }
@@ -298,7 +163,7 @@ const saveNewListData = async () => {
 
   var values;
 
-  console.log("Chunk Size:"+chunkSize+"Total Line Count: "+totallinecount+"StartSequence "+startSequence+"End Sequence"+lastSequence)
+  // console.log("Chunk Size:"+chunkSize+"Total Line Count: "+totallinecount+"StartSequence "+startSequence+"End Sequence"+lastSequence)
 
   // I want to divide the calls to 2, I want to halve the listings. The first will call will be startSting sequence+what is halved
   // Next call will be the previous call end sequencccccce
@@ -310,7 +175,7 @@ const saveNewListData = async () => {
 
         endSequence=startSequence+chunkSize;
 
-        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
+        //console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
 
         values = {
           ETag: ETag,
@@ -324,7 +189,7 @@ const saveNewListData = async () => {
         console.log("Second Chunk:"+secondChunk)
 
         secondStart=startSequence+secondChunk
-        console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+        //console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
 
         values = {
           ETag: ETag,
@@ -337,7 +202,10 @@ const saveNewListData = async () => {
       const downloadResponse = await getListingStream(values)
 
       if(downloadResponse.downloaded){
+
         console.log("Data was downloaded")
+        listDataAdded = true
+        listAddError = false
 
         //console.log("ChunkSize+1: "+(chunkSize+1))
         count=count+1
@@ -345,11 +213,18 @@ const saveNewListData = async () => {
       }
       else {
         console.log("Error Downloading Data")
+        listDataAdded = false
+        listAddError = true 
       }
  
     } // End WHILE LOOP TO FETCH DATA
-    
-};
+
+    // Return our promise here
+    resolve({ listDataAdded: listDataAdded, listAddError:listAddError })
+
+  })
+
+}; // End of saveNewListData
 
 const fetchData = async () => {
 
@@ -451,7 +326,7 @@ const fetchData = async () => {
             sequence: key,
           };
 
-          const { listDataAdded, listAddError } = await newListData(data);
+          const { listDataAdded, listAddError } = await saveNewListData();
 
           if (listDataAdded) {
             console.log("New Product List Data Added");
@@ -472,98 +347,6 @@ const fetchData = async () => {
 
 module.exports.fetchListingsData = (event, context) => {
   fetchData();
-};
-
-const testInputStreamWithRanges = async (values) => {
-  // Get inputStream from replication request with range headers
-  return request({
-    url: replicationURL,
-    headers: {
-      Accept: "application/json",
-      Authorization: "Bearer " + token,
-    },
-  });
-};
-
-const getData = async () => {
-  console.log("Fetch meta Data");
-
-  const metaResponse = await metaStream();
-
-  console.log("MetaData is" + JSON.stringify(metaResponse.data));
-
-  const lastSequence = metaResponse.data.Metadata.lastsequence;
-  const sequence = lastSequence - metaResponse.data.Metadata.totallinecount;
-  const ETag = metaResponse.data.ETag;
-
-  var values = {
-    withRanges: true,
-    ETag: ETag,
-    startSequence: sequence,
-    endSequence: 6000,
-  };
-
-  console.log(
-    "ETag: " +
-      values.ETag +
-      " Sequence: " +
-      values.startSequence +
-      "First take end:" +
-      (values.startSequence + 6000)
-  );
-
-  console.log("Inside Test FetchListings");
-
-  const inputStream = await testInputStreamWithRanges(values);
-  const writeStream = fs.createWriteStream("/tmp/propertylisting.json");
-
-  var date = new Date();
-  date.setSeconds(0);
-  date.setMilliseconds(0);
-
-  var key = date.getTime().toString().padEnd(19, 0);
-
-  console.log("Sequence Key is " + key);
-    
-    console.log("Downloading with Ranges");
-
-    console.log("Request Data values: "+JSON.stringify(values))
-
-    // Call stream with Ranges
-    const withRanges = await testInputStreamWithRanges(); 
-
-    withRanges
-      .on("data", (response) => {
-        console.log("Data: " + response);
-
-      })
-      .on("error", (err) => {
-        console.log("Error is" + err);
-      })
-      /*
-      .pipe(new JsonLinesTransform())
-      .pipe(writeStream)
-      .on("finish", () => {
-        
-        const jsonfile = fs.createReadStream("/tmp/propertylisting.json");
-
-        let rawdata = fs.readFileSync("/tmp/propertylisting.json");
-
-        console.log("RAW Data "+rawdata);
-
-        var myjson = jsonfile.toString().split("}{");
-
-        console.log(" Myjson with Ranges" + myjson);
-
-        console.log("After my JSON file reading A");
-
-        // Create a JSON object array
-        // [myjson.join('},{')]
-        var mylist = "[" + myjson.join("},{") + "]";
-
-        const listings1 = JSON.parse(mylist);
-      });*/
-
 };
 
 module.exports.testfetchListingsData = (event, context, callback) => {
@@ -604,57 +387,13 @@ module.exports.testfetchListingsData = (event, context, callback) => {
       // [myjson.join('},{')]
       var mylist = "[" + myjson.join("},{") + "]";
 
-      const listings1 = JSON.parse(mylist);*/
+      const listings1 = JSON.parse(mylist);
+      */
     });
 };
 
-module.exports.run = (event, context) => {
-
-  setInterval(() => { 
-    request({
-      url: replicationURL,
-      headers: {
-        Accept: "application/json",
-        Authorization: "Bearer " + token,
-      },
-    })
-    .on("data", (response) => {
-      console.log("Data: " + response);
-  
-    })
-    .on("error", (err) => {
-      console.log("Error is" + err);
-      context.done(null, 'FAILURE');
-    })
-    .on("finish", () => {
-  
-      context.succeed("Sucess")
-      /*
-      const jsonfile = fs.createReadStream("/tmp/propertylisting.json");
-  
-      let rawdata = fs.readFileSync("/tmp/propertylisting.json");
-  
-      console.log("RAW Data "+rawdata);
-  
-      var myjson = jsonfile.toString().split("}{");
-  
-      console.log(" Myjson with Ranges" + myjson);
-  
-      console.log("After my JSON file reading A");
-  
-      // Create a JSON object array
-      // [myjson.join('},{')]
-      var mylist = "[" + myjson.join("},{") + "]";
-  
-      const listings1 = JSON.parse(mylist);*/
-    }); 
-    }, 500)
-
-  
-
-  console.log("After fetch function")
-
-  
+module.exports.run = (event, context) => {  
+ 
   /*const time = new Date();
 
   const db = {
@@ -670,4 +409,5 @@ module.exports.run = (event, context) => {
       context.functionName
     }" ran at ${time} with db ${JSON.stringify(db, null, 2)}`
   );*/
+
 };

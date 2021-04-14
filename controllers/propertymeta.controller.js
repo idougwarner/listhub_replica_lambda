@@ -138,8 +138,8 @@ module.exports.ismetadataNew = async (lastModified) => {
     });
 
     if (data) {
-      
-      console.log("IsmetadataNew " + JSON.stringify(data));
+
+      console.log("Is Metadata New " + JSON.stringify(data));
 
       //console.log(propertyMeta.propertymeta.LastModified);
       let timeResult = await TimeUtil.istimeANewerthantimeB(

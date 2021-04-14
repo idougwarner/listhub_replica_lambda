@@ -98,7 +98,7 @@ const getListingStream = async (values) => {
           }
 
         }).catch((err)=>{
-          console.log("Error from DB"+err)
+          console.log("Error Adding Properties: "+err)
         })
 
         //console.log(mylist.toString())

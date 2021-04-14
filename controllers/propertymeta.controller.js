@@ -148,11 +148,15 @@ module.exports.ismetadataNew = async (lastModified) => {
       );
 
       if (timeResult.newUpdate) {
+
         const result = { newUpdate: true, error: null };
         return result;
+
       } else {
+        
         const result = { newUpdate: false, error: "No Update" };
         return result;
+        
       }
     }
   } catch (err) {

@@ -131,8 +131,6 @@ const saveNewListData = async () => {
   var listDataAdded = "";
   var listAddError = "";
 
-  return new Promise((resolve, reject) => {
-
   try {
 
     metaResponse = await getMetaDataStream();
@@ -220,9 +218,8 @@ const saveNewListData = async () => {
     } // End WHILE LOOP TO FETCH DATA
 
     // Return our promise here
-    resolve({ listDataAdded: listDataAdded, listAddError:listAddError })
+    return ({ listDataAdded: listDataAdded, listAddError:listAddError })
 
-  })
 
 }; // End of saveNewListData
 

@@ -154,6 +154,7 @@ module.exports.ismetadataNew = async (lastModified) => {
       if (timeResult.newUpdate) {
 
         const result = { newUpdate: true, error: null };
+        
         return result;
 
       } else {
@@ -167,7 +168,7 @@ module.exports.ismetadataNew = async (lastModified) => {
     else {
       console.log("No New MetaData")
     }
-    
+
   } catch (err) {
     const result = {
       newUpdate: false,

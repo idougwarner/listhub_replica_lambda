@@ -227,7 +227,7 @@ const fetchData = async () => {
 
   console.log("Inside FetchListings");
 
-  const response =  await getMetaDataStream();;
+  const response =  await getMetaDataStream();
 
   if (response) {
     console.log("Last Modified is " + response.data.LastModified);
@@ -240,7 +240,7 @@ const fetchData = async () => {
 
     var key = date.getTime().toString().padEnd(19, 0);
 
-    const metaResponse = await metaStream();
+    const metaResponse = await getMetaDataStream();
 
     console.log("MetaData is" + JSON.stringify(metaResponse.data));
 

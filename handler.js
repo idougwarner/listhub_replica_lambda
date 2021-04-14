@@ -77,23 +77,29 @@ const getListingStream = async (values) => {
         var parsedListings = JSON.parse(mylist);
         // BULK SAVE TO DATABASE
 
-        const response =  propertyBulkCreate(parsedListings);
-        console.log("Response from DB"+response)
+        propertyBulkCreate(parsedListings).then((response)=>{
 
-        if(dataAdded) {
-          // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
-          console.log("Finished reading data\n")
-        
-          console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
+          console.log("Response from DB"+JSON.stringify(response))
+          
+          console.log("Data Added To DB"+response.dataAdded)
+          if(response.dataAdded) {
+            // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
+            console.log("Added data to DB\n")
+          
+            //console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
+  
+            resolve({ downloaded: true, error:null, startSequence: values.startSequence, endSequence: values.endSequence })
+  
+          }
+          else {
+  
+            resolve({ downloaded: false, error:error, startSequence: values.startSequence, endSequence: values.endSequence })
+  
+          }
 
-          resolve({ downloaded: true, error:null, startSequence: values.startSequence, endSequence: values.endSequence })
-
-        }
-        else {
-
-          resolve({ downloaded: false, error:error, startSequence: values.startSequence, endSequence: values.endSequence })
-
-        }
+        }).catch((err)=>{
+          console.log("Error from DB"+err)
+        })
 
         //console.log(mylist.toString())
 

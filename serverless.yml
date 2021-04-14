@@ -25,8 +25,8 @@ functions:
     timeout: 900
     events:
       - schedule: rate(1 hour)
-  testFunction:
-    handler: handler.testFunction
+  fetchListingsData:
+    handler: handler.fetchListingsData
     timeout: 890
     events:
       - schedule: rate(1 hour)

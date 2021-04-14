@@ -10,6 +10,7 @@ const {
   propertyDataExists,
   propertyDeleteAll,
 } = require("./controllers/property.controller");
+
 const {
   metaCreate,
   metaDataExists,

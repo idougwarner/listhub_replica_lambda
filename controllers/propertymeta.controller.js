@@ -137,7 +137,8 @@ module.exports.ismetadataNew = async (lastModified) => {
       where: { LastModified: lastModified },
     });
 
-    if (data.length > 0) {
+    if (data) {
+      
       console.log("IsmetadataNew " + JSON.stringify(data));
 
       //console.log(propertyMeta.propertymeta.LastModified);
@@ -160,7 +161,7 @@ module.exports.ismetadataNew = async (lastModified) => {
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },
       body: "Problem Deleting Property Info.",
-      error: "Problem checking meta data",
+      error: err,
     };
 
     return result;

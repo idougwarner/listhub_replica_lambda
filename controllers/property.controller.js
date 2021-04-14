@@ -73,6 +73,7 @@ module.exports.propertyBulkCreate = async (jsonData) => {
       return result;
     }
   } catch (err) {
+    console.log("Error Adding Data:"+err)
     const result = {
       dataAdded: false,
       statusCode: 500,

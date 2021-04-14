@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const Property = sequelize.define("Property", {
+  const Property = sequelize.define("PropertyFull", {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,

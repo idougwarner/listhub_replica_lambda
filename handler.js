@@ -40,7 +40,7 @@ const getListingStream = async (values) => {
 
   var listings = ""
 
-  var results = {}
+  return new Promise((resolve, reject) => {
 
       // Get inputStream from replication request with range headers
      var stream = request({
@@ -77,7 +77,8 @@ const getListingStream = async (values) => {
         var parsedListings = JSON.parse(mylist);
         // BULK SAVE TO DATABASE
 
-        const { dataAdded, data, error  } = await propertyBulkCreate(parsedListings);
+        const response =  propertyBulkCreate(parsedListings);
+        console.log("Response from DB"+response)
 
         if(dataAdded) {
           // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
@@ -85,14 +86,12 @@ const getListingStream = async (values) => {
         
           console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
 
-          results= { downloaded: true, error:null, startSequence: values.startSequence, endSequence: values.endSequence }
+          resolve({ downloaded: true, error:null, startSequence: values.startSequence, endSequence: values.endSequence })
 
         }
         else {
 
-          console.log("Problem writing to database\n")
-
-          results = { downloaded: false, error:error, startSequence: values.startSequence, endSequence: values.endSequence }
+          resolve({ downloaded: false, error:error, startSequence: values.startSequence, endSequence: values.endSequence })
 
         }
 
@@ -108,7 +107,7 @@ const getListingStream = async (values) => {
         
         console.log("Error: "+err)
 
-        results = {downloaded:false, error:err};
+        resolve({downloaded:false, error:err});
 
       })
       .on("response", (response) => {
@@ -117,8 +116,7 @@ const getListingStream = async (values) => {
 
       })
 
-      return results
-
+    })// End of Promise
 };
 
 // Sync entire data while using ranges and save to database

@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const Property = sequelize.define("PropertyFull1", {
+  const Property = sequelize.define("PropertyFull2", {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,
@@ -7,7 +7,7 @@ module.exports = (sequelize, Sequelize) => {
       primaryKey: true
     },
     Property: {
-      type: Sequelize.JSONB
+      type: Sequelize.JSON
     },
     sequence: {
       type: Sequelize.BIGINT,

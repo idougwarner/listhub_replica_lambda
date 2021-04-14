@@ -78,7 +78,7 @@ const getListingStream = async (values) => {
         var parsedListings = JSON.parse(mylist);
         // BULK SAVE TO DATABASE
 
-        propertyBulkCreate(mylist).then((response)=>{
+        propertyBulkCreate(parsedListings).then((response)=>{
 
           console.log("Response from DB"+JSON.stringify(response))
           

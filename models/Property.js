@@ -6,9 +6,8 @@ module.exports = (sequelize, Sequelize) => {
       unique: true,
       primaryKey: true
     },
-    ListingKey: {
-      unique: true,
-      type: Sequelize.TEXT
+    Property: {
+      type: Sequelize.JSONB
     },
     sequence: {
       type: Sequelize.BIGINT,

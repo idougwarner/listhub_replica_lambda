@@ -147,6 +147,8 @@ module.exports.ismetadataNew = async (lastModified) => {
         data.LastModified
       );
 
+      console.log("TimeResult"+JSON.stringify(timeResult))
+
       if (timeResult.newUpdate) {
 
         const result = { newUpdate: true, error: null };
@@ -156,7 +158,7 @@ module.exports.ismetadataNew = async (lastModified) => {
         
         const result = { newUpdate: false, error: "No Update" };
         return result;
-        
+
       }
     }
   } catch (err) {

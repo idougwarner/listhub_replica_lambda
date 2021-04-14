@@ -15,7 +15,7 @@ module.exports = (sequelize, Sequelize) => {
     ContentLength: {
       type: Sequelize.BIGINT,
     },
-    Etag: {
+    ETag: {
       type: Sequelize.TEXT,
       unique: true,
     },

@@ -137,6 +137,8 @@ module.exports.ismetadataNew = async (lastModified) => {
       where: { LastModified: lastModified },
     });
 
+    console.log("Metadata Result " + JSON.stringify(data));
+
     if (data) {
 
       console.log("Is Metadata New " + JSON.stringify(data));

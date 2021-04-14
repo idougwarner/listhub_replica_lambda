@@ -20,26 +20,6 @@ const {
 const { metaURL, replicationURL, token } = require("./config/url");
 const { response } = require("express");
 
-class JsonLinesTransform extends stream.Transform {
-  _transform(chunk, env, cb) {
-    if (!this.chunks) {
-      this.chunks = "";
-    }
-
-    this.chunks += chunk;
-
-    var lines = this.chunks.split(/\n/);
-
-    this.chunks = lines.pop();
-
-    for (let i = 0; i < lines.length; i++) {
-      this.push(lines[i]);
-    }
-
-    cb();
-  }
-}
-
 const getInputStream1 = async (values) => {
   return request({
     url: replicationURL,
@@ -206,7 +186,173 @@ const metaStream = async () => {
   });
 };
 
+// Get the List Data and save to Database
+const getListingStream = async (values) => {
+
+  var listings = ""
+  var listingsArray = []
+
+  return new Promise((resolve, reject) => {
+
+      // Get inputStream from replication request with range headers
+     var stream = request({
+        url: replicationURL,
+        headers: {
+          Accept: "application/json",
+          Authorization: "Bearer " + token,
+          "If-Range": values.ETag,
+          Range: "sequence=" + values.startSequence + "-"+values.endSequence
+        }
+      })
+
+      stream
+      .on("data", (data) => {
+
+        // Append our data to the array as we read it
+        //console.log("Chunk is:"+data)        
+        listings = listings+data
+    
+      })
+      .on("complete", () => {
+
+        /*myVar.split('\n').map(JSON.parse);
+        console.log(myArray);*/
+
+        //console.log(listings)
+
+        var myjson = listings.split(/\n/);
+
+        var lastEmpty= myjson.pop()
+        
+        var mylist = "[" + myjson.toString() + "]";
+
+        const listings1 = JSON.parse(mylist);
+        // SAVE TO DATABASE
+
+        //console.log(mylist.toString())
+
+        // Bulk Write to database
+        //writeStream.write(myjson)
+
+        //console.log("Listing Data...\n"+listings)
+        
+        // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
+        console.log("Finished reading data\n")
+       
+        console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
+
+        resolve({ downloaded: true, error:null, startSequence: values.startSequence, endSequence: values.endSequence })
+
+      })
+      .on("error", (err) => {
+        
+        console.log("Error: "+err)
+
+        resolve({downloaded:false, error:err});
+
+      })
+      .on("response", (response) => {
+
+        console.log("Status Code:"+response.statusCode+" Aborted: "+response.aborted+" ")
+
+      })
+
+    })// End of Promise
+};
+
+// Sync entire data while using ranges and save to database
+const saveNewListData = async () => {
+
+  var metaResponse;
+  var lastSequence = 0;
+  var startSequence = 0 ;
+  var ETag;
+  var count = 0;
+  var endSequence = 0;
+  var secondStart = 0 ;
+
+  try {
+
+    metaResponse = await getMetaDataStream();
+
+    console.log("Status code is: "+metaResponse);
+
+    lastSequence = metaResponse.data.Metadata.lastsequence;
+    startSequence = lastSequence - metaResponse.data.Metadata.totallinecount;
+    ETag = metaResponse.data.ETag;
+
+    console.log("MetaData is" + JSON.stringify(metaResponse.data)+"Status code is: "+metaResponse.statusCode);
+
+  }
+
+  catch(err) {
+
+    console.log("Error is: "+err)
+
+  }
+
+  const totallinecount = metaResponse.data.Metadata.totallinecount;
+  
+  var chunkSize = parseInt(totallinecount/2);
+  var secondChunk = parseInt(totallinecount/2)+1;
+
+  var values;
+
+  console.log("Chunk Size:"+chunkSize+"Total Line Count: "+totallinecount+"StartSequence "+startSequence+"End Sequence"+lastSequence)
+
+  // I want to divide the calls to 2, I want to halve the listings. The first will call will be startSting sequence+what is halved
+  // Next call will be the previous call end sequencccccce
+  while (
+    count < 2
+  ) {
+
+      if(count==0) {
+
+        endSequence=startSequence+chunkSize;
+
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
+
+        values = {
+          ETag: ETag,
+          startSequence: startSequence,
+          endSequence: endSequence,
+        };
+      }
+
+      else if(count==1) {
+
+        console.log("Second Chunk:"+secondChunk)
+
+        secondStart=startSequence+secondChunk
+        console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+
+        values = {
+          ETag: ETag,
+          startSequence: secondStart,
+          endSequence: "",
+        };
+
+      }
+
+      const downloadResponse = await getListingStream(values)
+
+      if(downloadResponse.downloaded){
+        console.log("Data was downloaded")
+
+        //console.log("ChunkSize+1: "+(chunkSize+1))
+        count=count+1
+
+      }
+      else {
+        console.log("Error Downloading Data")
+      }
+ 
+    } // End WHILE LOOP TO FETCH DATA
+    
+};
+
 const fetchData = async () => {
+
   console.log("Inside FetchListings");
 
   const response = await metaStream();
@@ -242,7 +388,8 @@ const fetchData = async () => {
     console.log("Data Exists: " + dataExists);
 
     if (!dataExists) {
-      // Call Replicate data to populate new data
+
+      // Property data does not exist therefore populate table a fresh with getData
       const data = {
         storeType: "new",
         ContentLength: response.data.ContentLength,
@@ -250,13 +397,14 @@ const fetchData = async () => {
         sequence: sequence,
       };
 
-      const { listDataAdded, listAddError } = await newListData(data);
+      const { listDataAdded, listAddError } = await saveNewListData();
 
       if (listDataAdded) {
         console.log("Product List Data Added" + listDataAdded);
       } else {
         console.log("Problem adding data");
       }
+
     } else {
       console.log("Product listing data exists");
     }
@@ -522,14 +670,4 @@ module.exports.run = (event, context) => {
       context.functionName
     }" ran at ${time} with db ${JSON.stringify(db, null, 2)}`
   );*/
-};
-
-
-module.exports.testFunction = async (event, context) => {
-
-  var time=1;
-  setInterval(() => { 
-    console.log("Hello "+time);
-    time=time+1 
-    }, 50000)
 };

@@ -56,7 +56,7 @@ const getListingStream = async (values) => {
           Accept: "application/json",
           Authorization: "Bearer " + token,
           "If-Range": values.ETag,
-          Range: "sequence=" + values.startSequence + "-"+values.endSequence
+          Range: "sequence=" + values.startSequence + "-"+'1618507920000166657'
         }
       })
 

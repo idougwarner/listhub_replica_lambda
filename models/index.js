@@ -21,7 +21,7 @@ const connection = {};
 
 module.exports = async () => {
   if (connection.isConnected) {
-    console.log("=> Using existing connection.");
+    //console.log("=> Using existing connection.");
     return Models;
   }
 

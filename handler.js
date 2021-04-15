@@ -67,6 +67,7 @@ const getListingStream = async (values) => {
 
             // console.log(data)
             console.log("Data Added To DB"+response.dataAdded)
+            console.log("List Data"+response.listdata)
             // return data
 
           }).catch((err)=>{

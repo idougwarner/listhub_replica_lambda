@@ -45,6 +45,7 @@ const getMetaDataStream = async () => {
 const getListingStream = async (values) => {
 
   var listings = ""
+  var listArray = []
 
   return new Promise((resolve, reject) => {
 
@@ -62,7 +63,10 @@ const getListingStream = async (values) => {
       stream
       .pipe(JSONStream.parse())
       .pipe(es.mapSync((data) => {
+
+        listArray.push(data)
           
+        /*
           propertyCreate(data).then((response) => {
 
             // console.log(data)
@@ -73,11 +77,24 @@ const getListingStream = async (values) => {
           }).catch((err)=>{
             console.log("Error from DB "+err)
           })  
+        */
+       
       }))
 
-      stream.on("complete", () => {
-        console.log("Finished Streaming data")
-      })
+      stream.on("complete",() => {
+        
+        console.log("Completed reading of data"+listArray.length)
+
+        endTime=new Date()
+
+        var timeTaken=Date.parse(endTime)-Date.parse(startTime);
+
+        var diffMins = Math.round(((timeTaken % 86400000) % 3600000) / 60000);
+        
+        console.log("End Time: "+new Date())
+        console.log("It took "+diffMins+" Minutes")
+
+      })  
 
       /*
       stream

@@ -78,12 +78,12 @@ const getListingStream = async (values) => {
             console.log("Error from DB "+err)
           })  
         */
-       
+
       }))
 
       stream.on("complete",() => {
         
-        console.log("Completed reading of data"+listArray.length)
+        console.log("Completed reading of data: "+listArray.length)
 
         endTime=new Date()
 

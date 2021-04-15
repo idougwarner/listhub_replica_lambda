@@ -56,9 +56,16 @@ const getListingStream = async (values) => {
           Accept: "application/json",
           Authorization: "Bearer " + token,
           "If-Range": values.ETag,
-          Range: "sequence=" + values.startSequence + "-"+'1618507920000166657'
+          Range: "sequence=" + values.startSequence + "-"+values.endSequence
         }
       })
+
+      // STREAMING WITH JSON STREAM
+      var startTime, endTime
+
+      startTime=new Date()
+      
+      console.log("Start Time: "+startTime)
 
       stream
       .pipe(JSONStream.parse())
@@ -208,7 +215,7 @@ const saveNewListData = async () => {
 
   const totallinecount = metaResponse.data.Metadata.totallinecount;
   
-  var chunkSize = parseInt(totallinecount/2);
+  var chunkSize = parseInt(totallinecount/5);
   var secondChunk = parseInt(totallinecount/2)+1;
 
   var values;

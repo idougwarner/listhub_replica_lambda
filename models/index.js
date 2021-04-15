@@ -25,7 +25,7 @@ module.exports = async () => {
     return Models;
   }
 
-  await sequelize.sync();
+  //await sequelize.sync();
   await sequelize.authenticate();
 
   connection.isConnected = true;
@@ -34,3 +34,7 @@ module.exports = async () => {
 
   return Models;
 };
+
+module.exports.syncDB = async () => {
+  await sequelize.sync();
+}

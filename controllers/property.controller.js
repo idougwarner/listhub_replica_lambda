@@ -11,30 +11,26 @@ module.exports.propertyCreate = async (jsonData) => {
     return result;
   }
 
-  // Create a Property Listing
-  const property = {
-    listingKey: jsonData.ListingKey,
-    sequence: jsonData.sequence,
-  };
-
-  console.log("Listing Key " + property.listingKey);
+  // console.log("Listing Key " + property.listingKey);
 
   try {
     const { Property } = await connectToDatabase();
 
-    const data = await Property.create(property);
+    const data = await Property.create(jsonData);
 
     if (data) {
-      console.log("New Property Data is" + data);
+      //console.log("New Property Data is" + data);
 
       const result = { dataAdded: true, listdata: data, statusCode: 200, error: null };
 
       return result;
+
     } else {
       const result = { dataAdded: false, listdata: null, statusCode: 500, error: "Problem Creating Data" };
 
       return result;
     }
+
   } catch (err) {
     const result = {
       dataAdded: false,

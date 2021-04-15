@@ -5,6 +5,8 @@ const fs = require("fs");
 const stream = require("stream");
 const https = require("https");
 
+const { syncDB } = require("./models");
+
 const {
   propertyBulkCreate,
   propertyDataExists,
@@ -55,6 +57,26 @@ const getListingStream = async (values) => {
       })
 
       stream
+      .pipe(JSONStream.parse())
+      .pipe(es.mapSync((data) => {
+          
+          propertyCreate(data).then((response) => {
+
+            // console.log(data)
+            console.log("Data Added To DB"+response.dataAdded)
+            // return data
+
+          }).catch((err)=>{
+            console.log("Error from DB "+err)
+          })  
+      }))
+
+      stream.on("complete", () => {
+        console.log("Finished Streaming data")
+      })
+
+      /*
+      stream
       .on("data", (data) => {
 
         // Append our data to the array as we read it
@@ -65,7 +87,7 @@ const getListingStream = async (values) => {
       .on("complete", () => {
 
         /*myVar.split('\n').map(JSON.parse);
-        console.log(myArray);*/
+        console.log(myArray);
 
         //console.log(listings)
 
@@ -121,7 +143,7 @@ const getListingStream = async (values) => {
 
         console.log("Status Code:"+response.statusCode+" Aborted: "+response.aborted+" ")
 
-      })
+      })*/
 
     })// End of Promise
 };
@@ -232,6 +254,9 @@ const saveNewListData = async () => {
 }; // End of saveNewListData
 
 const fetchData = async () => {
+
+  // Sync Database first
+  await syncDB();
 
   console.log("Inside FetchListings");
 

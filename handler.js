@@ -68,7 +68,7 @@ const getListingStream = async (values) => {
           
         /*
           propertyCreate(data).then((response) => {
-
+            
             // console.log(data)
             console.log("Data Added To DB; "+response.dataAdded)
             console.log("List Data"+JSON.stringify(response.listdata))
@@ -76,7 +76,8 @@ const getListingStream = async (values) => {
 
           }).catch((err)=>{
             console.log("Error from DB "+err)
-          })  
+          })
+
         */
 
       }))

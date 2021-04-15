@@ -10,6 +10,7 @@ const es = require('event-stream');
 const { syncDB } = require("./models");
 
 const {
+  propertyCreate,
   propertyBulkCreate,
   propertyDataExists,
   propertyDeleteAll,

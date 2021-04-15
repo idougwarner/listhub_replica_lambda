@@ -36,5 +36,5 @@ module.exports = async () => {
 };
 
 module.exports.syncDB = async () => {
-  await sequelize.sync();
+  await sequelize.sync({force:true});
 }

@@ -215,7 +215,7 @@ const saveNewListData = async () => {
 
   const totallinecount = metaResponse.data.Metadata.totallinecount;
   
-  var chunkSize = parseInt(totallinecount/5);
+  var chunkSize = parseInt(totallinecount/3);
   var secondChunk = parseInt(totallinecount/2)+1;
 
   var values;

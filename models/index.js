@@ -1,6 +1,8 @@
 const Sequelize = require("sequelize");
-const PropertyModel = require("./Property");
-const PropertyMetaModel = require("./PropertyMeta");
+const listhub_listings_a_model = require("./listhub_listings_a");
+const listhub_listings_b_model = require("./listhub_listings_b");
+
+const listings_meta_model = require("./listings_meta");
 
 const sequelize = new Sequelize(
   process.env.DB_NAME,
@@ -13,10 +15,11 @@ const sequelize = new Sequelize(
   }
 );
 
-const Property = PropertyModel(sequelize, Sequelize);
-const PropertyMeta = PropertyMetaModel(sequelize, Sequelize);
+const listhub_listings_a = listhub_listings_a_model(sequelize, Sequelize);
+const listhub_listings_b = listhub_listings_b_model(sequelize, Sequelize);
+const listings_meta = listings_meta_model(sequelize, Sequelize);
 
-const Models = { Property, PropertyMeta };
+const Models = { listhub_listings_a, listhub_listings_b, listings_meta };
 const connection = {};
 
 module.exports = async () => {

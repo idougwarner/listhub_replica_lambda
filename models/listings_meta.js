@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const PropertyMeta = sequelize.define("PropertyMeta", {
+  const listings_meta = sequelize.define("listings_meta", {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,
@@ -24,7 +24,7 @@ module.exports = (sequelize, Sequelize) => {
     },
   });
 
-  return PropertyMeta;
+  return listings_meta;
 };
 
 /**

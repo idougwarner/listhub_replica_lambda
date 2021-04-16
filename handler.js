@@ -10,18 +10,18 @@ const es = require('event-stream');
 const { syncDB } = require("./models");
 
 const {
-  propertyCreate,
-  propertyBulkCreate,
-  propertyDataExists,
-  propertyDeleteAll,
-} = require("./controllers/property.controller");
+  listCreate,
+  listBulkCreate,
+  listDataExists,
+  listDeleteAll,
+} = require("./controllers/listhub_listings_a.controller");
 
 const {
   metaCreate,
   metaDataExists,
   metaDeleteAll,
   ismetadataNew,
-} = require("./controllers/propertymeta.controller");
+} = require("./controllers/listings_meta.controller");
 
 const { metaURL, replicationURL, token } = require("./config/url");
 const { response } = require("express");
@@ -95,12 +95,23 @@ const getListingStream = async (values) => {
 
         endTime=new Date()
 
-        var timeTaken=Date.parse(endTime)-Date.parse(startTime);
+        listBulkCreate(data).then((response) => {
+            
+          // console.log(data)
+          console.log("Data Added To DB; "+response.dataAdded)
+          console.log("List Data"+JSON.stringify(response.listdata))
 
-        var diffMins = Math.round(((timeTaken % 86400000) % 3600000) / 60000);
+          var timeTaken=Date.parse(endTime)-Date.parse(startTime);
+
+          var diffMins = Math.round(((timeTaken % 86400000) % 3600000) / 60000);
+          console.log("End Time: "+new Date())
+          console.log("It took "+diffMins+" Minutes")
+          // return data
+
+        }).catch((err)=>{
+          console.log("Error from DB "+err)
+        })
         
-        console.log("End Time: "+new Date())
-        console.log("It took "+diffMins+" Minutes")
 
       })  
 
@@ -317,7 +328,7 @@ const fetchData = async () => {
     console.log("KEY is: " + key);
 
     // CHECK IF PRODUCT LISTING DATA EXISTS AND IF NOT POPULATE THE LISTINGS TABLE
-    const { dataExists } = await propertyDataExists();
+    const { dataExists } = await listDataExists();
 
     console.log("Data Exists: " + dataExists);
 

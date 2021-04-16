@@ -1,7 +1,7 @@
 const connectToDatabase = require("../models");
 
 // Create and Save a new Property Listing
-module.exports.propertyCreate = async (jsonData) => {
+module.exports.listCreate = async (jsonData) => {
 
   // Validate request
   if (!jsonData) {
@@ -14,9 +14,9 @@ module.exports.propertyCreate = async (jsonData) => {
   // console.log("Listing Key " + property.listingKey);
 
   try {
-    const { Property } = await connectToDatabase();
+    const { listhub_listings_a } = await connectToDatabase();
 
-    const data = await Property.create(jsonData);
+    const data = await listhub_listings_a.create(jsonData);
 
     if (data) {
       //console.log("New Property Data is" + data);
@@ -45,7 +45,7 @@ module.exports.propertyCreate = async (jsonData) => {
   }
 };
 
-module.exports.propertyBulkCreate = async (jsonData) => {
+module.exports.listBulkCreate = async (jsonData) => {
   
   // Validate request
   if (!jsonData) {
@@ -55,9 +55,9 @@ module.exports.propertyBulkCreate = async (jsonData) => {
   }
 
   try {
-    const { Property } = await connectToDatabase();
+    const { listhub_listings_a } = await connectToDatabase();
 
-    const data = await Property.bulkCreate(jsonData);
+    const data = await listhub_listings_a.bulkCreate(jsonData);
 
     if (data.length != 0) {
       const result = { dataAdded: true, data: data, error: null };
@@ -83,11 +83,11 @@ module.exports.propertyBulkCreate = async (jsonData) => {
 };
 
 // Retrieve all Properties from the database.
-module.exports.propertyFindAll = async () => {
+module.exports.listFindAll = async () => {
   try {
-    const { Property } = await connectToDatabase();
+    const { listhub_listings_a } = await connectToDatabase();
 
-    const data = await Property.findAll({ raw: true });
+    const data = await listhub_listings_a.findAll({ raw: true });
 
     if (data.length !== 0) {
       console.log("Data exists");
@@ -114,11 +114,11 @@ module.exports.propertyFindAll = async () => {
   }
 };
 
-module.exports.propertyDataExists = async () => {
+module.exports.listDataExists = async () => {
   try {
-    const { Property } = await connectToDatabase();
+    const { listhub_listings_a } = await connectToDatabase();
 
-    const data = await Property.findAll({ raw: true });
+    const data = await listhub_listings_a.findAll({ raw: true });
 
     if (data.length !== 0) {
       console.log("Data exists");
@@ -144,11 +144,11 @@ module.exports.propertyDataExists = async () => {
 };
 
 // Delete all Properties from the database.
-module.exports.propertyDeleteAll = async () => {
+module.exports.listDeleteAll = async () => {
   try {
-    const { Property } = await connectToDatabase();
+    const { listhub_listings_a } = await connectToDatabase();
 
-    const data = await Property.destroy({
+    const data = await listhub_listings_a.destroy({
       where: {},
       truncate: false,
     });

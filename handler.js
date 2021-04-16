@@ -71,9 +71,9 @@ const getListingStream = async (values) => {
       .pipe(JSONStream.parse())
       .pipe(es.mapSync((data) => {
 
-        listArray.push(data)
+        //listArray.push(data)
           
-        /*
+
           propertyCreate(data).then((response) => {
             
             // console.log(data)
@@ -85,8 +85,6 @@ const getListingStream = async (values) => {
             console.log("Error from DB "+err)
           })
 
-        */
-
       }))
 
       stream.on("complete",() => {
@@ -94,6 +92,27 @@ const getListingStream = async (values) => {
         console.log("Completed reading of data: "+listArray.length)
 
         endTime=new Date()
+
+        if(true) {
+          // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
+          console.log("Added data to DB\n")
+          var timeTaken=Date.parse(endTime)-Date.parse(startTime);
+
+          var diffMins = Math.round(((timeTaken % 86400000) % 3600000) / 60000);
+          console.log("End Time: "+new Date())
+          console.log("It took "+diffMins+" Minutes")
+        
+          //console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
+
+          resolve({ downloaded: true, error:null })
+
+        }
+        /*
+        else {
+
+          resolve({ downloaded: false, error:error })
+
+        }
 
         listBulkCreate(listArray).then((response) => {
             
@@ -124,7 +143,7 @@ const getListingStream = async (values) => {
 
         }).catch((err)=>{
           console.log("Error from DB "+err)
-        })
+        })*/
         
 
       })  

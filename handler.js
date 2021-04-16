@@ -90,6 +90,7 @@ const getListingStream = async (values) => {
         console.log("Completed reading of data: "+listArray.length)
 
         for(var i=0; i<listArray.length; i++) {
+          
           listCreate(listArray[i]).then((response) => {
             
             // console.log(data)
@@ -102,7 +103,7 @@ const getListingStream = async (values) => {
           })
         }
 
-        
+
         /*
 
         listBulkCreate(listArray).then((response) => {

@@ -231,6 +231,7 @@ const saveNewListData = async () => {
   var secondStart = 0 ;
   var listDataAdded = "";
   var listAddError = "";
+  var start = "";
 
   try {
 
@@ -287,15 +288,15 @@ const saveNewListData = async () => {
       // Second Chunk
       else if(count==2) {
 
-        secondStart = startSequence + chunkSize + 1
-        endSequence = secondStart + chunkSize
+        startSequence = endSequence + 1
+        endSequence = startSequence + chunkSize
 
         // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
-        console.log("Second Start is: "+secondStart)
+        console.log("Second Start is: "+startSequence)
 
         values = {
           ETag: ETag,
-          startSequence: secondStart,
+          startSequence: startSequence,
           endSequence: endSequence,
         };
 
@@ -304,16 +305,16 @@ const saveNewListData = async () => {
       // Third Chunk
       else if(count==3) {
 
-        thirdStart=endSequence+chunkSize+1
-        endSequence = thirdStart + chunkSize
+        startSequence = endSequence + 1
+        endSequence = startSequence + chunkSize
 
-        console.log("Third Start is: "+thirdStart)
+        console.log("Third Start is: "+startSequence)
 
         // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
 
         values = {
           ETag: ETag,
-          startSequence: thirdStart,
+          startSequence: startSequence,
           endSequence: endSequence,
         };
 
@@ -322,16 +323,16 @@ const saveNewListData = async () => {
       // Fourth Chunk
       else if(count==4) {
 
-        fourthStart=endSequence+chunkSize+1
-        endSequence = fourthStart + chunkSize
+        startSequence = endSequence + 1
+        endSequence = startSequence + chunkSize
 
-        console.log("Fourth Start is: "+fourthStart)
+        console.log("Fourth Start is: "+startSequence)
 
         //console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
 
         values = {
           ETag: ETag,
-          startSequence: fourthStart,
+          startSequence: startSequence,
           endSequence: endSequence,
         };
 
@@ -340,16 +341,16 @@ const saveNewListData = async () => {
       // Fifth Chunk
       else if(count==5) {
 
-        fifthStart=endSequence+chunkSize+1
-        endSequence = ""
+        startSequence = endSequence + 1
+        endSequence = startSequence + chunkSize
 
-        console.log("Fifth Start is: "+fifthStart)
+        console.log("Fifth Start is: "+startSequence)
 
         // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
 
         values = {
           ETag: ETag,
-          startSequence: fifthStart,
+          startSequence: startSequence,
           endSequence: endSequence,
         };
 
@@ -358,16 +359,16 @@ const saveNewListData = async () => {
       // First Chunk
       else if(count==6) {
 
-        start=endSequence+chunkSize+1
-        endSequence = start + chunkSize
+        startSequence = endSequence + 1
+        endSequence = startSequence + chunkSize
 
-        console.log("Sixth Start is: "+start)
+        console.log("Sixth Start is: "+startSequence)
 
         // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
 
         values = {
           ETag: ETag,
-          startSequence: start,
+          startSequence: startSequence,
           endSequence: endSequence,
         };
       }
@@ -375,16 +376,16 @@ const saveNewListData = async () => {
       // Second Chunk
       else if(count==7) {
 
-        start=endSequence+chunkSize+1
-        endSequence = start + chunkSize
+        startSequence = endSequence + 1
+        endSequence = startSequence + chunkSize
 
-        console.log("Seventh Start is: "+start)
+        console.log("Seventh Start is: "+startSequence)
 
         // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
 
         values = {
           ETag: ETag,
-          startSequence: start,
+          startSequence: startSequence,
           endSequence: endSequence,
         };
 
@@ -393,16 +394,16 @@ const saveNewListData = async () => {
       // Third Chunk
       else if(count==8) {
 
-        start=endSequence+chunkSize+1
-        endSequence = start + chunkSize
+        startSequence = endSequence + 1
+        endSequence = startSequence + chunkSize
 
-        console.log("Eighth Start is: "+start)
+        console.log("Eighth Start is: "+startSequence)
 
         // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
 
         values = {
           ETag: ETag,
-          startSequence: start,
+          startSequence: startSequence,
           endSequence: endSequence,
         };
 
@@ -411,8 +412,8 @@ const saveNewListData = async () => {
       // Fourth Chunk
       else if(count==9) {
 
-        start=endSequence+chunkSize+1
-        endSequence = start + chunkSize
+        startSequence = endSequence + 1
+        endSequence = startSequence + chunkSize
 
         console.log("Ninth Start is: "+start)
 
@@ -420,7 +421,7 @@ const saveNewListData = async () => {
 
         values = {
           ETag: ETag,
-          startSequence: start,
+          startSequence: startSequence,
           endSequence: endSequence,
         };
 
@@ -429,16 +430,16 @@ const saveNewListData = async () => {
       // Fifth Chunk
       else if(count==10) {
 
-        start=endSequence+chunkSize+1
-        endSequence = start + chunkSize
+        startSequence = endSequence + 1
+        endSequence = startSequence + chunkSize
 
-        console.log("Tenth Start is: "+start)
+        console.log("Tenth Start is: "+startSequence)
 
         // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
 
         values = {
           ETag: ETag,
-          startSequence: start,
+          startSequence: startSequence,
           endSequence: endSequence,
         };
 

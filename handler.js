@@ -75,7 +75,7 @@ const getListingStream = async (values) => {
           listCreate(data).then((response) => {
             
             // console.log(data)
-            console.log("Data Added To DB; "+response.dataAdded)
+            console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
             // console.log("List Data"+JSON.stringify(response.listdata))
             // return data
 

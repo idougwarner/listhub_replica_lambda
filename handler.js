@@ -76,7 +76,7 @@ const getListingStream = async (values) => {
             
             // console.log(data)
             console.log("Data Added To DB; "+response.dataAdded)
-            console.log("List Data"+JSON.stringify(response.listdata))
+            // console.log("List Data"+JSON.stringify(response.listdata))
             // return data
 
           }).catch((err)=>{
@@ -276,7 +276,7 @@ const saveNewListData = async () => {
 
         endSequence=startSequence+chunkSize;
 
-        //console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
 
         values = {
           ETag: ETag,
@@ -291,7 +291,8 @@ const saveNewListData = async () => {
         startSequence = endSequence + 1
         endSequence = startSequence + chunkSize
 
-        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
+        
         console.log("Second Start is: "+startSequence)
 
         values = {
@@ -310,7 +311,7 @@ const saveNewListData = async () => {
 
         console.log("Third Start is: "+startSequence)
 
-        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
 
         values = {
           ETag: ETag,
@@ -328,7 +329,7 @@ const saveNewListData = async () => {
 
         console.log("Fourth Start is: "+startSequence)
 
-        //console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
 
         values = {
           ETag: ETag,
@@ -346,7 +347,7 @@ const saveNewListData = async () => {
 
         console.log("Fifth Start is: "+startSequence)
 
-        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
 
         values = {
           ETag: ETag,
@@ -364,7 +365,7 @@ const saveNewListData = async () => {
 
         console.log("Sixth Start is: "+startSequence)
 
-        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
 
         values = {
           ETag: ETag,
@@ -381,7 +382,7 @@ const saveNewListData = async () => {
 
         console.log("Seventh Start is: "+startSequence)
 
-        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
 
         values = {
           ETag: ETag,
@@ -399,7 +400,7 @@ const saveNewListData = async () => {
 
         console.log("Eighth Start is: "+startSequence)
 
-        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
 
         values = {
           ETag: ETag,
@@ -417,7 +418,7 @@ const saveNewListData = async () => {
 
         console.log("Ninth Start is: "+start)
 
-        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
 
         values = {
           ETag: ETag,
@@ -435,7 +436,7 @@ const saveNewListData = async () => {
 
         console.log("Tenth Start is: "+startSequence)
 
-        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
 
         values = {
           ETag: ETag,

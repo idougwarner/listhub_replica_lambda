@@ -96,7 +96,7 @@ const getListingStream = async (values) => {
           // console.log(data)
           //console.log("Data Added To DB; "+response.dataAdded+" Error: "+response.error)
           
-          if(true) {
+          if(response.dataAdded) {
             // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
             console.log("Added data to DB\n")
             var timeTaken=Date.parse(endTime)-Date.parse(startTime);
@@ -107,7 +107,7 @@ const getListingStream = async (values) => {
           
             //console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
   
-            //resolve({ downloaded: true, error:null })
+            resolve({ downloaded: true, error:null })
   
           }
 
@@ -279,7 +279,7 @@ const saveNewListData = async () => {
   // I want to divide the calls to 2, I want to halve the listings. The first will call will be startSting sequence+what is halved
   // Next call will be the previous call end sequencccccce
   while (
-    count <= 10
+    count <= 15
   ) {
 
       // First Chunk

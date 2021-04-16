@@ -1,3 +1,4 @@
+"use strict";
 const connectToDatabase = require("../models");
 
 // Create and Save a new Property Listing

@@ -71,8 +71,8 @@ const getListingStream = async (values) => {
       .pipe(JSONStream.parse())
       .pipe(es.mapSync((data) => {
 
-        //listArray.push(data)
-          listCreate(data).then((response) => {
+        listArray.push(data)
+          /*listCreate(data).then((response) => {
             
             // console.log(data)
             console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
@@ -81,7 +81,7 @@ const getListingStream = async (values) => {
 
           }).catch((err)=>{
             console.log("Error from DB "+err)
-          })
+          })*/
 
       }))
 
@@ -91,20 +91,31 @@ const getListingStream = async (values) => {
 
         endTime=new Date()
 
-        if(true) {
-          // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
-          console.log("Added data to DB\n")
-          var timeTaken=Date.parse(endTime)-Date.parse(startTime);
+        listBulkCreate(listArray).then((response) => {
+            
+          // console.log(data)
+          console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
+          
+          if(true) {
+            // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
+            console.log("Added data to DB\n")
+            var timeTaken=Date.parse(endTime)-Date.parse(startTime);
+  
+            var diffMins = Math.round(((timeTaken % 86400000) % 3600000) / 60000);
+            console.log("End Time: "+new Date())
+            console.log("It took "+diffMins+" Minutes")
+          
+            //console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
+  
+            resolve({ downloaded: true, error:null })
+  
+          }
 
-          var diffMins = Math.round(((timeTaken % 86400000) % 3600000) / 60000);
-          console.log("End Time: "+new Date())
-          console.log("It took "+diffMins+" Minutes")
+        }).catch((err)=>{
+          console.log("Error from DB "+err)
+        })
+
         
-          //console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
-
-          resolve({ downloaded: true, error:null })
-
-        }
         /*
         else {
 

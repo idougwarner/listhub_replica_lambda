@@ -300,121 +300,123 @@ const fetchData = async () => {
 
   console.log("Inside FetchListings");
 
-  const response =  await getMetaDataStream();
+  try {
 
-  if (response) {
-    console.log("Last Modified is " + response.data.LastModified);
-    console.log("Content Length: " + response.data.ContentLength);
-    console.log("Etag Value: " + response.data.ETag);
+    const response =  await getMetaDataStream();
 
-    var date = new Date();
-    date.setSeconds(0);
-    date.setMilliseconds(0);
-
-    var key = date.getTime().toString().padEnd(19, 0);
-
-    const metaResponse = await getMetaDataStream();
-
-    console.log("MetaData is" + JSON.stringify(metaResponse.data));
-
-    const lastSequence = metaResponse.data.Metadata.lastsequence;
-    const sequence = lastSequence - metaResponse.data.Metadata.totallinecount;
-    const ETag = metaResponse.data.ETag;
-
-    const values = { ETag: ETag, sequence: sequence };
-
-    console.log("ETag: " + values.ETag + " Sequence: " + values.sequence);
-
-    console.log("KEY is: " + key);
-
-    // CHECK IF PRODUCT LISTING DATA EXISTS AND IF NOT POPULATE THE LISTINGS TABLE
-    const { dataExists } = await listDataExists();
-
-    console.log("Data Exists: " + dataExists);
-
-    if (!dataExists) {
-
-      // Property data does not exist therefore populate table a fresh with getData
-      const data = {
-        storeType: "new",
-        ContentLength: response.data.ContentLength,
-        ETag: ETag,
-        sequence: sequence,
-      };
-
-      const { listDataAdded, listAddError } = await saveNewListData();
-
-      if (listDataAdded) {
-        console.log("Product List Data Added" + listDataAdded);
+    if (response) {
+      console.log("Last Modified is " + response.data.LastModified);
+      console.log("Content Length: " + response.data.ContentLength);
+      console.log("Etag Value: " + response.data.ETag);
+  
+      var date = new Date();
+      date.setSeconds(0);
+      date.setMilliseconds(0);
+  
+      var key = date.getTime().toString().padEnd(19, 0);
+  
+      const metaResponse = await getMetaDataStream();
+  
+      console.log("MetaData is" + JSON.stringify(metaResponse.data));
+  
+      const lastSequence = metaResponse.data.Metadata.lastsequence;
+      const sequence = lastSequence - metaResponse.data.Metadata.totallinecount;
+      const ETag = metaResponse.data.ETag;
+  
+      const values = { ETag: ETag, sequence: sequence };
+  
+      console.log("ETag: " + values.ETag + " Sequence: " + values.sequence);
+  
+      console.log("KEY is: " + key);
+  
+      // CHECK IF PRODUCT LISTING DATA EXISTS AND IF NOT POPULATE THE LISTINGS TABLE
+      const { dataExists } = await listDataExists();
+  
+      console.log("Data Exists: " + dataExists);
+  
+      if (!dataExists) {
+  
+        // Property data does not exist therefore populate table a fresh with getData
+        const data = {
+          storeType: "new",
+          ContentLength: response.data.ContentLength,
+          ETag: ETag,
+          sequence: sequence,
+        };
+  
+        const { listDataAdded, listAddError } = await saveNewListData();
+  
+        if (listDataAdded) {
+          console.log("Product List Data Added" + listDataAdded);
+        } else {
+          console.log("Problem adding data");
+        }
+  
       } else {
-        console.log("Problem adding data");
+        console.log("Product listing data exists");
       }
-
-    } else {
-      console.log("Product listing data exists");
-    }
-
-    // CHECK WHETHER PROPERTY METADATA EXISTS AND IF NOT CREATE NEW METADATA
-    const { metadataExists } = await metaDataExists();
-
-    // If metadata does not exist then store to database
-    if (!metadataExists) {
-      // Store the new Metadata
-      const { metadataAdded } = await metaCreate(response.data);
-
-      // Check if meta has been stored
-      if (metadataAdded) {
-        console.log("New metadata has been created");
-      }
-    }
-
-    // NOW THAT WE HAVE POPULATED LISTINGS AND METADATA WE WILL CHECK METADATA TO SEE IF THERE IS NEW UPDATE THAT NEEDS OUR ATTENTION
-
-    // Compare stored meta data and new meta data coming in from Metadata URL to see if we have new listings
-    const { newUpdate } = await ismetadataNew(response.data.LastModified);
-
-    if (newUpdate === true) {
-      console.log("New listings ready for download: ");
-
-      // If new metadata detected delete old metadata record and save new metadata and call replicationData to download new listings
-      const { metadataDeleted, error } = await metaDeleteAll();
-
-      if (metadataDeleted) {
+  
+      // CHECK WHETHER PROPERTY METADATA EXISTS AND IF NOT CREATE NEW METADATA
+      const { metadataExists } = await metaDataExists();
+  
+      // If metadata does not exist then store to database
+      if (!metadataExists) {
         // Store the new Metadata
-
-        const { metadataAdded, metadata, error } = await metaCreate(
-          response.data
-        );
-
+        const { metadataAdded } = await metaCreate(response.data);
+  
+        // Check if meta has been stored
         if (metadataAdded) {
-          console.log("New Metadata" + JSON.stringify(data));
-
-          const data = {
-            storeType: "newDownload",
-            ContentLength: response.data.ContentLength,
-            ETag: response.data.ETag,
-            sequence: key,
-          };
-
-          const { listDataAdded, listAddError } = await saveNewListData();
-
-          if (listDataAdded) {
-            console.log("New Product List Data Added");
+          console.log("New metadata has been created");
+        }
+      }
+  
+      // NOW THAT WE HAVE POPULATED LISTINGS AND METADATA WE WILL CHECK METADATA TO SEE IF THERE IS NEW UPDATE THAT NEEDS OUR ATTENTION
+  
+      // Compare stored meta data and new meta data coming in from Metadata URL to see if we have new listings
+      const { newUpdate } = await ismetadataNew(response.data.LastModified);
+  
+      if (newUpdate === true) {
+        console.log("New listings ready for download: ");
+  
+        // If new metadata detected delete old metadata record and save new metadata and call replicationData to download new listings
+        const { metadataDeleted, error } = await metaDeleteAll();
+  
+        if (metadataDeleted) {
+          // Store the new Metadata
+  
+          const { metadataAdded, metadata, error } = await metaCreate(
+            response.data
+          );
+  
+          if (metadataAdded) {
+            console.log("New Metadata" + JSON.stringify(data));
+  
+            const { listDataAdded, listAddError } = await saveNewListData();
+  
+            if (listDataAdded) {
+              console.log("New Product List Data Added");
+            } else {
+              console.log("Problem adding data");
+            }
           } else {
-            console.log("Problem adding data");
+            console.log("Problem Adding new Meta Data" + error);
           }
         } else {
-          console.log("Problem Adding new Meta Data" + error);
+          console.log("Problem deleting Meta Data " + error);
         }
       } else {
-        console.log("Problem deleting Meta Data " + error);
+  
+        console.log("New Update: "+newUpdate)
+        // Do nothing to existing listings
       }
-    } else {
-
-      console.log("New Update: "+newUpdate)
-      // Do nothing to existing listings
     }
+
+  }// End of try Block
+
+  catch(err) {
+    console.log("Connect Error Meta: "+err)
   }
+
 };
 
 module.exports.fetchListingsData = (event, context) => {

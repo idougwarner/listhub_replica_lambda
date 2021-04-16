@@ -106,7 +106,7 @@ const getListingStream = async (values) => {
         }
 
         console.log("Items added "+i+1)
-        console.log("Last listing added is "+JSON.stringify(listArray[i]))
+        console.log("Last listing added is: "+JSON.stringify(listArray[i]))
 
 
         /*

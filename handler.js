@@ -486,7 +486,7 @@ const fetchData = async () => {
 
   catch(err) {
 
-    console.log(err)
+    console.log(err.response.status)
     
     if(err=="Request failed with status code 401") {
       console.log("You are not authorized to access Listhub API")

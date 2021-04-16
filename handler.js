@@ -72,7 +72,7 @@ const getListingStream = async (values) => {
       .pipe(es.mapSync((data) => {
 
         //listArray.push(data)
-          propertyCreate(data).then((response) => {
+          listCreate(data).then((response) => {
             
             // console.log(data)
             console.log("Data Added To DB; "+response.dataAdded)

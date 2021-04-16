@@ -107,7 +107,7 @@ const getListingStream = async (values) => {
           
             //console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
   
-            resolve({ downloaded: true, error:null })
+            //resolve({ downloaded: true, error:null })
   
           }
 
@@ -269,7 +269,7 @@ const saveNewListData = async () => {
 
   const totallinecount = metaResponse.data.Metadata.totallinecount;
   
-  var chunkSize = parseInt(totallinecount/10);
+  var chunkSize = parseInt(totallinecount/50);
   var secondChunk = chunkSize+1;
 
   var values;

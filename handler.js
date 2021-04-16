@@ -240,7 +240,7 @@ const saveNewListData = async () => {
 
   const totallinecount = metaResponse.data.Metadata.totallinecount;
   
-  var chunkSize = parseInt(totallinecount/5);
+  var chunkSize = parseInt(totallinecount/10);
   var secondChunk = chunkSize+1;
 
   var values;
@@ -250,7 +250,7 @@ const saveNewListData = async () => {
   // I want to divide the calls to 2, I want to halve the listings. The first will call will be startSting sequence+what is halved
   // Next call will be the previous call end sequencccccce
   while (
-    count <= 5
+    count <= 10
   ) {
 
       // First Chunk
@@ -333,6 +333,95 @@ const saveNewListData = async () => {
         values = {
           ETag: ETag,
           startSequence: fifthStart,
+          endSequence: endSequence,
+        };
+
+      }
+
+      // First Chunk
+      else if(count==6) {
+
+        start=endSequence+chunkSize+1
+        endSequence = start + chunkSize
+
+        console.log("Sixth Start is: "+start)
+
+        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+
+        values = {
+          ETag: ETag,
+          startSequence: start,
+          endSequence: endSequence,
+        };
+      }
+
+      // Second Chunk
+      else if(count==7) {
+
+        start=endSequence+chunkSize+1
+        endSequence = start + chunkSize
+
+        console.log("Seventh Start is: "+start)
+
+        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+
+        values = {
+          ETag: ETag,
+          startSequence: start,
+          endSequence: endSequence,
+        };
+
+      }
+
+      // Third Chunk
+      else if(count==8) {
+
+        start=endSequence+chunkSize+1
+        endSequence = start + chunkSize
+
+        console.log("Eighth Start is: "+start)
+
+        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+
+        values = {
+          ETag: ETag,
+          startSequence: start,
+          endSequence: endSequence,
+        };
+
+      }
+
+      // Fourth Chunk
+      else if(count==9) {
+
+        start=endSequence+chunkSize+1
+        endSequence = start + chunkSize
+
+        console.log("Ninth Start is: "+start)
+
+        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+
+        values = {
+          ETag: ETag,
+          startSequence: start,
+          endSequence: endSequence,
+        };
+
+      }
+
+      // Fifth Chunk
+      else if(count==10) {
+
+        start=endSequence+chunkSize+1
+        endSequence = start + chunkSize
+
+        console.log("Tenth Start is: "+start)
+
+        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+
+        values = {
+          ETag: ETag,
+          startSequence: start,
           endSequence: endSequence,
         };
 

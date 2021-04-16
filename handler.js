@@ -89,12 +89,14 @@ const getListingStream = async (values) => {
         
         console.log("Completed reading of data: "+listArray.length)
 
-        for(var i=0; i<listArray.length; i++) {
-          
+        var i;
+
+        for(i=0; i<listArray.length; i++) {
+
           listCreate(listArray[i]).then((response) => {
             
             // console.log(data)
-            console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
+            //console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
             // console.log("List Data"+JSON.stringify(response.listdata))
             // return data
 
@@ -103,9 +105,11 @@ const getListingStream = async (values) => {
           })
         }
 
+        console.log("Items added "+i+1)
+        console.log("Last listing added is "+JSON.stringify(listArray[i]))
+
 
         /*
-
         listBulkCreate(listArray).then((response) => {
 
           endTime=new Date()
@@ -285,7 +289,7 @@ const saveNewListData = async () => {
 
   const totallinecount = metaResponse.data.Metadata.totallinecount;
   
-  var chunkSize = parseInt(totallinecount/15);
+  var chunkSize = parseInt(totallinecount/5);
   var secondChunk = chunkSize+1;
 
   var values;

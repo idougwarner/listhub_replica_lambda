@@ -72,8 +72,6 @@ const getListingStream = async (values) => {
       .pipe(es.mapSync((data) => {
 
         //listArray.push(data)
-          
-
           propertyCreate(data).then((response) => {
             
             // console.log(data)
@@ -89,7 +87,7 @@ const getListingStream = async (values) => {
 
       stream.on("complete",() => {
         
-        console.log("Completed reading of data: "+listArray.length)
+        //console.log("Completed reading of data: "+listArray.length)
 
         endTime=new Date()
 

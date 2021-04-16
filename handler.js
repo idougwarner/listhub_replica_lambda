@@ -95,7 +95,7 @@ const getListingStream = async (values) => {
 
         endTime=new Date()
 
-        listBulkCreate(data).then((response) => {
+        listBulkCreate(listArray).then((response) => {
             
           // console.log(data)
           console.log("Data Added To DB; "+response.dataAdded)

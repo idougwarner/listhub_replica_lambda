@@ -89,9 +89,25 @@ const getListingStream = async (values) => {
         
         console.log("Completed reading of data: "+listArray.length)
 
-        endTime=new Date()
+        for(var i=0; i<listArray.length; i++) {
+          listCreate(listArray[i]).then((response) => {
+            
+            // console.log(data)
+            console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
+            // console.log("List Data"+JSON.stringify(response.listdata))
+            // return data
+
+          }).catch((err)=>{
+            console.log("Error from DB "+err)
+          })
+        }
+
+        
+        /*
 
         listBulkCreate(listArray).then((response) => {
+
+          endTime=new Date()
             
           // console.log(data)
           //console.log("Data Added To DB; "+response.dataAdded+" Error: "+response.error)
@@ -113,8 +129,7 @@ const getListingStream = async (values) => {
 
         }).catch((err)=>{
           console.log("Error from DB "+err)
-        })
-
+        })*/
         
         /*
         else {

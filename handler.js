@@ -106,7 +106,21 @@ const getListingStream = async (values) => {
           var diffMins = Math.round(((timeTaken % 86400000) % 3600000) / 60000);
           console.log("End Time: "+new Date())
           console.log("It took "+diffMins+" Minutes")
-          // return data
+
+          if(response.dataAdded) {
+            // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
+            console.log("Added data to DB\n")
+          
+            //console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
+  
+            resolve({ downloaded: true, error:null })
+  
+          }
+          else {
+  
+            resolve({ downloaded: false, error:error })
+  
+          }
 
         }).catch((err)=>{
           console.log("Error from DB "+err)
@@ -195,7 +209,7 @@ const saveNewListData = async () => {
   var lastSequence = 0;
   var startSequence = 0 ;
   var ETag;
-  var count = 0;
+  var count = 1;
   var endSequence = 0;
   var secondStart = 0 ;
   var listDataAdded = "";
@@ -227,7 +241,7 @@ const saveNewListData = async () => {
   const totallinecount = metaResponse.data.Metadata.totallinecount;
   
   var chunkSize = parseInt(totallinecount/5);
-  var secondChunk = parseInt(totallinecount/5)+1;
+  var secondChunk = chunkSize+1;
 
   var values;
 
@@ -236,10 +250,11 @@ const saveNewListData = async () => {
   // I want to divide the calls to 2, I want to halve the listings. The first will call will be startSting sequence+what is halved
   // Next call will be the previous call end sequencccccce
   while (
-    count < 2
+    count <= 5
   ) {
 
-      if(count==0) {
+      // First Chunk
+      if(count==1) {
 
         endSequence=startSequence+chunkSize;
 
@@ -252,17 +267,73 @@ const saveNewListData = async () => {
         };
       }
 
-      else if(count==1) {
+      // Second Chunk
+      else if(count==2) {
 
-        console.log("Second Chunk:"+secondChunk)
+        secondStart = startSequence + chunkSize + 1
+        endSequence = secondStart + chunkSize
 
-        secondStart=startSequence+secondChunk
-        //console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+        console.log("Second Start is: "+secondStart)
 
         values = {
           ETag: ETag,
           startSequence: secondStart,
-          endSequence: "",
+          endSequence: endSequence,
+        };
+
+      }
+
+      // Third Chunk
+      else if(count==3) {
+
+        thirdStart=endSequence+chunkSize+1
+        endSequence = thirdStart + chunkSize
+
+        console.log("Third Start is: "+thirdStart)
+
+        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+
+        values = {
+          ETag: ETag,
+          startSequence: thirdStart,
+          endSequence: endSequence,
+        };
+
+      }
+
+      // Fourth Chunk
+      else if(count==4) {
+
+        fourthStart=endSequence+chunkSize+1
+        endSequence = fourthStart + chunkSize
+
+        console.log("Fourth Start is: "+fourthStart)
+
+        //console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+
+        values = {
+          ETag: ETag,
+          startSequence: fourthStart,
+          endSequence: endSequence,
+        };
+
+      }
+
+      // Fifth Chunk
+      else if(count==5) {
+
+        fifthStart=endSequence+chunkSize+1
+        endSequence = ""
+
+        console.log("Fifth Start is: "+fifthStart)
+
+        // console.log("Step "+count+' \nStart Sequence: '+secondStart+" End Sequence: \" \"");
+
+        values = {
+          ETag: ETag,
+          startSequence: fifthStart,
+          endSequence: endSequence,
         };
 
       }

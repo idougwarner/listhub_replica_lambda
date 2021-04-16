@@ -94,7 +94,7 @@ const getListingStream = async (values) => {
         listBulkCreate(listArray).then((response) => {
             
           // console.log(data)
-          console.log("Data Added To DB; "+response.dataAdded+" Error: "+response.error)
+          //console.log("Data Added To DB; "+response.dataAdded+" Error: "+response.error)
           
           if(true) {
             // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller

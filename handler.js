@@ -71,7 +71,7 @@ const getListingStream = async (values) => {
       .pipe(JSONStream.parse())
       .pipe(es.mapSync((data) => {
 
-        listArray.push(data)
+          listArray.push(data)
           /*listCreate(data).then((response) => {
             
             // console.log(data)
@@ -87,7 +87,7 @@ const getListingStream = async (values) => {
 
       stream.on("complete",() => {
         
-        //console.log("Completed reading of data: "+listArray.length)
+        console.log("Completed reading of data: "+listArray.length)
 
         endTime=new Date()
 
@@ -269,7 +269,7 @@ const saveNewListData = async () => {
 
   const totallinecount = metaResponse.data.Metadata.totallinecount;
   
-  var chunkSize = parseInt(totallinecount/50);
+  var chunkSize = parseInt(totallinecount/2);
   var secondChunk = chunkSize+1;
 
   var values;

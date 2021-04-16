@@ -24,8 +24,10 @@ const connection = {};
 
 module.exports = async () => {
   if (connection.isConnected) {
+
     //console.log("=> Using existing connection.");
     return Models;
+    
   }
 
   //await sequelize.sync();
@@ -39,5 +41,5 @@ module.exports = async () => {
 };
 
 module.exports.syncDB = async () => {
-  await sequelize.sync({force:true});
+ return sequelize.sync({ force:true });
 }

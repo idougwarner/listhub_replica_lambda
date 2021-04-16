@@ -296,8 +296,7 @@ const saveNewListData = async () => {
         };
       }
 
-      // Second Chunk
-      else if(count==2) {
+      else if(count==15) {
 
         startSequence = endSequence + 1
         endSequence = startSequence + chunkSize
@@ -309,143 +308,16 @@ const saveNewListData = async () => {
         values = {
           ETag: ETag,
           startSequence: startSequence,
-          endSequence: endSequence,
+          endSequence: "",
         };
 
       }
 
       // Third Chunk
-      else if(count==3) {
+      else {
 
         startSequence = endSequence + 1
         endSequence = startSequence + chunkSize
-
-        console.log("Third Start is: "+startSequence)
-
-        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
-
-        values = {
-          ETag: ETag,
-          startSequence: startSequence,
-          endSequence: endSequence,
-        };
-
-      }
-
-      // Fourth Chunk
-      else if(count==4) {
-
-        startSequence = endSequence + 1
-        endSequence = startSequence + chunkSize
-
-        console.log("Fourth Start is: "+startSequence)
-
-        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
-
-        values = {
-          ETag: ETag,
-          startSequence: startSequence,
-          endSequence: endSequence,
-        };
-
-      }
-
-      // Fifth Chunk
-      else if(count==5) {
-
-        startSequence = endSequence + 1
-        endSequence = startSequence + chunkSize
-
-        console.log("Fifth Start is: "+startSequence)
-
-        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
-
-        values = {
-          ETag: ETag,
-          startSequence: startSequence,
-          endSequence: endSequence,
-        };
-
-      }
-
-      // First Chunk
-      else if(count==6) {
-
-        startSequence = endSequence + 1
-        endSequence = startSequence + chunkSize
-
-        console.log("Sixth Start is: "+startSequence)
-
-        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
-
-        values = {
-          ETag: ETag,
-          startSequence: startSequence,
-          endSequence: endSequence,
-        };
-      }
-
-      // Second Chunk
-      else if(count==7) {
-
-        startSequence = endSequence + 1
-        endSequence = startSequence + chunkSize
-
-        console.log("Seventh Start is: "+startSequence)
-
-        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
-
-        values = {
-          ETag: ETag,
-          startSequence: startSequence,
-          endSequence: endSequence,
-        };
-
-      }
-
-      // Third Chunk
-      else if(count==8) {
-
-        startSequence = endSequence + 1
-        endSequence = startSequence + chunkSize
-
-        console.log("Eighth Start is: "+startSequence)
-
-        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
-
-        values = {
-          ETag: ETag,
-          startSequence: startSequence,
-          endSequence: endSequence,
-        };
-
-      }
-
-      // Fourth Chunk
-      else if(count==9) {
-
-        startSequence = endSequence + 1
-        endSequence = startSequence + chunkSize
-
-        console.log("Ninth Start is: "+start)
-
-        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
-
-        values = {
-          ETag: ETag,
-          startSequence: startSequence,
-          endSequence: endSequence,
-        };
-
-      }
-
-      // Fifth Chunk
-      else if(count==10) {
-
-        startSequence = endSequence + 1
-        endSequence = startSequence + chunkSize
-
-        console.log("Tenth Start is: "+startSequence)
 
         console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
 

@@ -94,7 +94,7 @@ const getListingStream = async (values) => {
         listBulkCreate(listArray).then((response) => {
             
           // console.log(data)
-          console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
+          console.log("Data Added To DB; "+response.dataAdded+" Error: "+response.error)
           
           if(true) {
             // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
@@ -269,7 +269,7 @@ const saveNewListData = async () => {
 
   const totallinecount = metaResponse.data.Metadata.totallinecount;
   
-  var chunkSize = parseInt(totallinecount/5);
+  var chunkSize = parseInt(totallinecount/20);
   var secondChunk = chunkSize+1;
 
   var values;

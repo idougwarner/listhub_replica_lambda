@@ -89,13 +89,11 @@ const getListingStream = async (values) => {
         
         console.log("Completed reading of data: "+listArray.length)
 
-        var i;
-        
-        var lastItem = 0
-
         const loop = async ()=> {
           var errors=0
           var itemsAdded=0
+          var i;
+          var lastItem = 0
 
           return new Promise((resolve, reject) => {
 

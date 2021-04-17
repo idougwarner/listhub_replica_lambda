@@ -104,12 +104,12 @@ const getListingStream = async (values) => {
                 if(response.dataAdded)
                 {
 
-                  itemsAdded = itemsAdded+1
+                  itemsAdded = (itemsAdded+1)
 
                 }
                 else {
 
-                  errors = errors+1
+                  errors = (errors+1)
 
                 }
 
@@ -117,25 +117,27 @@ const getListingStream = async (values) => {
                 //console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
                 // console.log("List Data"+JSON.stringify(response.listdata))
                 // return data
-                lastItem=lastItem+i
+                lastItem=(lastItem+i)
     
               }).catch((err)=>{
                 console.log("Error from DB "+err)
               })
             }
 
-            resolve({itemsAdded:itemsAdded, errors:errors, lastItem:lastItem})
+            console.log("Outside of for loop"+i)
+
+            //resolve({itemsAdded:itemsAdded, errors:errors, lastItem:lastItem})
 
           })         
 
         }
 
         const { itemsAdded, errors, lastItem } = await loop()
-        console.log("Items added "+itemsAdded+1+" Errors: "+errors)
-        console.log("Last listing added is: "+JSON.stringify(listArray[lastItem]))
         
+        console.log("Items added "+itemsAdded+1+" Errors: "+errors)
+        console.log("Last listing added is: "+JSON.stringify(listArray[lastItem]))         
 
-        resolve ({ downloaded: true, error:null})
+        //resolve ({ downloaded: true, error:null})
 
         /*
         listBulkCreate(listArray).then((response) => {

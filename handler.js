@@ -92,12 +92,12 @@ const getListingStream = async (values) => {
         const loop = async ()=> {
           var errors = 0
           var itemsAdded = 0
-          var i;
+          var i, len;
           var lastItem = 0
 
           return new Promise((resolve, reject) => {
 
-            for(i=0; i<listArray.length; i++) {
+            for(i=0, len=listArray.length; i<len; i++) {
 
              listCreate(listArray[i]).then((response) => {
 

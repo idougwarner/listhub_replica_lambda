@@ -7,7 +7,7 @@ module.exports = (sequelize, Sequelize) => {
       primaryKey: true
     },
     Property: {
-      type: Sequelize.JSON
+      type: Sequelize.JSONB
     },
     sequence: {
       type: Sequelize.BIGINT,

@@ -119,7 +119,7 @@ const getListingStream = async (values) => {
 
                 }
 
-                console.log("Items Added "+itemsAdded)
+                console.log("Items Added "+itemsAdded+"Array Length "+listArray.length)
                 // console.log(data)
                 //console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
                 // console.log("List Data"+JSON.stringify(response.listdata))
@@ -329,7 +329,7 @@ const saveNewListData = async () => {
 
   const totallinecount = metaResponse.data.Metadata.totallinecount;
   
-  var chunkSize = parseInt(totallinecount/5);
+  var chunkSize = parseInt(totallinecount/3);
   var secondChunk = chunkSize+1;
 
   var values;

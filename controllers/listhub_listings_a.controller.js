@@ -85,10 +85,10 @@ module.exports.listBulkCreate = async (jsonData) => {
 
 // Load data in a loop
 
-module.exports.listBulkList = async (arrayListData) => {
+module.exports.listBulkList = async (listArray) => {
   
   // Validate request
-  if (!arrayListData) {
+  if (!listArray.length) {
 
     const result = { dataAdded: false, data: null, error: "No Data to Add" };
 
@@ -101,9 +101,9 @@ module.exports.listBulkList = async (arrayListData) => {
     // Connect once and loop throught the records as we create them
     const { listhub_listings_a } = await connectToDatabase();
 
-    for(i=0, len=arrayListData.length; i<len; i++) {
+    for(var i=0, len=listArray.length; i<len; i++) {
 
-      const data = await listhub_listings_a.create(jsonData);
+      const data = await listhub_listings_a.create(listArray[i]);
       
       if (data.length != 0) {
         const result = { dataAdded: true, data: data, error: null };

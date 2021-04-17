@@ -99,7 +99,7 @@ const getListingStream = async (values) => {
 
             for(i=0; i<listArray.length; i++) {
 
-              listCreate(listArray[i]).then((response) => {
+             await listCreate(listArray[i]).then((response) => {
 
                 if(response.dataAdded)
                 {

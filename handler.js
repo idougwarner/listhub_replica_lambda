@@ -102,6 +102,8 @@ const getListingStream = async (values) => {
         
         console.log("Completed reading of data: "+listArray.length)
 
+        var time=new Date()
+
         pool.connect((err, client, done) => {
               
           var i = 0, count = 0;
@@ -110,7 +112,7 @@ const getListingStream = async (values) => {
 
               client.query(
                   'INSERT INTO "listhub_listings_as" ("sequence","Property", "createdAt", "updatedAt") VALUES ($1,$2,$3,$4) RETURNING id', 
-                  [listArray[i].sequence, listArray[i].Property, new Date(), new Date()], 
+                  [listArray[i].sequence, listArray[i].Property, time, time], 
                   function(err, result) {
                       if (err) {
                           console.log(err);

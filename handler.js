@@ -90,7 +90,7 @@ const getListingStream = async (values) => {
 
           listArray.push(data)
 
-          var time=new Date()
+          var time = new Date()
 
             count = 0
 
@@ -105,7 +105,9 @@ const getListingStream = async (values) => {
                     }
     
                     count++;
+
                     console.log('count = ' + count);
+                    
                     if (count == listArray.length) {
                         console.log('Client will end now!!!');
                         

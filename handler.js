@@ -127,6 +127,10 @@ const getListingStream = async (values) => {
 
             }
 
+            if((i+1)==listArray.length) {
+              console.log("Finished reading and writing all data "+i+" Array Length: "+listArray.length)
+            }
+
             console.log("Outside of for loop"+i)
 
             //resolve({itemsAdded:itemsAdded, errors:errors, lastItem:lastItem})

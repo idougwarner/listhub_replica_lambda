@@ -6,6 +6,8 @@ const stream = require("stream");
 const https = require("https");
 const JSONStream = require('JSONStream');
 const es = require('event-stream');
+var pg = require('pg');
+var dbUrl = 'postgres://postgres:postgres@listhub-dev.crstoxoylybt.us-west-2.rds.amazonaws.com:5432/listhubdev';
 
 const { syncDB } = require("./models");
 
@@ -96,7 +98,35 @@ const getListingStream = async (values) => {
           var i, len;
           var lastItem = 0
 
-          await listBulkList(listArray)
+          //await listBulkList(listArray)
+
+            pg.connect(dbUrl, function(err, client, done) {
+              
+              var i = 0, count = 0;
+
+              for (i = 0; i < listArray.length; i++) {
+
+                  client.query(
+                      'INSERT INTO "listhub_listings_as" ("sequence","Property") VALUES ($1,$2) RETURNING id', 
+                      [listArray[i].sequence, listArray[i].Property], 
+                      function(err, result) {
+                          if (err) {
+                              console.log(err);
+                          } else {
+                              console.log('row inserted with id: ' + result.rows[0].id);
+                          }
+          
+                          count++;
+                          console.log('count = ' + count);
+                          if (count == listArray.length) {
+                              console.log('Client will end now!!!');
+                              client.end();
+                          }
+                    });        
+              }
+          });
+
+          console.log("After List Bulk List")
 
           /*
           return new Promise((resolve, reject) => {
@@ -218,7 +248,6 @@ const getListingStream = async (values) => {
           console.log("Error from DB "+err)
         })*/
         
-
       })  
 
       /*
@@ -232,7 +261,9 @@ const getListingStream = async (values) => {
       })
       .on("complete", () => {
 
-        /*myVar.split('\n').map(JSON.parse);
+        /*
+        myVar.split('\n').map(JSON.parse);
+        
         console.log(myArray);
 
         //console.log(listings)

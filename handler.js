@@ -99,7 +99,7 @@ const getListingStream = async (values) => {
 
             for(i=0; i<listArray.length; i++) {
 
-             await listCreate(listArray[i]).then((response) => {
+             listCreate(listArray[i]).then((response) => {
 
                 if(response.dataAdded)
                 {
@@ -110,9 +110,14 @@ const getListingStream = async (values) => {
                 else {
 
                   errors = (errors+1)
-
                 }
-
+                
+                if((i+1)==listArray.length) {
+                  
+                  console.log("Finished reading and writing all data "+i+" Array Length: "+listArray.length)
+                  // We will return promise here
+                  
+                }
                 // console.log(data)
                 //console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
                 // console.log("List Data"+JSON.stringify(response.listdata))

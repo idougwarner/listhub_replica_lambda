@@ -58,6 +58,8 @@ const getListingStream = async (values) => {
         }
       })
 
+      return new Promise((resolve, reject) => {
+
       // STREAMING WITH JSON STREAM
       var startTime, endTime
 
@@ -83,7 +85,7 @@ const getListingStream = async (values) => {
 
       }))
 
-      stream.on("complete",() => {
+      stream.on("complete", async () => {
         
         console.log("Completed reading of data: "+listArray.length)
 
@@ -131,6 +133,9 @@ const getListingStream = async (values) => {
         const { itemsAdded, errors, lastItem } = await loop()
         console.log("Items added "+itemsAdded+1+" Errors: "+errors)
         console.log("Last listing added is: "+JSON.stringify(listArray[lastItem]))
+        
+
+        resolve ({ downloaded: true, error:null})
 
         /*
         listBulkCreate(listArray).then((response) => {
@@ -269,6 +274,7 @@ const getListingStream = async (values) => {
         console.log("Status Code:"+response.statusCode+" Aborted: "+response.aborted+" ")
 
       })*/
+    })// End Promise
 
 };
 

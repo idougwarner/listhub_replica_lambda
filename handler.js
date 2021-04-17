@@ -47,8 +47,6 @@ const getListingStream = async (values) => {
   var listings = ""
   var listArray = []
 
-  return new Promise((resolve, reject) => {
-
       // Get inputStream from replication request with range headers
      var stream = request({
         url: replicationURL,
@@ -90,24 +88,49 @@ const getListingStream = async (values) => {
         console.log("Completed reading of data: "+listArray.length)
 
         var i;
+        var errors=0
+        var itemsAdded=0
+        var lastItem = 0
 
-        for(i=0; i<listArray.length; i++) {
+        const loop = async ()=> {
 
-          listCreate(listArray[i]).then((response) => {
-            
-            // console.log(data)
-            //console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
-            // console.log("List Data"+JSON.stringify(response.listdata))
-            // return data
+          return new Promise((resolve, reject) => {
 
-          }).catch((err)=>{
-            console.log("Error from DB "+err)
-          })
+            for(i=0; i<listArray.length; i++) {
+
+              listCreate(listArray[i]).then((response) => {
+
+                if(response.dataAdded)
+                {
+
+                  itemsAdded=itemsAdded+1
+
+                }
+                else {
+
+                  errors=errors+1
+
+                }
+                // console.log(data)
+                //console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
+                // console.log("List Data"+JSON.stringify(response.listdata))
+                // return data
+                lastItem=lastItem+i
+    
+              }).catch((err)=>{
+                console.log("Error from DB "+err)
+              })
+            }
+
+            resolve({itemsAdded:itemsAdded, errors:errors, lastItem:lastItem})
+
+          })         
+
         }
 
-        console.log("Items added "+i+1)
-        console.log("Last listing added is: "+JSON.stringify(listArray[i]))
-
+        const { itemsAdded, errors, lastItem } = await loop()
+        console.log("Items added "+itemsAdded+1+" Errors: "+errors)
+        console.log("Last listing added is: "+JSON.stringify(listArray[lastItem]))
 
         /*
         listBulkCreate(listArray).then((response) => {
@@ -247,7 +270,6 @@ const getListingStream = async (values) => {
 
       })*/
 
-    })// End of Promise
 };
 
 // Sync entire data while using ranges and save to database

@@ -12,6 +12,7 @@ const { syncDB } = require("./models");
 const {
   listCreate,
   listBulkCreate,
+  listBulkList,
   listDataExists,
   listDeleteAll,
 } = require("./controllers/listhub_listings_a.controller");
@@ -95,6 +96,9 @@ const getListingStream = async (values) => {
           var i, len;
           var lastItem = 0
 
+          await listBulkList(listArray)
+
+          /*
           return new Promise((resolve, reject) => {
 
             for(i=0, len=listArray.length; i<len; i++) {
@@ -138,7 +142,7 @@ const getListingStream = async (values) => {
 
             //resolve({itemsAdded:itemsAdded, errors:errors, lastItem:lastItem})
 
-          })         
+          }) */        
 
         }
 

@@ -83,6 +83,55 @@ module.exports.listBulkCreate = async (jsonData) => {
   }
 };
 
+// Load data in a loop
+
+module.exports.listBulkList = async (arrayListData) => {
+  
+  // Validate request
+  if (!arrayListData) {
+
+    const result = { dataAdded: false, data: null, error: "No Data to Add" };
+
+    return result;
+    
+  }
+
+  try {
+
+    // Connect once and loop throught the records as we create them
+    const { listhub_listings_a } = await connectToDatabase();
+
+    for(i=0, len=arrayListData.length; i<len; i++) {
+
+      const data = await listhub_listings_a.create(jsonData);
+      
+      if (data.length != 0) {
+        const result = { dataAdded: true, data: data, error: null };
+  
+        console.log("Added "+i+" Records")
+
+      } else {
+        const result = { dataAdded: false, error: "Problem creating Listings" };
+  
+        console.log(result);
+      }
+
+    }
+
+  } catch (err) {
+    console.log("Error Adding Data:"+err)
+    const result = {
+      dataAdded: false,
+      statusCode: 500,
+      headers: { "Content-Type": "text/plain" },
+      body: "Could not create the Property.",
+      error: err,
+    };
+
+    return result;
+  }
+};
+
 // Retrieve all Properties from the database.
 module.exports.listFindAll = async () => {
   try {

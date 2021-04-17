@@ -99,7 +99,7 @@ const getListingStream = async (values) => {
 
             for(i=0; i<listArray.length; i++) {
 
-              await listCreate(listArray[i]).then((response) => {
+              listCreate(listArray[i]).then((response) => {
 
                 if(response.dataAdded)
                 {
@@ -119,8 +119,10 @@ const getListingStream = async (values) => {
                 // return data
                 lastItem=(lastItem+i)
     
-              }).catch((err)=>{
+              }).catch((err) => {
+
                 console.log("Error from DB "+err)
+
               })
 
             }

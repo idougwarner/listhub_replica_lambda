@@ -9,6 +9,16 @@ const es = require('event-stream');
 var pg = require('pg');
 var dbUrl = 'postgres://postgres:postgres@listhub-dev.crstoxoylybt.us-west-2.rds.amazonaws.com:5432/listhubdev';
 
+const { Pool, Client } = require("pg");
+
+const pool = new Pool({
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: process.env.DB_PORT
+});
+
 const { syncDB } = require("./models");
 
 const {
@@ -88,11 +98,11 @@ const getListingStream = async (values) => {
 
       }))
 
-      stream.on("complete", async () => {
+      stream.on("complete", () => {
         
         console.log("Completed reading of data: "+listArray.length)
 
-        pg.connect(dbUrl, function(err, client, done) {
+        pool.connect((err, client, done) => {
               
           var i = 0, count = 0;
 

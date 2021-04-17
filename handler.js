@@ -118,6 +118,8 @@ const getListingStream = async (values) => {
                   // We will return promise here
 
                 }
+
+                console.log("Items Added "+itemsAdded)
                 // console.log(data)
                 //console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
                 // console.log("List Data"+JSON.stringify(response.listdata))

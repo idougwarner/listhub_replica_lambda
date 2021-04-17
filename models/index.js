@@ -22,12 +22,12 @@ const listings_meta = listings_meta_model(sequelize, Sequelize);
 const Models = { listhub_listings_a, listhub_listings_b, listings_meta };
 const connection = {};
 
-module.exports = async () => {
+module.exports.connectDB = async () => {
   if (connection.isConnected) {
 
     //console.log("=> Using existing connection.");
     return Models;
-    
+
   }
 
   //await sequelize.sync();

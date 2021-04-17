@@ -146,10 +146,10 @@ const getListingStream = async (values) => {
 
         }
 
-        const { itemsAdded, errors, lastItem } = await loop()
+        //const { itemsAdded, errors, lastItem } = await loop()
         
-        console.log("Items added "+itemsAdded+1+" Errors: "+errors)
-        console.log("Last listing added is: "+JSON.stringify(listArray[lastItem]))         
+        //console.log("Items added "+itemsAdded+1+" Errors: "+errors)
+        //console.log("Last listing added is: "+JSON.stringify(listArray[lastItem]))         
 
         //resolve ({ downloaded: true, error:null})
 

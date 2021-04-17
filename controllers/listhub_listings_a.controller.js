@@ -1,5 +1,5 @@
 "use strict";
-const connectToDatabase = require("../models");
+const { connectToDatabase } = require("../models");
 
 // Create and Save a new Property Listing
 module.exports.listCreate = async (jsonData) => {

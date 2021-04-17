@@ -109,7 +109,7 @@ const getListingStream = async (values) => {
           for (i = 0; i < listArray.length; i++) {
 
               client.query(
-                  'INSERT INTO "listhub_listings_as" ("sequence","Property", "createdAt", "updatedAt") VALUES ($1,$2,$3) RETURNING id', 
+                  'INSERT INTO "listhub_listings_as" ("sequence","Property", "createdAt", "updatedAt") VALUES ($1,$2,$3,$4) RETURNING id', 
                   [listArray[i].sequence, listArray[i].Property, new Date(), new Date()], 
                   function(err, result) {
                       if (err) {

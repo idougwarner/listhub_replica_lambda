@@ -33,9 +33,9 @@ module.exports.metaCreate = async (jsonData) => {
   // Save PropertyMeta entry in the property table
 
   try {
-    const { PropertyMeta } = await connectToDatabase();
+    const { listings_meta } = await connectToDatabase();
 
-    const data = await PropertyMeta.create(propertymeta);
+    const data = await listings_meta.create(propertymeta);
 
     if (data) {
       console.log("New Meta Data is" + data);
@@ -69,9 +69,9 @@ module.exports.metaCreate = async (jsonData) => {
 // Retrieve all Propertymeta from the database.
 module.exports.metaFindAll = async () => {
   try {
-    const { PropertyMeta } = await connectToDatabase();
+    const { listings_meta } = await connectToDatabase();
 
-    const data = await PropertyMeta.findAll({ raw: true });
+    const data = await listings_meta.findAll({ raw: true });
 
     if (data.length > 0) {
       console.log("Data exists");
@@ -100,9 +100,9 @@ module.exports.metaFindAll = async () => {
 // Check if there is Metadata data
 module.exports.metaDataExists = async () => {
   try {
-    const { PropertyMeta } = await connectToDatabase();
+    const { listings_meta } = await connectToDatabase();
 
-    const data = await PropertyMeta.findAll({ raw: true });
+    const data = await listings_meta.findAll({ raw: true });
 
     if (data.length > 0) {
       console.log("Data exists");
@@ -131,7 +131,7 @@ module.exports.metaDataExists = async () => {
 module.exports.ismetadataNew = async (lastModified) => {
   // Check whether there is data before comparing otherwise store the new data
   try {
-    const { PropertyMeta } = await connectToDatabase();
+    const { listings_meta } = await connectToDatabase();
 
     const data = await PropertyMeta.findOne({
       where: { LastModified: lastModified },
@@ -185,9 +185,9 @@ module.exports.ismetadataNew = async (lastModified) => {
 // Delete all PropertyMetas from the database.
 module.exports.metaDeleteAll = async () => {
   try {
-    const { PropertyMeta } = await connectToDatabase();
+    const { listings_meta } = await connectToDatabase();
 
-    const data = await PropertyMeta.destroy({
+    const data = await listings_meta.destroy({
       where: {},
       truncate: false,
     });

@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const Listhub_listings_b = sequelize.define("listhub_listings_b", {
+  const listhub_listings_b = sequelize.define("listhub_listings_b", {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,
@@ -15,5 +15,5 @@ module.exports = (sequelize, Sequelize) => {
     },
   });
 
-  return Listhub_listings_b;
+  return listhub_listings_b;
 };

@@ -80,49 +80,262 @@ const getListingStream = async (values) => {
       
       console.log("Start Time: "+startTime)
 
-      pool.connect((err, client, done) => {
-
       stream
       .pipe(JSONStream.parse())
       .pipe(es.mapSync((data) => {
 
           listArray.push(data)
 
-          var time=new Date()
+          /*listCreate(data).then((response) => {
+            
+            // console.log(data)
+            console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
+            // console.log("List Data"+JSON.stringify(response.listdata))
+            // return data
 
-            count = 0
+          }).catch((err)=>{
+            console.log("Error from DB "+err)
+          })*/
 
-            client.query(
-                'INSERT INTO "listhub_listings_as" ("sequence","Property", "createdAt", "updatedAt") VALUES ($1,$2,$3,$4) RETURNING id', 
-                [data.sequence, data.Property, time, time], 
-                function(err, result) {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        console.log('row inserted with id: ' + result.rows[0].id);
-                    }
-    
-                    count++;
-                    console.log('count = ' + count);
-                    if (count == listArray.length) {
-                        console.log('Client will end now!!!');
-                        
-                    }
-            });// End of Client Query    
       }))
 
       stream.on("complete", () => {
         
         console.log("Completed reading of data: "+listArray.length)
 
-        client.end();
-
         var time=new Date()
+
+        pool.connect((err, client, done) => {
+              
+          var i = 0, count = 0;
+
+          for (i = 0; i < listArray.length; i++) {
+
+              client.query(
+                  'INSERT INTO "listhub_listings_as" ("sequence","Property", "createdAt", "updatedAt") VALUES ($1,$2,$3,$4) RETURNING id', 
+                  [listArray[i].sequence, listArray[i].Property, time, time], 
+                  function(err, result) {
+                      if (err) {
+                          console.log(err);
+                      } else {
+                          console.log('row inserted with id: ' + result.rows[0].id);
+                      }
+      
+                      count++;
+                      console.log('count = ' + count);
+                      if (count == listArray.length) {
+                          console.log('Client will end now!!!');
+                          client.end();
+                      }
+                });        
+          }
+      });
+
+        const loop = async ()=> {
+          var errors = 0
+          var itemsAdded = 0
+          var i, len;
+          var lastItem = 0
+
+          //await listBulkList(listArray)
+
+            
+
+          console.log("After List Bulk List")
+
+          /*
+          return new Promise((resolve, reject) => {
+
+            for(i=0, len=listArray.length; i<len; i++) {
+
+             listCreate(listArray[i]).then((response) => {
+
+                if(response.dataAdded)
+                {
+
+                  itemsAdded = (itemsAdded+1)
+
+                }
+                else {
+
+                  errors = (errors+1)
+                }
+                
+                if((i+1)==listArray.length) {
+                  
+                  console.log("Finished reading and writing all data "+i+" Array Length: "+listArray.length)
+                  // We will return promise here
+
+                }
+
+                console.log("Items Added "+itemsAdded+"Array Length "+listArray.length)
+                // console.log(data)
+                //console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
+                // console.log("List Data"+JSON.stringify(response.listdata))
+                // return data
+                lastItem=(lastItem+i)
+    
+              }).catch((err) => {
+
+                console.log("Error from DB "+err)
+
+              })
+
+            }
+
+            console.log("Outside of for loop "+i)
+
+            //resolve({itemsAdded:itemsAdded, errors:errors, lastItem:lastItem})
+
+          }) */        
+
+        }
+
+        //const { itemsAdded, errors, lastItem } = await loop()
         
-      }) // End of Stream Complete 
+        //console.log("Items added "+itemsAdded+1+" Errors: "+errors)
+        //console.log("Last listing added is: "+JSON.stringify(listArray[lastItem]))         
 
-    }); // End of Pool Connect
+        //resolve ({ downloaded: true, error:null})
 
+        /*
+        listBulkCreate(listArray).then((response) => {
+
+          endTime=new Date()
+            
+          // console.log(data)
+          //console.log("Data Added To DB; "+response.dataAdded+" Error: "+response.error)
+          
+          if(response.dataAdded) {
+            // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
+            console.log("Added data to DB\n")
+            var timeTaken=Date.parse(endTime)-Date.parse(startTime);
+  
+            var diffMins = Math.round(((timeTaken % 86400000) % 3600000) / 60000);
+            console.log("End Time: "+new Date())
+            console.log("It took "+diffMins+" Minutes")
+          
+            //console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
+  
+            resolve({ downloaded: true, error:null })
+  
+          }
+
+        }).catch((err)=>{
+          console.log("Error from DB "+err)
+        })*/
+        
+        /*
+        else {
+
+          resolve({ downloaded: false, error:error })
+
+        }
+
+        listBulkCreate(listArray).then((response) => {
+            
+          // console.log(data)
+          console.log("Data Added To DB; "+response.dataAdded)
+          console.log("List Data"+JSON.stringify(response.listdata))
+
+          var timeTaken=Date.parse(endTime)-Date.parse(startTime);
+
+          var diffMins = Math.round(((timeTaken % 86400000) % 3600000) / 60000);
+          console.log("End Time: "+new Date())
+          console.log("It took "+diffMins+" Minutes")
+
+          if(response.dataAdded) {
+            // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
+            console.log("Added data to DB\n")
+          
+            //console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
+  
+            resolve({ downloaded: true, error:null })
+  
+          }
+          else {
+  
+            resolve({ downloaded: false, error:error })
+  
+          }
+
+        }).catch((err)=>{
+          console.log("Error from DB "+err)
+        })*/
+        
+      })  
+
+      /*
+      stream
+      .on("data", (data) => {
+
+        // Append our data to the array as we read it
+        //console.log("Chunk is:"+data)        
+        listings = listings+data
+    
+      })
+      .on("complete", () => {
+
+        /*
+        myVar.split('\n').map(JSON.parse);
+        
+        console.log(myArray);
+
+        //console.log(listings)
+
+        var myjson = listings.split(/\n/);
+
+        var lastEmpty= myjson.pop()
+        
+        var mylist = "[" + myjson.toString() + "]";
+
+        var parsedListings = JSON.parse(mylist);
+        // BULK SAVE TO DATABASE
+
+        propertyBulkCreate(parsedListings).then((response)=>{
+
+          console.log("Response from DB"+JSON.stringify(response))
+          
+          console.log("Data Added To DB"+response.dataAdded)
+          if(response.dataAdded) {
+            // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
+            console.log("Added data to DB\n")
+          
+            //console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
+  
+            resolve({ downloaded: true, error:null, startSequence: values.startSequence, endSequence: values.endSequence })
+  
+          }
+          else {
+  
+            resolve({ downloaded: false, error:error, startSequence: values.startSequence, endSequence: values.endSequence })
+  
+          }
+
+        }).catch((err)=>{
+          console.log("Error Adding Properties: "+err)
+        })
+
+        //console.log(mylist.toString())
+
+        // Bulk Write to database
+        //writeStream.write(myjson)
+
+        //console.log("Listing Data...\n"+listings)
+        
+      })
+      .on("error", (err) => {
+        
+        console.log("Error: "+err)
+
+        resolve({downloaded:false, error:err});
+
+      })
+      .on("response", (response) => {
+
+        console.log("Status Code:"+response.statusCode+" Aborted: "+response.aborted+" ")
+
+      })*/
     })// End Promise
 
 };

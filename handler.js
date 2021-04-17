@@ -90,8 +90,8 @@ const getListingStream = async (values) => {
         console.log("Completed reading of data: "+listArray.length)
 
         const loop = async ()=> {
-          var errors=0
-          var itemsAdded=0
+          var errors = 0
+          var itemsAdded = 0
           var i;
           var lastItem = 0
 
@@ -104,14 +104,15 @@ const getListingStream = async (values) => {
                 if(response.dataAdded)
                 {
 
-                  itemsAdded=itemsAdded+1
+                  itemsAdded = itemsAdded+1
 
                 }
                 else {
 
-                  errors=errors+1
+                  errors = errors+1
 
                 }
+
                 // console.log(data)
                 //console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
                 // console.log("List Data"+JSON.stringify(response.listdata))

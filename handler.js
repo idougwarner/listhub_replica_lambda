@@ -82,6 +82,8 @@ const getListingStream = async (values) => {
 
       pool.connect((err, client, done) => {
 
+      var count;
+
       stream
       .pipe(JSONStream.parse())
       .pipe(es.mapSync((data) => {

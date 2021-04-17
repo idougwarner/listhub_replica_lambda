@@ -116,7 +116,7 @@ const getListingStream = async (values) => {
                   
                   console.log("Finished reading and writing all data "+i+" Array Length: "+listArray.length)
                   // We will return promise here
-                  
+
                 }
                 // console.log(data)
                 //console.log("Data Added To DB; "+response.dataAdded+" Error:"+response.error)
@@ -132,11 +132,7 @@ const getListingStream = async (values) => {
 
             }
 
-            if((i+1)==listArray.length) {
-              console.log("Finished reading and writing all data "+i+" Array Length: "+listArray.length)
-            }
-
-            console.log("Outside of for loop"+i)
+            console.log("Outside of for loop "+i)
 
             //resolve({itemsAdded:itemsAdded, errors:errors, lastItem:lastItem})
 

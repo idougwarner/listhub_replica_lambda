@@ -96,7 +96,7 @@ const getListingStream = async (values) => {
           var i, len;
           var lastItem = 0
 
-          await listBulkList(listArray)
+          var bulkList = await listBulkList(listArray)
 
           /*
           return new Promise((resolve, reject) => {

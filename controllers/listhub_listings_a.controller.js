@@ -108,7 +108,7 @@ module.exports.listBulkList = async (listArray) => {
       if (data.length != 0) {
         const result = { dataAdded: true, data: data, error: null };
   
-        console.log("Added "+i+" Records")
+        console.log("Added "+(i+1)+" Records")
 
       } else {
         const result = { dataAdded: false, error: "Problem creating Listings" };

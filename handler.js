@@ -92,6 +92,32 @@ const getListingStream = async (values) => {
         
         console.log("Completed reading of data: "+listArray.length)
 
+        pg.connect(dbUrl, function(err, client, done) {
+              
+          var i = 0, count = 0;
+
+          for (i = 0; i < listArray.length; i++) {
+
+              client.query(
+                  'INSERT INTO "listhub_listings_as" ("sequence","Property") VALUES ($1,$2) RETURNING id', 
+                  [listArray[i].sequence, listArray[i].Property], 
+                  function(err, result) {
+                      if (err) {
+                          console.log(err);
+                      } else {
+                          console.log('row inserted with id: ' + result.rows[0].id);
+                      }
+      
+                      count++;
+                      console.log('count = ' + count);
+                      if (count == listArray.length) {
+                          console.log('Client will end now!!!');
+                          client.end();
+                      }
+                });        
+          }
+      });
+
         const loop = async ()=> {
           var errors = 0
           var itemsAdded = 0
@@ -100,31 +126,7 @@ const getListingStream = async (values) => {
 
           //await listBulkList(listArray)
 
-            pg.connect(dbUrl, function(err, client, done) {
-              
-              var i = 0, count = 0;
-
-              for (i = 0; i < listArray.length; i++) {
-
-                  client.query(
-                      'INSERT INTO "listhub_listings_as" ("sequence","Property") VALUES ($1,$2) RETURNING id', 
-                      [listArray[i].sequence, listArray[i].Property], 
-                      function(err, result) {
-                          if (err) {
-                              console.log(err);
-                          } else {
-                              console.log('row inserted with id: ' + result.rows[0].id);
-                          }
-          
-                          count++;
-                          console.log('count = ' + count);
-                          if (count == listArray.length) {
-                              console.log('Client will end now!!!');
-                              client.end();
-                          }
-                    });        
-              }
-          });
+            
 
           console.log("After List Bulk List")
 

@@ -115,6 +115,9 @@ const getListingStream = async (values) => {
         console.log("Finished copying to csv file")
 
       })
+      stream.on("error",(err)=>{
+        console.log("Error is: "+err)
+      })
         /*
       stream
       .pipe(JSONStream.parse())

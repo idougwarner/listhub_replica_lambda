@@ -126,7 +126,7 @@ const getListingStream = async (values) => {
 
       var time = new Date()
 
-      stream
+      /*stream
         .pipe(new JsonLinesTransform())
         .pipe(writeStream);
       
@@ -137,13 +137,14 @@ const getListingStream = async (values) => {
       })
       stream.on("error",(err)=>{
         console.log("Error is: "+err)
-      })
-        /*
+      })*/
+    
       stream
       .pipe(JSONStream.parse())
       .pipe(es.mapSync((data) => {
 
           //listArray.push(data)
+          listings=listings+JSON.stringify(data)
 
           // Convert this data to a string, now we need to write it to a csv
          // console.log(JSON.stringify(data))
@@ -154,7 +155,7 @@ const getListingStream = async (values) => {
 
         // COPY table FROM '/tmp/table.csv' DELIMITER ',';
 
-        client.query(
+        /*client.query(
           'INSERT INTO "listhub_listings_as" ("sequence","Property", "createdAt", "updatedAt") VALUES ($1,$2,$3,$4) RETURNING id', 
           [data.sequence, data.Property, time, time], 
           function(err, result) {
@@ -199,9 +200,9 @@ const getListingStream = async (values) => {
 
        // client.end();
 
-        var time=new Date()
+        var time=new Date()*/
         
-      }) // End of Stream Complete */
+      }) // End of Stream Complete 
 
       /*
       stream
@@ -442,6 +443,7 @@ const fetchData = async () => {
         const { listDataAdded, listAddError } = await saveNewListData();
   
         if (listDataAdded) {
+          // We should copy data in list_a to list_b
           console.log("Product List Data Added" + listDataAdded);
         } else {
           console.log("Problem adding data");
@@ -471,6 +473,7 @@ const fetchData = async () => {
       const { newUpdate } = await ismetadataNew(response.data.LastModified);
   
       if (newUpdate === true) {
+
         console.log("New listings ready for download: ");
   
         // If new metadata detected delete old metadata record and save new metadata and call replicationData to download new listings
@@ -478,7 +481,8 @@ const fetchData = async () => {
   
         if (metadataDeleted) {
           // Store the new Metadata
-  
+
+          // CHECK   
           const { metadataAdded, metadata, error } = await metaCreate(
             response.data
           );

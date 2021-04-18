@@ -105,7 +105,17 @@ const getListingStream = async (values) => {
       count = 0
 
       var time = new Date()
+
+      stream
+        .pipe(new JsonLinesTransform())
+        .pipe(writeStream);
       
+      stream.on("complete",()=> {
+
+        console.log("Finished reading file")
+
+      })
+        /*
       stream
       .pipe(JSONStream.parse())
       .pipe(es.mapSync((data) => {
@@ -114,35 +124,57 @@ const getListingStream = async (values) => {
 
           // Convert this data to a string, now we need to write it to a csv
          // console.log(JSON.stringify(data))
-
-          // COPY table FROM '/tmp/table.csv' DELIMITER ',';
-
-            client.query(
-                'INSERT INTO "listhub_listings_as" ("sequence","Property", "createdAt", "updatedAt") VALUES ($1,$2,$3,$4) RETURNING id', 
-                [data.sequence, data.Property, time, time], 
-                function(err, result) {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        console.log('row inserted with id: ' + result.rows[0].id);
-                    }
-    
-                    count++;
-
-                    console.log('count = ' + count);
-                    
-                    if (count == listArray.length) {
-                        console.log('Client will end now!!!');
-                        
-                    }
-            });// End of Client Query    
+            
       }))
 
       stream.on("complete", () => {
+
+        // COPY table FROM '/tmp/table.csv' DELIMITER ',';
+
+        client.query(
+          'INSERT INTO "listhub_listings_as" ("sequence","Property", "createdAt", "updatedAt") VALUES ($1,$2,$3,$4) RETURNING id', 
+          [data.sequence, data.Property, time, time], 
+          function(err, result) {
+              if (err) {
+                  console.log(err);
+              } else {
+                  console.log('row inserted with id: ' + result.rows[0].id);
+              }
+
+              count++;
+
+              console.log('count = ' + count);
+              
+              if (count == listArray.length) {
+                  console.log('Client will end now!!!');
+                  
+              }
+      })*/
+
+        /*
+        client.query(
+          'INSERT INTO "listhub_listings_as" ("sequence","Property", "createdAt", "updatedAt") VALUES ($1,$2,$3,$4) RETURNING id', 
+          [data.sequence, data.Property, time, time], 
+          function(err, result) {
+              if (err) {
+                  console.log(err);
+              } else {
+                  console.log('row inserted with id: ' + result.rows[0].id);
+              }
+
+              count++;
+
+              console.log('count = ' + count);
+              
+              if (count == listArray.length) {
+                  console.log('Client will end now!!!');
+                  
+              }
+      });// End of Client Query  
         
         console.log("Completed reading of data: "+listArray.length)
 
-        client.end();
+       // client.end();
 
         var time=new Date()
         

@@ -143,7 +143,7 @@ const getListingStream = async (values) => {
         console.log("Error is: "+err)
       })*/
 
-      var stream1 = client.query(copyFrom(`COPY ${targetTable} FROM CSV STDIN`))
+      var stream1 = client.query(copyFrom(`COPY ${targetTable} FROM STDIN`))
      // var fileStream = fs.createReadStream(inputFile)
 
       stream.on('error', (error) =>{

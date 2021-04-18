@@ -76,7 +76,7 @@ const getListingStream = async (values) => {
   var listings = ""
   var listArray = []
 
-  const writeStream = fs.createWriteStream("/tmp/propertylisting.json", { 'flags': 'a', 'encoding': null, 'mode': 0666});
+  const writeStream = fs.createWriteStream("/tmp/propertylisting.json");
 
       // Get inputStream from replication request with range headers
      var stream = request({

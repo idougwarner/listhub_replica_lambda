@@ -1,7 +1,7 @@
-const connectToDatabase = require("../models");
+const { connectToDatabase } = require("../models");
 
 // Create and Save a new Property Listing
-module.exports.listCreate = async (jsonData) => {
+module.exports.listReferenceCreate = async (jsonData) => {
 
   // Validate request
   if (!jsonData) {
@@ -14,9 +14,9 @@ module.exports.listCreate = async (jsonData) => {
   // console.log("Listing Key " + property.listingKey);
 
   try {
-    const { listhub_listings_b } = await connectToDatabase();
+    const { listings_update_reference } = await connectToDatabase();
 
-    const data = await listhub_listings_b.create(jsonData);
+    const data = await listings_update_reference.create(jsonData);
 
     if (data) {
       //console.log("New Property Data is" + data);
@@ -45,7 +45,7 @@ module.exports.listCreate = async (jsonData) => {
   }
 };
 
-module.exports.listBulkCreate = async (jsonData) => {
+module.exports.listReferenceBulkCreate = async (jsonData) => {
   
   // Validate request
   if (!jsonData) {
@@ -55,16 +55,16 @@ module.exports.listBulkCreate = async (jsonData) => {
   }
 
   try {
-    const { listhub_listings_b } = await connectToDatabase();
+    const { listings_update_reference } = await connectToDatabase();
 
-    const data = await listhub_listings_b.bulkCreate(jsonData);
+    const data = await listings_update_reference.bulkCreate(jsonData);
 
     if (data.length != 0) {
       const result = { dataAdded: true, data: data, error: null };
 
       return result;
     } else {
-      const result = { dataAdded: false, error: "Problem creating Listings" };
+      const result = { dataAdded: false, error: "Problem creating reference" };
 
       return result;
     }
@@ -74,7 +74,7 @@ module.exports.listBulkCreate = async (jsonData) => {
       dataAdded: false,
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },
-      body: "Could not create the Property.",
+      body: "Could not create the Reference.",
       error: err,
     };
 
@@ -83,15 +83,15 @@ module.exports.listBulkCreate = async (jsonData) => {
 };
 
 // Retrieve all Properties from the database.
-module.exports.listFindAll = async () => {
+module.exports.listReferenceFindAll = async () => {
   try {
-    const { listhub_listings_b } = await connectToDatabase();
+    const { listings_update_reference } = await connectToDatabase();
 
-    const data = await listhub_listings_b.findAll({ raw: true });
+    const data = await listings_update_reference.findAll({ raw: true });
 
     if (data.length !== 0) {
       console.log("Data exists");
-      console.log("Property Listing Data " + data.length);
+      console.log("Listings reference Data " + data.length);
 
       const result = { dataExists: true, data: data };
 
@@ -106,7 +106,7 @@ module.exports.listFindAll = async () => {
       dataExists: false,
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },
-      body: "Problem obtain Property Info.",
+      body: "Problem obtain Reference Info.",
       error: err,
     };
 
@@ -114,11 +114,11 @@ module.exports.listFindAll = async () => {
   }
 };
 
-module.exports.listDataExists = async () => {
+module.exports.listReferenceExists = async () => {
   try {
-    const { listhub_listings_b } = await connectToDatabase();
+    const { listings_update_reference } = await connectToDatabase();
 
-    const data = await listhub_listings_b.findAll({ raw: true });
+    const data = await listings_update_reference.findAll({ raw: true });
 
     if (data.length !== 0) {
       console.log("Data exists");
@@ -136,19 +136,19 @@ module.exports.listDataExists = async () => {
       dataExists: false,
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },
-      body: "Problem finding Property Info.",
+      body: "Problem finding Reference Info.",
     };
 
     return result;
   }
 };
 
-// Delete all Properties from the database.
-module.exports.listDeleteAll = async () => {
+// Delete all Reference from the database.
+module.exports.listReferenceDeleteAll = async () => {
   try {
-    const { listhub_listings_b } = await connectToDatabase();
+    const { listings_update_reference } = await connectToDatabase();
 
-    const data = await listhub_listings_b.destroy({
+    const data = await listings_update_reference.destroy({
       where: {},
       truncate: false,
     });

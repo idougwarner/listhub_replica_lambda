@@ -2,12 +2,12 @@
 const { connectToDatabase } = require("../models");
 
 // Create and Save a new Property Listing
-module.exports.listCreate = async (jsonData) => {
+module.exports.list_a_Create = async (jsonData) => {
 
   // Validate request
   if (!jsonData) {
     
-    const result = { dataAdded: false,  listdata: null, statusCode: 500, error: "Empty Property" };
+    const result = { data_a_Added: false,  list_a_data: null, status_a_Code: 500, error: "Empty Property" };
 
     return result;
   }
@@ -22,22 +22,22 @@ module.exports.listCreate = async (jsonData) => {
     if (data) {
       //console.log("New Property Data is" + data);
 
-      const result = { dataAdded: true, listdata: data, statusCode: 200, error: null };
+      const result = { data_a_Added: true, list_a_data: data, status_a_Code: 200, error_a: null };
 
       return result;
 
     } else {
-      const result = { dataAdded: false, listdata: null, statusCode: 500, error: "Problem Creating Data" };
+      const result = { data_a_Added: false, list_a_data: null, status_a_Code: 500, error_a: "Problem Creating Data" };
 
       return result;
     }
 
   } catch (err) {
     const result = {
-      dataAdded: false,
-      listdata: null,
-      statusCode: 500,
-      error: err,
+      data_a_Added: false,
+      list_a_data: null,
+      status_a_Code: 500,
+      error_a: err,
       headers: { "Content-Type": "text/plain" },
       body: "Could not create the Property.",
     };
@@ -46,11 +46,11 @@ module.exports.listCreate = async (jsonData) => {
   }
 };
 
-module.exports.listBulkCreate = async (jsonData) => {
+module.exports.list_a_BulkCreate = async (jsonData) => {
   
   // Validate request
   if (!jsonData) {
-    const result = { dataAdded: false, data: null, error: "No Data to Add" };
+    const result = { data_a_Added: false, list_a_data: null, error_a: "No Data to Add" };
 
     return result;
   }
@@ -61,19 +61,19 @@ module.exports.listBulkCreate = async (jsonData) => {
     const data = await listhub_listings_a.bulkCreate(jsonData);
 
     if (data.length != 0) {
-      const result = { dataAdded: true, data: data, error: null };
+      const result = { data_a_Added: true, list_a_data: data, error_a: null };
 
       return result;
     } else {
-      const result = { dataAdded: false, error: "Problem creating Listings" };
+      const result = { data_a_Added: false, error_a: "Problem creating Listings" };
 
       return result;
     }
   } catch (err) {
     console.log("Error Adding Data:"+err)
     const result = {
-      dataAdded: false,
-      statusCode: 500,
+      data_a_Added: false,
+      status_a_Code: 500,
       headers: { "Content-Type": "text/plain" },
       body: "Could not create the Property.",
       error: err,
@@ -85,12 +85,12 @@ module.exports.listBulkCreate = async (jsonData) => {
 
 // Load data in a loop
 
-module.exports.listBulkList = async (listArray) => {
+module.exports.list_a_BulkList = async (listArray) => {
   
   // Validate request
   if (!listArray.length) {
 
-    const result = { dataAdded: false, data: null, error: "No Data to Add" };
+    const result = { data_a_Added: false, data_a: null, error: "No Data to Add" };
 
     return result;
     
@@ -106,12 +106,12 @@ module.exports.listBulkList = async (listArray) => {
       const data = await listhub_listings_a.create(listArray[i]);
       
       if (data.length != 0) {
-        const result = { dataAdded: true, data: data, error: null };
+        const result = { data_a_Added: true, data_a: data, error: null };
   
         console.log("Added "+(i+1)+" Records")
 
       } else {
-        const result = { dataAdded: false, error: "Problem creating Listings" };
+        const result = { data_a_Added: false, error: "Problem creating Listings" };
   
         console.log(result);
       }
@@ -121,8 +121,8 @@ module.exports.listBulkList = async (listArray) => {
   } catch (err) {
     console.log("Error Adding Data:"+err)
     const result = {
-      dataAdded: false,
-      statusCode: 500,
+      data_a_Added: false,
+      status_a_Code: 500,
       headers: { "Content-Type": "text/plain" },
       body: "Could not create the Property.",
       error: err,
@@ -133,7 +133,7 @@ module.exports.listBulkList = async (listArray) => {
 };
 
 // Retrieve all Properties from the database.
-module.exports.listFindAll = async () => {
+module.exports.list_a_FindAll = async () => {
   try {
     const { listhub_listings_a } = await connectToDatabase();
 
@@ -143,18 +143,18 @@ module.exports.listFindAll = async () => {
       console.log("Data exists");
       console.log("Property Listing Data " + data.length);
 
-      const result = { dataExists: true, data: data };
+      const result = { data_a_Exists: true, data_a: data };
 
       return result;
     } else {
-      const result = { dataExists: false, error: "No Data" };
+      const result = { data_a_Exists: false, error_a: "No Data" };
 
       return result;
     }
   } catch (err) {
     const result = {
-      dataExists: false,
-      statusCode: 500,
+      data_a_Exists: false,
+      status_a_Code: 500,
       headers: { "Content-Type": "text/plain" },
       body: "Problem obtain Property Info.",
       error: err,
@@ -164,7 +164,7 @@ module.exports.listFindAll = async () => {
   }
 };
 
-module.exports.listDataExists = async () => {
+module.exports.list_a_DataExists = async () => {
   try {
     const { listhub_listings_a } = await connectToDatabase();
 
@@ -173,18 +173,19 @@ module.exports.listDataExists = async () => {
     if (data.length !== 0) {
       console.log("Data exists");
 
-      const result = { dataExists: true, data: data, error: null };
+      const result = { data_a_Exists: true, data_a: data, error: null };
 
       return result;
+
     } else {
-      const result = { dataExists: false, error: "No Data", data: null };
+      const result = { data_a_Exists: false, error: "No Data", data_a: null };
 
       return result;
     }
   } catch (err) {
     const result = {
-      dataExists: false,
-      statusCode: 500,
+      data_a_Exists: false,
+      status_a_Code: 500,
       headers: { "Content-Type": "text/plain" },
       body: "Problem finding Property Info.",
     };
@@ -194,7 +195,7 @@ module.exports.listDataExists = async () => {
 };
 
 // Delete all Properties from the database.
-module.exports.listDeleteAll = async () => {
+module.exports.list_a_DeleteAll = async () => {
   try {
     const { listhub_listings_a } = await connectToDatabase();
 
@@ -204,18 +205,18 @@ module.exports.listDeleteAll = async () => {
     });
 
     if (data.length == 0) {
-      const result = { dataDeleted: true, error: null };
+      const result = { data_a_Deleted: true, error: null };
 
       return result;
     } else {
-      const result = { dataDeleted: false, error: "No Data to delete" };
+      const result = { data_a_Deleted: false, error: "No Data to delete" };
 
       return result;
     }
   } catch (err) {
     const result = {
-      dataDeleted: false,
-      statusCode: 500,
+      data_a_Deleted: false,
+      status_a_Code: 500,
       headers: { "Content-Type": "text/plain" },
       body: "Problem Deleting Property Info.",
       error: err,

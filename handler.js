@@ -22,12 +22,28 @@ const pool = new Pool({
 const { syncDB } = require("./models");
 
 const {
+  list_a_Create,
+  list_a_BulkCreate,
+  list_a_BulkList,
+  list_a_DataExists,
+  list_a_DeleteAll,
+} = require("./controllers/listhub_listings_a.controller");
+
+const {
+  list_b_Create,
+  list_b_BulkCreate,
+  list_b_BulkList,
+  list_b_DataExists,
+  list_b_DeleteAll,
+} = require("./controllers/listhub_listings_b.controller");
+
+const {
   listCreate,
   listBulkCreate,
   listBulkList,
   listDataExists,
   listDeleteAll,
-} = require("./controllers/listhub_listings_a.controller");
+} = require("./controllers/listings_update_reference.controller");
 
 const {
   metaCreate,
@@ -60,6 +76,8 @@ const getListingStream = async (values) => {
   var listings = ""
   var listArray = []
 
+  const writeStream = fs.createWriteStream("/tmp/propertylisting.json", { 'flags': 'a', 'encoding': null, 'mode': 0666});
+
       // Get inputStream from replication request with range headers
      var stream = request({
         url: replicationURL,
@@ -87,12 +105,17 @@ const getListingStream = async (values) => {
       count = 0
 
       var time = new Date()
-
+      
       stream
       .pipe(JSONStream.parse())
       .pipe(es.mapSync((data) => {
 
-          listArray.push(data)
+          //listArray.push(data)
+
+          // Convert this data to a string, now we need to write it to a csv
+         // console.log(JSON.stringify(data))
+
+          // COPY table FROM '/tmp/table.csv' DELIMITER ',';
 
             client.query(
                 'INSERT INTO "listhub_listings_as" ("sequence","Property", "createdAt", "updatedAt") VALUES ($1,$2,$3,$4) RETURNING id', 
@@ -123,7 +146,60 @@ const getListingStream = async (values) => {
 
         var time=new Date()
         
-      }) // End of Stream Complete 
+      }) // End of Stream Complete */
+
+      /*
+      stream
+      .on("data", (data) => {
+
+        // Append our data to the array as we read it
+       
+        console.log("Chunk is:"+data)
+                
+        listings = listings+data
+
+        //console.log(mylist.toString())
+
+        // Bulk Write to database
+        //writeStream.write(myjson)
+    
+      })
+      .on("complete", () => {
+
+        //console.log(listings)
+
+        var myjson = listings.split(/\n/);
+
+        var lastEmpty= myjson.pop()
+        
+        var mylist = "[" + myjson.toString() + "]";
+
+        const listings1 = JSON.parse(mylist);
+
+        //console.log(mylist.toString())
+
+        // Bulk Write to database
+        //writeStream.write(myjson)
+
+        console.log("Listing Data...\n"+listings)
+        
+        propertyBulkCreate(listings1).then((response)=>{
+          console.log("Data Added To DB"+JSON.stringify(response))
+        }).catch((err)=>{
+          console.log("Error from DB"+err)
+        })
+          
+        // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
+        console.log("Finished reading data\n")
+      
+        console.log('Downloaded data....\nStart Sequence: '+values.startSequence+" End Sequence: "+values.endSequence)
+
+        downloaded = true; 
+        listerror = null; //startSequence: values.startSequence, endSequence: values.endSequence }
+
+        resolve({downloaded: downloaded, error:listerror})
+
+      })*/
 
     }); // End of Pool Connect
 
@@ -292,14 +368,15 @@ const fetchData = async () => {
   
       console.log("KEY is: " + key);
   
-      // CHECK IF PRODUCT LISTING DATA EXISTS ON BOTH TABLES AND IF NOT POPULATE THE LISTINGS TABLE
-      const { dataExists } = await listDataExists();
+      // Check if Listhub listings exist in both listings a and listings b
+      const { data_a_Exists } = await list_a_DataExists();
+      const { data_b_Exists } = await list_b_DataExists();
   
-      console.log("Data Exists: " + dataExists);
+      console.log("Does Data Exist in Listings A: " + data_a_Exists + "Does Data Exist in Listings B: " + data_b_Exists);
   
-      if (!dataExists) {
+      if (!data_a_Exists) {
   
-        // Property data does not exist therefore populate table a fresh with getData
+        // Listings A data does not exist therefore populate table a fresh with getData
         const data = {
           storeType: "new",
           ContentLength: response.data.ContentLength,

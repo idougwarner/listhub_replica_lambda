@@ -3,7 +3,7 @@ const listhub_listings_a_model = require("./listhub_listings_a");
 const listhub_listings_b_model = require("./listhub_listings_b");
 
 const listings_meta_model = require("./listings_meta");
-const listings_update_reference = require("./listings_update_reference");
+const listings_update_reference_model = require("./listings_update_reference");
 
 const sequelize = new Sequelize(
   process.env.DB_NAME,
@@ -19,7 +19,7 @@ const sequelize = new Sequelize(
 const listhub_listings_a = listhub_listings_a_model(sequelize, Sequelize);
 const listhub_listings_b = listhub_listings_b_model(sequelize, Sequelize);
 const listings_meta = listings_meta_model(sequelize, Sequelize);
-const listings_update_reference = listings_update_reference(sequelize, Sequelize);
+const listings_update_reference = listings_update_reference_model(sequelize, Sequelize);
 
 const Models = { listhub_listings_a, listhub_listings_b, listings_meta, listings_update_reference };
 const connection = {};

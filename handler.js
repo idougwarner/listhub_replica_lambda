@@ -292,7 +292,7 @@ const fetchData = async () => {
   
       console.log("KEY is: " + key);
   
-      // CHECK IF PRODUCT LISTING DATA EXISTS AND IF NOT POPULATE THE LISTINGS TABLE
+      // CHECK IF PRODUCT LISTING DATA EXISTS ON BOTH TABLES AND IF NOT POPULATE THE LISTINGS TABLE
       const { dataExists } = await listDataExists();
   
       console.log("Data Exists: " + dataExists);

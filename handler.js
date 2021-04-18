@@ -128,7 +128,7 @@ const getListingStream = async (values) => {
 
       var time = new Date()
 
-      var targetTable="listhub_listings_a"
+      var targetTable="listhub_listings_as"
 
       /*stream
         .pipe(new JsonLinesTransform())

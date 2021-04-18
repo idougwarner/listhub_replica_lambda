@@ -7,9 +7,11 @@ const https = require("https");
 const JSONStream = require('JSONStream');
 const es = require('event-stream');
 var pg = require('pg');
+
 var dbUrl = 'postgres://postgres:postgres@listhub-dev.crstoxoylybt.us-west-2.rds.amazonaws.com:5432/listhubdev';
 
 const { Pool, Client } = require("pg");
+const copyFrom = require('pg-copy-streams').from
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -126,6 +128,8 @@ const getListingStream = async (values) => {
 
       var time = new Date()
 
+      var targetTable="listhub_listings_a"
+
       /*stream
         .pipe(new JsonLinesTransform())
         .pipe(writeStream);
@@ -138,8 +142,24 @@ const getListingStream = async (values) => {
       stream.on("error",(err)=>{
         console.log("Error is: "+err)
       })*/
+
+      var stream1 = client.query(copyFrom(`COPY ${targetTable} FROM CSV STDIN`))
+     // var fileStream = fs.createReadStream(inputFile)
+
+      stream.on('error', (error) =>{
+          console.log(`Error in reading file: ${error}`)
+      })
+      stream1.on('error', (error) => {
+          console.log(`Error in copy command: ${error}`)
+      })
+      stream1.on('end', () => {
+          console.log(`Completed loading data into ${targetTable}`)
+          client.end()
+      })
+
+      stream.pipe(stream1);
     
-      stream
+      /*stream
       .pipe(JSONStream.parse())
       .pipe(es.mapSync((data) => {
 
@@ -149,7 +169,7 @@ const getListingStream = async (values) => {
           // Convert this data to a string, now we need to write it to a csv
          // console.log(JSON.stringify(data))
             
-      }))
+      }))*/
 
       stream.on("complete", () => {
 

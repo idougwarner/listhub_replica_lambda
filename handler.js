@@ -112,7 +112,7 @@ const getListingStream = async (values) => {
       
       stream.on("complete",()=> {
 
-        console.log("Finished reading file")
+        console.log("Finished copying to csv file")
 
       })
         /*

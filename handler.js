@@ -145,11 +145,12 @@ const getListingStream = async (values) => {
       })
       */
 
-      client.query('CREATE TABLE IF NOT EXISTS "listhub_listings_a2" ("id" SERIAL, "property" JSON, "sequence" TEXT UNIQUE, PRIMARY KEY ("id"))', 
+      client.query('CREATE TABLE IF NOT EXISTS "listhub_listings_a3" ("id" SERIAL, "property" JSON, "sequence" TEXT UNIQUE, PRIMARY KEY ("id"))', 
         function(err, result) {
             if (err) {
                 console.log(err);
             } else {
+
                 console.log("Table created successfully");
 
                 var stream1 = client.query(copyFrom(`COPY ${targetTable} (property, sequence) FROM STDIN CSV`))

@@ -55,6 +55,26 @@ const {
 const { metaURL, replicationURL, token } = require("./config/url");
 const { response } = require("express");
 
+class JsonLinesTransform extends stream.Transform {
+  _transform(chunk, env, cb) {
+    if (!this.chunks) {
+      this.chunks = "";
+    }
+
+    this.chunks += chunk;
+
+    var lines = this.chunks.split(/\n/);
+
+    this.chunks = lines.pop();
+
+    for (let i = 0; i < lines.length; i++) {
+      this.push(lines[i]);
+    }
+
+    cb();
+  }
+}
+
 // Fetch MetaData
 const getMetaDataStream = async () => {
 

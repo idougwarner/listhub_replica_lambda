@@ -130,7 +130,8 @@ const getListingStream = async (values) => {
 
       var targetTable="listhub_listings_as"
 
-      /*stream
+      /*
+      stream
         .pipe(new JsonLinesTransform())
         .pipe(writeStream);
       
@@ -141,10 +142,11 @@ const getListingStream = async (values) => {
       })
       stream.on("error",(err)=>{
         console.log("Error is: "+err)
-      })*/
+      })
+      */
 
-      var stream1 = client.query(copyFrom(`COPY ${targetTable} FROM STDIN`))
-     // var fileStream = fs.createReadStream(inputFile)
+      var stream1 = client.query(copyFrom(`COPY ${targetTable} (sequence, Property) FROM STDIN CSV`))
+      // var fileStream = fs.createReadStream(inputFile)
 
       stream.on('error', (error) =>{
           console.log(`Error in reading file: ${error}`)

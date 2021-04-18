@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const listings_meta = sequelize.define("listings_meta", {
+  const listings_update_reference = sequelize.define("listings_update_reference", {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,
@@ -9,22 +9,12 @@ module.exports = (sequelize, Sequelize) => {
     table_name: {
       type: Sequelize.TEXT,
     },
-    LastModified: {
+    last_modified: {
       type: Sequelize.TEXT,
-    },
-    ContentLength: {
-      type: Sequelize.BIGINT,
-    },
-    ETag: {
-      type: Sequelize.TEXT,
-      unique: true,
-    },
-    ContentType: {
-      type: Sequelize.TEXT,
-    },
+    }
   });
 
-  return listings_meta;
+  return listings_update_reference;
 };
 
 /**

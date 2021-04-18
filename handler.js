@@ -84,15 +84,15 @@ const getListingStream = async (values) => {
 
       var count;
 
+      count = 0
+
+      var time = new Date()
+
       stream
       .pipe(JSONStream.parse())
       .pipe(es.mapSync((data) => {
 
           listArray.push(data)
-
-          var time = new Date()
-
-            count = 0
 
             client.query(
                 'INSERT INTO "listhub_listings_as" ("sequence","Property", "createdAt", "updatedAt") VALUES ($1,$2,$3,$4) RETURNING id', 

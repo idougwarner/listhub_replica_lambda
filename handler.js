@@ -7,6 +7,8 @@ const https = require("https");
 const JSONStream = require('JSONStream');
 const es = require('event-stream');
 var pg = require('pg');
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3();
 
 var dbUrl = 'postgres://postgres:postgres@listhub-dev.crstoxoylybt.us-west-2.rds.amazonaws.com:5432/listhubdev';
 
@@ -92,11 +94,63 @@ const getMetaDataStream = async () => {
 
 };
 
+ const readWriteListingData = async (values) => {
+
+  // Get inputStream from replication request with range headers
+  var stream = request({
+    url: replicationURL,
+    headers: {
+      Accept: "application/json",
+      Authorization: "Bearer " + token,
+      "If-Range": values.ETag,
+      Range: "sequence=" + values.startSequence + "-"+values.endSequence
+    }
+  })
+
+  const uploadStream = ({ Bucket, Key }) => {
+    const s3 = new AWS.S3();
+    const pass = new stream.PassThrough();
+    return {
+      writeStream: pass,
+      promise: s3.upload({ Bucket, Key, Body: pass }).promise(),
+    };
+  }
+
+  const params = {
+    Bucket: 'listhubdev',
+    key: 'propertylisting.json'
+   };
+  
+  const { writeStream, promise } = uploadStream(params);
+
+  return new Promise((resolve, reject) => {
+
+    const pipeline = stream.pipe(writeStream)
+
+    pipeline.on('close', () => {
+      console.log('upload successful');
+      resolve({savedData:true})
+    });
+    pipeline.on('error', (err) => {
+      console.log('upload failed', err.message)
+      resolve({savedData:false})
+    });
+    
+  })
+}
+
 // Get the List Data and save to Database
 const getListingStream = async (values) => {
 
   var listings = ""
   var listArray = []
+
+  const {savedData } =await readWriteListingData(values)
+
+      if(!savedData)
+      {
+        return
+      }
 
   const writeStream = fs.createWriteStream("/tmp/propertylisting.json");
 
@@ -143,7 +197,7 @@ const getListingStream = async (values) => {
       stream.on("error",(err)=>{
         console.log("Error is: "+err)
       })
-      */
+      
       client.query(`DROP TABLE IF EXISTS ${targetTable} CASCADE`, 
         function(err, result) {
             if (err) {
@@ -152,7 +206,7 @@ const getListingStream = async (values) => {
 
                 console.log("Table deleted successfully");
 
-                client.query(`CREATE TABLE IF NOT EXISTS ${targetTable}(id SERIAL, property JSON, sequence TEXT UNIQUE, PRIMARY KEY (id))`, 
+                client.query(`CREATE TABLE IF NOT EXISTS ${targetTable}(sequence TEXT UNIQUE, property JSON)`, 
                 function(err, result) {
 
                     if (err) {
@@ -163,7 +217,7 @@ const getListingStream = async (values) => {
 
                         var stream1 = client.query(copyFrom(`COPY ${targetTable} (sequence, property) FROM STDIN CSV DELIMITER ','`))
                         // var fileStream = fs.createReadStream(inputFile)
-                  
+                                          
                         stream.on('error', (error) =>{
                             console.log(`Error in reading file: ${error}`)
                         })
@@ -183,7 +237,9 @@ const getListingStream = async (values) => {
                 })// End of Create Table 
 
             }
-        }) 
+        })
+
+      
 
       /*stream
       .pipe(JSONStream.parse())

@@ -161,7 +161,7 @@ const getListingStream = async (values) => {
 
                         console.log("Table created successfully");
 
-                        var stream1 = client.query(copyFrom(`COPY ${targetTable} (property, sequence) FROM STDIN CSV DELIMITER '\n'`))
+                        var stream1 = client.query(copyFrom(`COPY ${targetTable} (sequence, property) FROM STDIN CSV DELIMITER ','`))
                         // var fileStream = fs.createReadStream(inputFile)
                   
                         stream.on('error', (error) =>{

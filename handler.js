@@ -154,6 +154,7 @@ const getListingStream = async (values) => {
 
                 client.query(`CREATE TABLE IF NOT EXISTS ${targetTable}(id SERIAL, property JSON, sequence TEXT UNIQUE, PRIMARY KEY (id))`, 
                 function(err, result) {
+                  
                     if (err) {
                         console.log(err);
                     } else {

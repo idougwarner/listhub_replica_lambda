@@ -174,16 +174,16 @@ const getListingStream = async (values) => {
                             console.log(`Completed loading data into ${targetTable}`)
                             client.end()
                         })
-                  
-                        stream.pipe(stream1)
-                        
+
+                        stream
+                        .pipe(new JsonLinesTransform())
+                        .pipe(stream1)
+                      
                     }
                 })// End of Create Table 
 
             }
         }) 
-
-           
 
       /*stream
       .pipe(JSONStream.parse())

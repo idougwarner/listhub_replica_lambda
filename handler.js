@@ -476,21 +476,75 @@ const fetchData = async () => {
   
       console.log("Does Data Exist in Listings A: " + data_a_Exists + "Does Data Exist in Listings B: " + data_b_Exists);
   
-      if (!data_a_Exists) {
+      if (!data_a_Exists && !data_b_Exists) {
   
         // Listings A data does not exist therefore populate table a fresh with getData
-        const data = {
-          storeType: "new",
-          ContentLength: response.data.ContentLength,
-          ETag: ETag,
-          sequence: sequence,
-        };
   
         const { listDataAdded, listAddError } = await saveNewListData();
   
         if (listDataAdded) {
-          // We should copy data in list_a to list_b
+          
+          // Initiate query to copy list_a to list_b
+          pool.connect((err, client, done) => {
+            
+            var sourceTable, destinationTable;
+            
+            sourceTable="listhub_listings_a"
+            destinationTable="listhub_listings_a"
+
+            client.query(`INSERT INTO ${destinationTable} SELECT * FROM ${sourceTable}`, 
+                function(err, result) {
+
+                    if (err) {
+                        console.log(err);
+                    } else {
+
+                        console.log("Records copied successfully to "+destinationTable);
+                      
+                    }
+                })
+         
+          var updatetable="listings_update_reference"
+
+          // Update Reference Table with different timings for both tables
+          client.query(`CREATE TABLE IF NOT EXISTS ${updatetable}(id SERIAL, table_name TEXT UNIQUE, last_modified TEXT UNIQUE, PRIMARY KEY (id))`, 
+                function(err, result) {
+
+                    if (err) {
+                        console.log(err);
+                    } else {
+
+                        console.log("Table created successfully");
+                        var time=new Date()
+
+                        client.query(
+                          `INSERT INTO ${table} (id, table_name, last_modified) VALUES (DEFAULT,$1, $2) RETURNING id`, 
+                          [ sourceTable, time, time], 
+                          function(err, result) {
+                              if (err) {
+                                  console.log(err);
+                              } else {
+                                  console.log('row inserted with id: ' + result.rows[0].id);
+                              }
+                
+                              count++;
+                
+                              console.log('count = ' + count);
+                              
+                              if (count == listArray.length) {
+                                  console.log('Client will end now!!!');
+                                  
+                              }
+                        });// End of Client Query 
+                      
+                    }
+                })// End of Create Table 
+
+          })
+          
+          
           console.log("Product List Data Added" + listDataAdded);
+
         } else {
           console.log("Problem adding data");
         }

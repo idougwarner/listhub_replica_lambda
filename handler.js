@@ -924,7 +924,7 @@ const fetchData = async () => {
               if(Date.parse(list_a_time_modified) > Date.parse(list_b_time_modified)){
                 // Keep list_a and overwrite list_b
 
-                const { listDataAdded, listAddError } = await save_new_list_b_data();
+                const { listDataAdded, listAddError } = save_new_list_b_data();
   
                 if (listDataAdded) {
 
@@ -949,7 +949,7 @@ const fetchData = async () => {
               }
               else {
 
-                const { listDataAdded, listAddError } = await save_new_list_a_data();
+                const { listDataAdded, listAddError } = save_new_list_a_data();
   
                 if (listDataAdded) {
 

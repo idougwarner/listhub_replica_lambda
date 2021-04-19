@@ -97,7 +97,7 @@ const getMetaDataStream = async () => {
  const readWriteListingData = async (values) => {
 
   // Get inputStream from replication request with range headers
-  var stream = request({
+  var stream1 = request({
     url: replicationURL,
     headers: {
       Accept: "application/json",
@@ -125,7 +125,7 @@ const getMetaDataStream = async () => {
 
   return new Promise((resolve, reject) => {
 
-    const pipeline = stream.pipe(writeStream)
+    const pipeline = stream1.pipe(writeStream)
 
     pipeline.on('close', () => {
       console.log('upload successful');

@@ -151,7 +151,7 @@ const getListingStream = async (values) => {
             } else {
 
                 console.log("Table deleted successfully");
-                
+
                 client.query(`CREATE TABLE IF NOT EXISTS ${targetTable}(id SERIAL, property JSON, sequence TEXT UNIQUE, PRIMARY KEY (id))`, 
                 function(err, result) {
                     if (err) {
@@ -160,7 +160,7 @@ const getListingStream = async (values) => {
 
                         console.log("Table created successfully");
 
-                        var stream1 = client.query(copyFrom(`COPY ${targetTable} (property, sequence) FROM STDIN CSV`))
+                        var stream1 = client.query(copyFrom(`COPY ${targetTable} (property, sequence) FROM STDIN CSV DELIMITER ','`))
                         // var fileStream = fs.createReadStream(inputFile)
                   
                         stream.on('error', (error) =>{
@@ -174,7 +174,9 @@ const getListingStream = async (values) => {
                             client.end()
                         })
                   
-                        stream.pipe(stream1);
+                        stream.pipe(new JsonLinesTransform())
+                        .pipe(stream1);
+                        
                     }
                 })// End of Create Table 
 

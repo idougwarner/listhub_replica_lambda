@@ -128,7 +128,7 @@ const getListingStream = async (values) => {
 
       var time = new Date()
 
-      var targetTable="listhub_listings_a2"
+      var targetTable="listhub_listings_a3"
 
       /*
       stream
@@ -144,32 +144,44 @@ const getListingStream = async (values) => {
         console.log("Error is: "+err)
       })
       */
-
-      client.query('CREATE TABLE IF NOT EXISTS listhub_listings_a3(id SERIAL, property JSON, sequence TEXT UNIQUE, PRIMARY KEY (id))', 
+      client.query(`DROP TABLE IF EXISTS ${targetTable} CASCADE`, 
         function(err, result) {
             if (err) {
                 console.log(err);
             } else {
 
-                console.log("Table created successfully");
+                console.log("Table deleted successfully");
+                
+                client.query(`CREATE TABLE IF NOT EXISTS ${targetTable}(id SERIAL, property JSON, sequence TEXT UNIQUE, PRIMARY KEY (id))`, 
+                function(err, result) {
+                    if (err) {
+                        console.log(err);
+                    } else {
 
-                var stream1 = client.query(copyFrom(`COPY ${targetTable} (property, sequence) FROM STDIN CSV`))
-                // var fileStream = fs.createReadStream(inputFile)
-          
-                stream.on('error', (error) =>{
-                    console.log(`Error in reading file: ${error}`)
-                })
-                stream1.on('error', (error) => {
-                    console.log(`Error in copy command: ${error}`)
-                })
-                stream1.on('end', () => {
-                    console.log(`Completed loading data into ${targetTable}`)
-                    client.end()
-                })
-          
-                stream.pipe(stream1);
+                        console.log("Table created successfully");
+
+                        var stream1 = client.query(copyFrom(`COPY ${targetTable} (property, sequence) FROM STDIN CSV`))
+                        // var fileStream = fs.createReadStream(inputFile)
+                  
+                        stream.on('error', (error) =>{
+                            console.log(`Error in reading file: ${error}`)
+                        })
+                        stream1.on('error', (error) => {
+                            console.log(`Error in copy command: ${error}`)
+                        })
+                        stream1.on('end', () => {
+                            console.log(`Completed loading data into ${targetTable}`)
+                            client.end()
+                        })
+                  
+                        stream.pipe(stream1);
+                    }
+                })// End of Create Table 
+
             }
-        })      
+        }) 
+
+           
 
       /*stream
       .pipe(JSONStream.parse())

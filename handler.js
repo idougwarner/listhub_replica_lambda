@@ -434,6 +434,254 @@ const saveNewListData = async () => {
 
 }; // End of saveNewListData
 
+const save_new_list_a_data = async () => {
+
+  var metaResponse;
+  var lastSequence = 0;
+  var startSequence = 0 ;
+  var ETag;
+  var count = 1;
+  var endSequence = 0;
+  var secondStart = 0 ;
+  var listDataAdded = "";
+  var listAddError = "";
+  var start = "";
+
+  try {
+
+    metaResponse = await getMetaDataStream();
+
+    console.log("Status code is: "+metaResponse);
+
+    lastSequence = metaResponse.data.Metadata.lastsequence;
+    startSequence = lastSequence - metaResponse.data.Metadata.totallinecount;
+    ETag = metaResponse.data.ETag;
+
+    console.log("MetaData is" + JSON.stringify(metaResponse.data)+"Status code is: "+metaResponse.statusCode);
+
+  }
+
+  catch(err) {
+
+    listDataAdded = false; 
+    listAddError = err;
+
+    console.log("Error is: "+err)
+
+  }
+
+  const totallinecount = metaResponse.data.Metadata.totallinecount;
+  
+  var chunkSize = parseInt(totallinecount/5);
+  var secondChunk = chunkSize+1;
+
+  var values;
+
+  // console.log("Chunk Size:"+chunkSize+"Total Line Count: "+totallinecount+"StartSequence "+startSequence+"End Sequence"+lastSequence)
+
+  // I want to divide the calls to 2, I want to halve the listings. The first will call will be startSting sequence+what is halved
+  // Next call will be the previous call end sequencccccce
+  while (
+    count <= 15
+  ) {
+
+      // First Chunk
+      if(count==1) {
+
+        endSequence=startSequence+chunkSize;
+
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
+
+        values = {
+          ETag: ETag,
+          startSequence: startSequence,
+          endSequence: endSequence,
+        };
+      }
+
+      else if(count==15) {
+
+        startSequence = endSequence + 1
+        endSequence = startSequence + chunkSize
+
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
+        
+        console.log("Second Start is: "+startSequence)
+
+        values = {
+          ETag: ETag,
+          startSequence: startSequence,
+          endSequence: "",
+        };
+
+      }
+
+      // Third Chunk
+      else {
+
+        startSequence = endSequence + 1
+        endSequence = startSequence + chunkSize
+
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
+
+        values = {
+          ETag: ETag,
+          startSequence: startSequence,
+          endSequence: endSequence,
+        };
+
+      }
+
+      const downloadResponse = await getListingStream(values)
+
+      if(downloadResponse.downloaded){
+
+        console.log("Data was downloaded")
+        listDataAdded = true
+        listAddError = false
+
+        //console.log("ChunkSize+1: "+(chunkSize+1))
+        count=count+1
+
+      }
+      else {
+        console.log("Error Downloading Data")
+        listDataAdded = false
+        listAddError = true 
+      }
+ 
+    } // End WHILE LOOP TO FETCH DATA
+
+    // Return our promise here
+    return ({ listDataAdded: listDataAdded, listAddError:listAddError })
+
+
+}; // End of save_new_list_a_data
+
+const save_new_list_b_data = async () => {
+
+  var metaResponse;
+  var lastSequence = 0;
+  var startSequence = 0 ;
+  var ETag;
+  var count = 1;
+  var endSequence = 0;
+  var secondStart = 0 ;
+  var listDataAdded = "";
+  var listAddError = "";
+  var start = "";
+
+  try {
+
+    metaResponse = await getMetaDataStream();
+
+    console.log("Status code is: "+metaResponse);
+
+    lastSequence = metaResponse.data.Metadata.lastsequence;
+    startSequence = lastSequence - metaResponse.data.Metadata.totallinecount;
+    ETag = metaResponse.data.ETag;
+
+    console.log("MetaData is" + JSON.stringify(metaResponse.data)+"Status code is: "+metaResponse.statusCode);
+
+  }
+
+  catch(err) {
+
+    listDataAdded = false; 
+    listAddError = err;
+
+    console.log("Error is: "+err)
+
+  }
+
+  const totallinecount = metaResponse.data.Metadata.totallinecount;
+  
+  var chunkSize = parseInt(totallinecount/5);
+  var secondChunk = chunkSize+1;
+
+  var values;
+
+  // console.log("Chunk Size:"+chunkSize+"Total Line Count: "+totallinecount+"StartSequence "+startSequence+"End Sequence"+lastSequence)
+
+  // I want to divide the calls to 2, I want to halve the listings. The first will call will be startSting sequence+what is halved
+  // Next call will be the previous call end sequencccccce
+  while (
+    count <= 15
+  ) {
+
+      // First Chunk
+      if(count==1) {
+
+        endSequence=startSequence+chunkSize;
+
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
+
+        values = {
+          ETag: ETag,
+          startSequence: startSequence,
+          endSequence: endSequence,
+        };
+      }
+
+      else if(count==15) {
+
+        startSequence = endSequence + 1
+        endSequence = startSequence + chunkSize
+
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
+        
+        console.log("Second Start is: "+startSequence)
+
+        values = {
+          ETag: ETag,
+          startSequence: startSequence,
+          endSequence: "",
+        };
+
+      }
+
+      // Third Chunk
+      else {
+
+        startSequence = endSequence + 1
+        endSequence = startSequence + chunkSize
+
+        console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
+
+        values = {
+          ETag: ETag,
+          startSequence: startSequence,
+          endSequence: endSequence,
+        };
+
+      }
+
+      const downloadResponse = await getListingStream(values)
+
+      if(downloadResponse.downloaded){
+
+        console.log("Data was downloaded")
+        listDataAdded = true
+        listAddError = false
+
+        //console.log("ChunkSize+1: "+(chunkSize+1))
+        count=count+1
+
+      }
+      else {
+        console.log("Error Downloading Data")
+        listDataAdded = false
+        listAddError = true 
+      }
+ 
+    } // End WHILE LOOP TO FETCH DATA
+
+    // Return our promise here
+    return ({ listDataAdded: listDataAdded, listAddError:listAddError })
+
+
+}; // End of save_new_list_a_data
+
 const fetchData = async () => {
 
   // Sync Database first
@@ -450,12 +698,6 @@ const fetchData = async () => {
       console.log("Content Length: " + response.data.ContentLength);
       console.log("Etag Value: " + response.data.ETag);
   
-      var date = new Date();
-      date.setSeconds(0);
-      date.setMilliseconds(0);
-  
-      var key = date.getTime().toString().padEnd(19, 0);
-  
       const metaResponse = await getMetaDataStream();
   
       console.log("MetaData is" + JSON.stringify(metaResponse.data));
@@ -468,14 +710,14 @@ const fetchData = async () => {
   
       console.log("ETag: " + values.ETag + " Sequence: " + values.sequence);
   
-      console.log("KEY is: " + key);
-  
       // Check if Listhub listings exist in both listings a and listings b
       const { data_a_Exists } = await list_a_DataExists();
       const { data_b_Exists } = await list_b_DataExists();
   
       console.log("Does Data Exist in Listings A: " + data_a_Exists + "Does Data Exist in Listings B: " + data_b_Exists);
-  
+
+      
+      // This is the first population of records in the event that both tables did not exist.  
       if (!data_a_Exists && !data_b_Exists) {
   
         // Listings A data does not exist therefore populate table a fresh with getData
@@ -507,7 +749,7 @@ const fetchData = async () => {
           var updatetable="listings_update_reference"
 
           // Update Reference Table with different timings for both tables
-          client.query(`CREATE TABLE IF NOT EXISTS ${updatetable}(id SERIAL, table_name TEXT UNIQUE, last_modified TEXT UNIQUE, PRIMARY KEY (id))`, 
+          client.query(`CREATE TABLE IF NOT EXISTS ${updatetable}(id SERIAL, table_name TEXT UNIQUE, last_modified TEXT UNIQUE, live_status TEXT UNIQUE, PRIMARY KEY (id))`, 
                 function(err, result) {
 
                     if (err) {
@@ -515,11 +757,13 @@ const fetchData = async () => {
                     } else {
 
                         console.log("Table created successfully");
+                        
                         var time=new Date()
 
+                        // Update reference table with list_a record
                         client.query(
-                          `INSERT INTO ${table} (id, table_name, last_modified) VALUES (DEFAULT,$1, $2) RETURNING id`, 
-                          [ sourceTable, time, time], 
+                          `INSERT INTO ${updatetable} (id, table_name, last_modified, live_status) VALUES (DEFAULT,$1, $2) RETURNING id`, 
+                          [ sourceTable, time, "live"], 
                           function(err, result) {
                               if (err) {
                                   console.log(err);
@@ -527,21 +771,29 @@ const fetchData = async () => {
                                   console.log('row inserted with id: ' + result.rows[0].id);
                               }
                 
-                              count++;
-                
-                              console.log('count = ' + count);
-                              
-                              if (count == listArray.length) {
-                                  console.log('Client will end now!!!');
-                                  
+                        });// End of list_a Client Query
+
+                        var newtime=new Date()
+
+                        // Update reference table with list_b record
+                        client.query(
+                          `INSERT INTO ${updatetable} (id, table_name, last_modified, live_status) VALUES (DEFAULT,$1, $2) RETURNING id`, 
+                          [ destinationTable, newtime, "not-live"], 
+                          function(err, result) {
+                              if (err) {
+                                  console.log(err);
+                              } else {
+                                  console.log('row inserted with id: ' + result.rows[0].id);
                               }
-                        });// End of Client Query 
+
+                        });// End of list_b Client Query 
                       
                     }
-                })// End of Create Table 
+                })// End of Create Table
+
+                client.end()
 
           })
-          
           
           console.log("Product List Data Added" + listDataAdded);
 
@@ -576,7 +828,7 @@ const fetchData = async () => {
 
         console.log("New listings ready for download: ");
   
-        // If new metadata detected delete old metadata record and save new metadata and call replicationData to download new listings
+        // Delete old metadata
         const { metadataDeleted, error } = await metaDeleteAll();
   
         if (metadataDeleted) {
@@ -588,15 +840,84 @@ const fetchData = async () => {
           );
   
           if (metadataAdded) {
-            console.log("New Metadata" + JSON.stringify(data));
+
+            var listings_update_reference_table = "listings_update_reference"            
+            var list_a_table = "listhub_listings_a"
+            var list_b_table = "listhub_listings_b"
+            var list_a_time_modified, list_b_time_modified;
+
+            pool.connect((err, client, done) => {
+              
+              // Get list_a_time_modifed
+              client.query(
+                `SELECT * FROM ${listings_update_reference_table} WHERE table_name = $1)`,
+                [list_a_table],  // array of query arguments
+                function(err, result) {
+                  list_a_time_modified = result.rows[0].last_modified;
+                }
+              );
+
+              client.query(
+                `SELECT * FROM ${listings_update_reference_table} WHERE table_name = $1)`,
+                [list_b_table],  // array of query arguments
+                function(err, result) {
+                  list_b_time_modified = result.rows[0].last_modified;
+                }
+              );
+
+              if(Date.parse(list_a_time_modified) > Date.parse(list_b_time_modified)){
+                // Keep list_a and overwrite list_b
+
+                const { listDataAdded, listAddError } = await save_new_list_b_data();
   
-            const { listDataAdded, listAddError } = await saveNewListData();
+                if (listDataAdded) {
+
+                  "UPDATE student SET age = 24 WHERE id = 3"
+
+                  var new_time = new Date()
+
+                  // Overwrite reference file with new data about list_b
+                  client.query(
+                    `UPDATE ${listings_update_reference_table} SET live_status = "live" AND last_modified = ${new_time} WHERE table_name = ${list_b_table})`,
+                    [list_b_table],  // array of query arguments
+                    function(err, result) {
+                      list_b_time_modified = result.rows[0].last_modified;
+                    }
+                  );
+
+                  console.log("New Product List Data Added");
+                } else {
+                  console.log("Problem adding data");
+                }
+
+              }
+              else {
+
+                const { listDataAdded, listAddError } = await save_new_list_a_data();
   
-            if (listDataAdded) {
-              console.log("New Product List Data Added");
-            } else {
-              console.log("Problem adding data");
-            }
+                if (listDataAdded) {
+
+                  var new_time = new Date()
+
+                  // Overwrite reference file with new data about list_b
+                  client.query(
+                    `UPDATE ${listings_update_reference_table} SET live_status = "live" AND last_modified = ${new_time} WHERE table_name = ${list_a_table})`,
+                    [list_a_table],  // array of query arguments
+                    function(err, result) {
+                      list_a_time_modified = result.rows[0].last_modified;
+                    }
+                  );
+
+                  console.log("New Product List Data Added");
+                } else {
+                  console.log("Problem adding data");
+                }
+
+              }
+            })
+
+            // Check between list_a and list_b to see which one is live. Table that is not live should receive update
+ 
           } else {
             console.log("Problem Adding new Meta Data" + error);
           }

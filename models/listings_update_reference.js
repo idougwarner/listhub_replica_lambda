@@ -11,6 +11,9 @@ module.exports = (sequelize, Sequelize) => {
     },
     last_modified: {
       type: Sequelize.TEXT,
+    },
+    live_status: {
+      type: Sequelize.TEXT,
     }
   });
 

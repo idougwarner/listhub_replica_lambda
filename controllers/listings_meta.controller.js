@@ -171,11 +171,15 @@ module.exports.meta_data_exist = async () => {
       client.query(`SELECT * from ${tbl_listings_meta}`, (err, res) => {
         
         if(res.rows) {
+          
+          console.log("Meta Data does not exist")
   
           const result = { metadataExists: true, metadata: data, error: null };
 
           return result;
         } else {
+
+          console.log("Meta Data does not exist")
 
           const result = { metadataExists: false, metadata: null, error: "No Data" };
     

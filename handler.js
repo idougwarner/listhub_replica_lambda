@@ -286,10 +286,10 @@ const meta_data_exist = async () => {
           console.log("Meta Data does exist")
   
           result.dataExists = true 
-          result.metadata = data
+          result.metadata = res.rows
           result.error = null
 
-          return ({ dataExists: true, metadata: data, error: null, statusCode: 200,  headers: null,
+          return ({ dataExists: true, metadata: res.rows, error: null, statusCode: 200,  headers: null,
             body: "Successfully created data" })
             
         } else {

@@ -61,6 +61,7 @@ const {
 
 const { metaURL, replicationURL, token } = require("./config/url");
 const { response } = require("express");
+const tbl_listings_meta="listings_meta";
 
 class JsonLinesTransform extends stream.Transform {
   _transform(chunk, env, cb) {
@@ -215,6 +216,53 @@ const set_listings_table = async (table_to_set) => {
   
 }
 
+const create_new_meta_data = async (data) => {
+
+  console.log("Inside create new metadata")
+
+  var result = { metadataAdded: null, error: "", metadata: null}
+
+  try {
+    const client = await pool.connect()
+
+      client.query(
+        `INSERT INTO ${tbl_listings_meta} (id, last_modifed, content_length, etag, content_type) VALUES (DEFAULT, $1,$2,$3,$4) RETURNING id`, 
+        [data.LastModified, data.ContentLength, data.ETag, data.ContentType], (err, res) => {
+            if (err) {
+                console.log(err);
+
+                result = {
+                  metadataAdded: false,
+                  error: "Could Not add Data",
+                  metadata: null
+                }
+        
+            } else {
+                console.log('row inserted with id: ' + res.rows[0].id);
+                
+                result = { metadataAdded: true, metadata: data, error: null }
+
+            }
+      })
+
+    return result
+  }
+  catch(err) {
+
+    result = {
+      metadataAdded: false,
+      statusCode: 500,
+      headers: { "Content-Type": "text/plain" },
+      body: "Could not create the PropertyMeta.",
+      error: err,
+      metadata: null,
+    }
+
+    console.log("Error "+err)    
+  }
+  return result;
+}
+
 const meta_data_exist = async () => {
   const tbl_listings_meta="listings_meta"; 
 
@@ -227,9 +275,14 @@ const meta_data_exist = async () => {
 
       client.query(`SELECT * from ${tbl_listings_meta}`, (err, res) => {
         
+        if(err) {
+          console.log("Check error"+err)
+          return ({ dataExists: false, metadata: null, error: null, statusCode: null,  headers: null,
+            body: "" })
+        }
         if(res.rows) {
 
-          console.log("Meta Data does not exist")
+          console.log("Meta Data does exist")
   
           result.dataExists = true 
           result.metadata = data
@@ -246,6 +299,7 @@ const meta_data_exist = async () => {
     
           return (result)
         }
+        
 
       });
     })

@@ -232,12 +232,12 @@ const create_new_meta_data = async (data) => {
                   metadata: null
                 }
 
-                return({ metadataAdded: false, error: "Could Not add Data", metadata: null})
+                return ({ metadataAdded: false, error: "Could Not add Data", metadata: null})
         
             } else {
                 console.log('row inserted with id: ' + res.rows[0].id);
                 
-                return({ metadataAdded: true, metadata: data, error: null })
+                return ({ metadataAdded: true, metadata: data, error: null })
 
             }
       })  
@@ -246,7 +246,7 @@ const create_new_meta_data = async (data) => {
 
     console.log("Error "+err) 
 
-    return({
+    return ({
       metadataAdded: false,
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },
@@ -318,7 +318,7 @@ const meta_data_exist = async () => {
  *  ListHubMonitor
  *  Invokes every 1 hour and detects any update. 
  */
-module.exports.listhubMonitor = (event, context) => {
+module.exports.listhubMonitor = async (event, context) => {
 
   try {
 

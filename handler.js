@@ -218,12 +218,11 @@ const set_listings_table = async (table_to_set) => {
 const create_new_meta_data = async (data) => {
 
   console.log("Inside create new metadata")
-  const client = pool.connect()
 
   return new Promise((resolve, reject) =>{
 
   try {
-        
+      const client = await pool.connect()  
       client.query(`INSERT INTO ${tbl_listings_meta} (id, last_modifed, content_length, etag, content_type) VALUES (DEFAULT, $1,$2,$3,$4) RETURNING id`, 
         [data.LastModified, data.ContentLength, data.ETag, data.ContentType], (err, res) => {
             if (err) {
@@ -330,7 +329,7 @@ module.exports.listhubMonitor = async (event, context) => {
     var table_b = "listhub_listings_b"
     var meta_table = "listings_meta"
 
-    await set_listings_table(table_a)
+    const {table_created} = await set_listings_table(table_a)
     await set_listings_table(table_b)
     await set_meta_table(meta_table)
     

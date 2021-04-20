@@ -58,6 +58,8 @@ module.exports.metaCreate = async (jsonData) => {
 
 module.exports.create_new_meta_data = async (data) => {
 
+  const result = {}
+
   try {
     await pool.connect((err, client, done) => {
 
@@ -67,19 +69,17 @@ module.exports.create_new_meta_data = async (data) => {
             if (err) {
                 console.log(err);
 
-                const result = {
+                result = {
                   metadataAdded: false,
                   error: "Could Not add Data",
                   metadata: null,
                 };
-          
-                return result;
+        
             } else {
                 console.log('row inserted with id: ' + result.rows[0].id);
                 
-                const result = { metadataAdded: true, metadata: data, error: null };
+                result = { metadataAdded: true, metadata: data, error: null };
 
-                return result;
             }
 
       })
@@ -87,7 +87,7 @@ module.exports.create_new_meta_data = async (data) => {
     })
   }
   catch(err) {
-    const result = {
+    result = {
       metadataAdded: false,
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },
@@ -96,8 +96,9 @@ module.exports.create_new_meta_data = async (data) => {
       metadata: null,
     };
 
-    return result;   
+       
   }
+  return result;
 
 }
 

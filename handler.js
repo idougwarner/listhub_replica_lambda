@@ -261,9 +261,6 @@ const create_new_meta_data = async (data) => {
 const meta_data_exist = async () => {
   const tbl_listings_meta="listings_meta"; 
 
-  var result = { dataExists: false, metadata: null, error: null, statusCode: null,  headers: null,
-    body: "" }
-
   try {  
 
     const client = await pool.connect();
@@ -277,6 +274,8 @@ const meta_data_exist = async () => {
           resolve({ dataExists: false, metadata: null, error: err, statusCode: null,  headers: null,
             body: "" })
         }
+
+        console.log("Rows: "+res.rows)
 
         if(res.rows) {
 

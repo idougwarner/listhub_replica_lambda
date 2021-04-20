@@ -166,7 +166,7 @@ module.exports.metaDataExists = async () => {
 module.exports.meta_data_exist = async () => {
 
   const result = { metadataExists: false, metadata: null, error: null, statusCode: null,  headers: null,
-    body: "" };
+    body: "" }
 
   try {  
 
@@ -235,13 +235,13 @@ module.exports.ismetadataNew = async (lastModified) => {
 
       if (timeResult.newUpdate) {
 
-        const result = { newUpdate: true, error: null };
+        const result = { newUpdate: true, error: null }
         
         return result;
 
       } else {
         
-        const result = { newUpdate: false, error: "No Update" };
+        const result = { newUpdate: false, error: "No Update" }
         return result;
 
       }
@@ -259,7 +259,7 @@ module.exports.ismetadataNew = async (lastModified) => {
       headers: { "Content-Type": "text/plain" },
       body: "Problem Deleting Property Info.",
       error: err,
-    };
+    }
 
     return result;
 

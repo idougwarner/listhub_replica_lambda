@@ -63,11 +63,11 @@ module.exports.create_new_meta_data = async (data) => {
   const result = {metadataAdded: null, metadata: null, error: null}
 
   try {
-    await pool.connect((err, client, done) => {
+    const client = await pool.connect()
 
       client.query(
         `INSERT INTO ${tbl_listings_meta} (id, last_modifed, content_length, etag, content_type) VALUES (DEFAULT, $1,$2,$3,$4) RETURNING id`, 
-        [data.LastModified, data.ContentLength, data.ETag, data.ContentType], (err, result) => {
+        [data.LastModified, data.ContentLength, data.ETag, data.ContentType], (err, res) => {
             if (err) {
                 console.log(err);
 
@@ -78,7 +78,7 @@ module.exports.create_new_meta_data = async (data) => {
                 }
         
             } else {
-                console.log('row inserted with id: ' + result.rows[0].id);
+                console.log('row inserted with id: ' + res.rows[0].id);
                 
                 result = { metadataAdded: true, metadata: data, error: null }
 
@@ -86,7 +86,6 @@ module.exports.create_new_meta_data = async (data) => {
 
       })
 
-    })
     return (result)
   }
   catch(err) {

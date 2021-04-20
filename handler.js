@@ -170,7 +170,7 @@ const set_meta_table = async (meta_table) => {
         })// End of Create Table
       }
     })
-  }catch(err) {
+  } catch(err) {
 
     console.log("Create table listings error"+err)
    // return ({updated:false, data: result.rows[0], error:err}) 
@@ -219,8 +219,6 @@ const create_new_meta_data = async (data) => {
 
   console.log("Inside create new metadata")
 
-  return new Promise((resolve, reject) =>{
-
   try {
       const client = await pool.connect()  
       client.query(`INSERT INTO ${tbl_listings_meta} (id, last_modifed, content_length, etag, content_type) VALUES (DEFAULT, $1,$2,$3,$4) RETURNING id`, 
@@ -234,12 +232,12 @@ const create_new_meta_data = async (data) => {
                   metadata: null
                 }
 
-                resolve({ metadataAdded: false, error: "Could Not add Data", metadata: null})
+                return({ metadataAdded: false, error: "Could Not add Data", metadata: null})
         
             } else {
                 console.log('row inserted with id: ' + res.rows[0].id);
                 
-                resolve({ metadataAdded: true, metadata: data, error: null })
+                return({ metadataAdded: true, metadata: data, error: null })
 
             }
       })  
@@ -248,7 +246,7 @@ const create_new_meta_data = async (data) => {
 
     console.log("Error "+err) 
 
-    resolve({
+    return({
       metadataAdded: false,
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },
@@ -257,7 +255,6 @@ const create_new_meta_data = async (data) => {
       metadata: null,
     })    
   }
-})
 }
 
 const meta_data_exist = async () => {

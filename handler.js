@@ -144,6 +144,9 @@ const getMetaDataStream = async () => {
 }
 
 const set_meta_table = async (meta_table) => {
+
+  try {
+    const client = await pool.connect()
   
   //id, last_modifed, content_length, etag, content_type
   // Get list_a_time_modifed
@@ -168,6 +171,12 @@ const set_meta_table = async (meta_table) => {
         })// End of Create Table
       }
     })
+  }catch(err) {
+
+    console.log("Create table listings error"+err)
+   // return ({updated:false, data: result.rows[0], error:err}) 
+
+  }
 
 }
 
@@ -202,7 +211,7 @@ const set_listings_table = async (table_to_set) => {
 
   } catch(err) {
 
-    console.log("Update status error"+err)
+    console.log("Create table listings error"+err)
     return ({updated:false, data: result.rows[0], error:err})    
 
   }

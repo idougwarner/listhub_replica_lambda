@@ -277,9 +277,11 @@ const meta_data_exist = async () => {
         
         if(err) {
           console.log("Check error"+err)
+
           return ({ dataExists: false, metadata: null, error: null, statusCode: null,  headers: null,
             body: "" })
         }
+
         if(res.rows) {
 
           console.log("Meta Data does exist")
@@ -288,7 +290,9 @@ const meta_data_exist = async () => {
           result.metadata = data
           result.error = null
 
-          return (result)
+          return ({ dataExists: true, metadata: data, error: null, statusCode: 200,  headers: null,
+            body: "Successfully created data" })
+            
         } else {
 
           console.log("Meta Data does not exist")
@@ -297,7 +301,8 @@ const meta_data_exist = async () => {
           result.metadata = null
           result.error = "No meta data"
     
-          return (result)
+          return ({ dataExists: false, metadata: null, error: null, statusCode: 500,  headers: null,
+            body: "Successfully created data" })
         }
         
 
@@ -314,7 +319,8 @@ const meta_data_exist = async () => {
 
       console.log("Error in meta"+err)
 
-    return (result);   
+      return ({ dataExists: false, metadata: null, error: err, statusCode: 500,  headers: { "Content-Type": "text/plain" },
+        body: "Problem finding PropertyMeta Info." })   
   }
 };
 

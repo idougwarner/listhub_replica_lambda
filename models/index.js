@@ -1,4 +1,5 @@
 const Sequelize = require("sequelize");
+const { Pool, Client } = require("pg");
 const listhub_listings_a_model = require("./listhub_listings_a");
 const listhub_listings_b_model = require("./listhub_listings_b");
 
@@ -44,4 +45,14 @@ module.exports.connectToDatabase = async () => {
 
 module.exports.syncDB = async () => {
  return sequelize.sync({ force:true });
+}
+
+module.exports.pool = async () => {
+  return new Pool({
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT
+  });
 }

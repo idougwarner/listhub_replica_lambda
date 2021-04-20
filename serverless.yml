@@ -8,6 +8,11 @@ provider:
   name: aws
   runtime: nodejs12.x
   lambdaHashingVersion: 20201221
+  iamRoleStatements:
+	  - Effect: Allow
+	    Action:
+	      - lambda:InvokeFunction
+	    Resource: "*"
   region: us-west-2
   environment:
     DB_HOST: ${param:DB_HOST}
@@ -30,6 +35,14 @@ functions:
     timeout: 890
     events:
       - schedule: rate(1 hour)
+  listhubMonitor:
+    handler: handler.listhubMonitor
+    timeout: 900
+    events:
+      - schedule: rate(1 hour)
+  streamExecutor:
+    handler: handler.streamExecutor
+    timeout: 900
   
 plugins:
   - serverless-plugin-lambda-insights

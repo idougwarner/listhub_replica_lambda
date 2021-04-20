@@ -8,7 +8,9 @@ const JSONStream = require('JSONStream');
 const es = require('event-stream');
 var pg = require('pg');
 const AWS = require('aws-sdk');
-const s3 = new AWS.S3();
+const lambda = new AWS.Lambda({
+  region: "us-west-2"
+});
 
 var dbUrl = 'postgres://postgres:postgres@listhub-dev.crstoxoylybt.us-west-2.rds.amazonaws.com:5432/listhubdev';
 
@@ -47,6 +49,7 @@ const {
   listBulkList,
   listDataExists,
   listDeleteAll,
+  table_to_save_listings
 } = require("./controllers/listings_update_reference.controller");
 
 const {
@@ -54,6 +57,8 @@ const {
   metaDataExists,
   metaDeleteAll,
   ismetadataNew,
+  create_new_meta_data,
+  is_meta_data_new
 } = require("./controllers/listings_meta.controller");
 
 const { metaURL, replicationURL, token } = require("./config/url");
@@ -238,71 +243,6 @@ const getListingStream = async (values) => {
 
             }
         })
-
-      
-
-      /*stream
-      .pipe(JSONStream.parse())
-      .pipe(es.mapSync((data) => {
-
-          //listArray.push(data)
-          listings=listings+JSON.stringify(data)
-
-          // Convert this data to a string, now we need to write it to a csv
-         // console.log(JSON.stringify(data))
-            
-      }))*/
-
-      stream.on("complete", () => {
-
-        // COPY table FROM '/tmp/table.csv' DELIMITER ',';
-
-        /*client.query(
-          'INSERT INTO "listhub_listings_as" ("sequence","Property", "createdAt", "updatedAt") VALUES ($1,$2,$3,$4) RETURNING id', 
-          [data.sequence, data.Property, time, time], 
-          function(err, result) {
-              if (err) {
-                  console.log(err);
-              } else {
-                  console.log('row inserted with id: ' + result.rows[0].id);
-              }
-
-              count++;
-
-              console.log('count = ' + count);
-              
-              if (count == listArray.length) {
-                  console.log('Client will end now!!!');
-                  
-              }
-      })*/
-
-        /*
-        client.query(
-          'INSERT INTO "listhub_listings_as" ("sequence","Property", "createdAt", "updatedAt") VALUES ($1,$2,$3,$4) RETURNING id', 
-          [data.sequence, data.Property, time, time], 
-          function(err, result) {
-              if (err) {
-                  console.log(err);
-              } else {
-                  console.log('row inserted with id: ' + result.rows[0].id);
-              }
-
-              count++;
-
-              console.log('count = ' + count);
-              
-              if (count == listArray.length) {
-                  console.log('Client will end now!!!');
-                  
-              }
-      });// End of Client Query  
-        
-        console.log("Completed reading of data: "+listArray.length)
-
-       // client.end();
-
-        var time=new Date()*/
         
       }) // End of Stream Complete 
 
@@ -668,6 +608,7 @@ const save_new_list_b_data = async () => {
       // First Chunk
       if(count==1) {
 
+        startSequence=startSequence = lastSequence - metaResponse.data.Metadata.totallinecount;
         endSequence=startSequence+chunkSize;
 
         console.log("Step "+count+' \nStart Sequence: '+startSequence+" End Sequence: "+endSequence);
@@ -897,80 +838,8 @@ const fetchData = async () => {
   
           if (metadataAdded) {
 
-            var listings_update_reference_table = "listings_update_reference"            
-            var list_a_table = "listhub_listings_a"
-            var list_b_table = "listhub_listings_b"
-            var list_a_time_modified, list_b_time_modified;
-
-            pool.connect((err, client, done) => {
-              
-              // Get list_a_time_modifed
-              client.query(
-                `SELECT * FROM ${listings_update_reference_table} WHERE table_name = $1)`,
-                [list_a_table],  // array of query arguments
-                function(err, result) {
-                  list_a_time_modified = result.rows[0].last_modified;
-                }
-              );
-
-              client.query(
-                `SELECT * FROM ${listings_update_reference_table} WHERE table_name = $1)`,
-                [list_b_table],  // array of query arguments
-                function(err, result) {
-                  list_b_time_modified = result.rows[0].last_modified;
-                }
-              );
-
-              if(Date.parse(list_a_time_modified) > Date.parse(list_b_time_modified)){
-                // Keep list_a and overwrite list_b
-
-                const { listDataAdded, listAddError } = save_new_list_b_data();
-  
-                if (listDataAdded) {
-
-                  "UPDATE student SET age = 24 WHERE id = 3"
-
-                  var new_time = new Date()
-
-                  // Overwrite reference file with new data about list_b
-                  client.query(
-                    `UPDATE ${listings_update_reference_table} SET live_status = "live" AND last_modified = ${new_time} WHERE table_name = ${list_b_table})`,
-                    [list_b_table],  // array of query arguments
-                    function(err, result) {
-                      list_b_time_modified = result.rows[0].last_modified;
-                    }
-                  );
-
-                  console.log("New Product List Data Added");
-                } else {
-                  console.log("Problem adding data");
-                }
-
-              }
-              else {
-
-                const { listDataAdded, listAddError } = save_new_list_a_data();
-  
-                if (listDataAdded) {
-
-                  var new_time = new Date()
-
-                  // Overwrite reference file with new data about list_b
-                  client.query(
-                    `UPDATE ${listings_update_reference_table} SET live_status = "live" AND last_modified = ${new_time} WHERE table_name = ${list_a_table})`,
-                    [list_a_table],  // array of query arguments
-                    function(err, result) {
-                      list_a_time_modified = result.rows[0].last_modified;
-                    }
-                  );
-
-                  console.log("New Product List Data Added");
-                } else {
-                  console.log("Problem adding data");
-                }
-
-              }
-            })
+            // Check table to update with list
+           const {}
 
             // Check between list_a and list_b to see which one is live. Table that is not live should receive update
  
@@ -994,12 +863,390 @@ const fetchData = async () => {
     console.log(err)
     
     if(err.response.status==401) {
+      
       console.log("You are not authorized to access Listhub API Obtain acces from admin")
+
     }
 
   }
 
 };
+
+const set_listings_table = async (table_to_set) => {
+
+  try {
+    const client = await pool().connect()
+        
+    // Get list_a_time_modifed
+    client.query(`DROP TABLE IF EXISTS ${table_to_set} CASCADE`, (err, result) => {
+        if (err) {
+            console.log(err);
+            return ({ table_created:false })
+        } else {
+
+            console.log("Table deleted successfully");
+
+            client.query(`CREATE TABLE IF NOT EXISTS ${table_to_set}(sequence TEXT UNIQUE, property JSON)`, (err, result) => {
+
+                if (err) {
+                    console.log(err);
+                } else {
+
+                  return ({ table_created:true })   
+                }
+            })// End of Create Table
+          }
+        })
+
+  } catch(err) {
+
+    console.log("Update status error"+err)
+    return ({updated:false, data: result.rows[0], error:err})    
+
+  }
+  
+}
+
+/**
+ *  ListHubMonitor
+ *  Invokes every 1 hour and detects any update. 
+ */
+module.exports.listhubMonitor = (event, context) => {
+
+  try {
+
+    var table_a = "listhub_listings_a"
+    var table_b = "listhub_listings_b"
+
+    await set_listings_table(table_a)
+    await set_listings_table(table_b)
+    
+    // Get meta_data info
+    const response =  await getMetaDataStream();
+    
+    if (response) {
+      
+      // Check whether there is new meta_data
+      const { metadataExists } = await metaDataExists();
+        
+      // Store meta_data if none exists
+      if (!metadataExists) {
+        
+        // Store the new Metadata
+        const { metadataAdded } = await create_new_meta_data(response.data);
+  
+        // Check if meta_data has been stored for the first time
+        if (metadataAdded) {
+          
+          console.log("New metadata has been created");
+
+          var lastSequence = response.data.Metadata.lastsequence;
+          var startSequence = lastSequence - response.data.Metadata.totallinecount;
+          var endSequence=0
+          var ETag = response.data.ETag;
+          
+          var i, range;
+          range = 15
+
+          const totallinecount = response.data.Metadata.totallinecount;
+  
+          var chunkSize = parseInt(totallinecount/range);
+
+          var values;
+          var ranges = []
+
+          for(i=1; i<=range; i++) {
+
+            if(i==1) {
+
+              startSequence = lastSequence - metaResponse.data.Metadata.totallinecount;
+              endSequence = startSequence+chunkSize;
+              
+              values = {
+                ETag: ETag,
+                startSequence: startSequence,
+                endSequence: endSequence,
+              };
+              ranges.push(values)
+            }
+
+            else if(i==range) {
+
+              startSequence = endSequence + 1
+              endSequence = startSequence + chunkSize
+
+              values = {
+                ETag: ETag,
+                startSequence: startSequence,
+                endSequence: "",
+              };
+
+              ranges.push(values)
+
+            }
+
+            // All chunks in between 1 and the last
+            else {
+
+              startSequence = endSequence + 1
+              endSequence = startSequence + chunkSize
+
+              values = {
+                ETag: ETag,
+                startSequence: startSequence,
+                endSequence: endSequence,
+              };
+
+              ranges.push(values)
+            }
+
+          }
+          
+          // Download new listings by calling StreamExecutor with table_name and ranges
+          // We shall download to two tables at the same time
+          for(var index=1; index<ranges.length; index++) {
+
+              var range = ranges[index]
+
+              const params1 = {
+                FunctionName: "streamExecutor",
+                InvocationType: "RequestResponse",
+                Payload: { range: range, table_name: table_a }
+              };
+          
+               lambda.invoke(params1, function(error, data) {
+                if (error) {
+                  console.error(JSON.stringify(error));
+                  return new Error(`Error printing messages: ${JSON.stringify(error)}`);
+                } else if (data) {
+                  console.log(data);
+                }
+              });
+
+              const params2 = {
+                FunctionName: "streamExecutor",
+                InvocationType: "RequestResponse",
+                Payload: { range: range, table_name: table_a }
+              };
+          
+              lambda.invoke(params2, function(error, data) {
+                if (error) {
+                  console.error(JSON.stringify(error));
+                  return new Error(`Error printing messages: ${JSON.stringify(error)}`);
+                } else if (data) {
+                  console.log(data);
+                }
+              });
+                                         
+          }
+        }
+      }// End If metadataExists
+      else {
+
+        // Compare stored meta_data and new meta_data coming in from listhub to see if we have new listings
+        const { newUpdate } = await is_meta_data_new(response.data.LastModified);
+
+        if(newUpdate) {
+          // Delete old meta and Download new Meta Data
+
+          const { metadataDeleted, error } = await metaDeleteAll();
+
+          if(metadataDeleted) {
+
+            const { metadataAdded } = await create_new_meta_data(response.data);
+
+            // Check which table to save new data
+            const {table_to_save} = await table_to_save_listings()
+
+            // Call StreamExecutor with table_to_save and ranges
+            var lastSequence = response.data.Metadata.lastsequence;
+            var startSequence = lastSequence - response.data.Metadata.totallinecount;
+            var endSequence=0
+            var ETag = response.data.ETag;
+            
+            var i, range;
+            range = 15
+
+            const totallinecount = response.data.Metadata.totallinecount;
+    
+            var chunkSize = parseInt(totallinecount/range);
+
+            var values;
+            var ranges = []
+
+            for(i=1; i<=range; i++) {
+
+              if(i==1) {
+
+                startSequence = lastSequence - metaResponse.data.Metadata.totallinecount;
+                endSequence = startSequence+chunkSize;
+                
+                values = {
+                  ETag: ETag,
+                  startSequence: startSequence,
+                  endSequence: endSequence,
+                };
+
+                ranges.push(values)
+
+              }
+
+              else if(i==range) {
+
+                startSequence = endSequence + 1
+                endSequence = startSequence + chunkSize
+
+                values = {
+                  ETag: ETag,
+                  startSequence: startSequence,
+                  endSequence: "",
+                };
+
+                ranges.push(values)
+
+              }
+
+              // All chunks in between 1 and the last
+              else {
+
+                startSequence = endSequence + 1
+                endSequence = startSequence + chunkSize
+
+                values = {
+                  ETag: ETag,
+                  startSequence: startSequence,
+                  endSequence: endSequence,
+                };
+
+                ranges.push(values)
+              }
+
+            }
+            
+            // Download new listings by calling StreamExecutor with table_name and ranges
+            // We shall download to two tables at the same time
+            for(var index=1; index<ranges.length; index++) {
+
+              var range = ranges[index]
+
+              // This will call the lambdas asynchronously
+              // Get response of each save so that we update live status of table
+              
+              const params = {
+                FunctionName: "streamExecutor",
+                InvocationType: "RequestResponse",
+                Payload: { range: range, table_name: table_to_save }
+              };
+          
+              lambda.invoke(params, function(error, data) {
+                if (error) {
+                  console.error(JSON.stringify(error));
+                  return new Error(`Error printing messages: ${JSON.stringify(error)}`);
+                } else if (data) {
+                  console.log(data);
+                }
+              });
+                                          
+            }
+
+          }
+                    
+        } 
+
+      }
+
+    }
+
+  }
+  catch(err) {
+    console.log("Error: "+err)
+  }
+    
+}
+
+/**
+ * StreamExecutor
+ * Streams the range and adds all listings in that range to the database 
+ */
+module.exports.streamExecutor = (event, context, callback) => {
+  
+  var ETag = event.range.values.ETag
+  var startSequence = event.range.startSequence
+  var endSequence = event.range.endSequence
+  var table_name = event.range.table_name
+  var listings = ""
+  var listArray = []
+
+      // Get inputStream from replication request with range headers
+     var stream = request({
+        url: replicationURL,
+        headers: {
+          Accept: "application/json",
+          Authorization: "Bearer " + token,
+          "If-Range": ETag,
+          Range: "sequence=" + startSequence + "-" + endSequence
+        }
+      })
+
+      // STREAMING WITH JSON STREAM
+      // var startTime, endTime
+
+      // startTime=new Date()
+      
+      console.log("Start Time: "+startTime)
+
+      stream
+      .pipe(JSONStream.parse())
+      .pipe(es.mapSync((data) => {
+
+          listArray.push(data)
+
+      }))
+
+      stream.on("complete", () => {
+        
+        console.log("Completed reading of data: "+listArray.length)
+
+        var time=new Date()
+
+        pool.connect((err, client, done) => {
+              
+          var i = 0, count = 0;
+
+          for (i = 0; i < listArray.length; i++) {
+
+              client.query(
+                  `INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING id`, 
+                  [listArray[i].sequence, listArray[i].Property], (err, result) => {
+                      if (err) {
+                          console.log(err);
+                      } else {
+                          console.log('row inserted with id: ' + result.rows[0].id);
+                      }
+      
+                      count++;
+                      console.log('count = ' + count);
+                      if (count == listArray.length) {
+                          console.log('Lists added successfully Connections will end now!!!');
+
+                          const response = {
+                            statusCode: 200,
+                            body: JSON.stringify({
+                              message: 'Lists Added successfully'
+                            })
+                          };
+
+                          client.end();
+                          callback(null, response);
+                      }
+                });        
+          }
+      });
+        
+      })
+
+}
+
 
 module.exports.fetchListingsData = (event, context) => {
   fetchData();
@@ -1026,6 +1273,7 @@ module.exports.testfetchListingsData = (event, context, callback) => {
     .on("finish", () => {
 
       context.succeed("Sucess")
+      
       /*
       const jsonfile = fs.createReadStream("/tmp/propertylisting.json");
 
@@ -1045,6 +1293,7 @@ module.exports.testfetchListingsData = (event, context, callback) => {
 
       const listings1 = JSON.parse(mylist);
       */
+
     });
 };
 

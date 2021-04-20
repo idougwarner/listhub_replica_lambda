@@ -1,4 +1,7 @@
-const { connectToDatabase } = require("../models");
+const { connectToDatabase, pool} = require("../models");
+const TimeUtil = require("../utils/timeFunctions");
+const tbl_listings_update_reference="listings_update_reference";
+
 
 // Create and Save a new Property Listing
 module.exports.listReferenceCreate = async (jsonData) => {
@@ -174,3 +177,65 @@ module.exports.listReferenceDeleteAll = async () => {
     return result;
   }
 };
+
+module.exports.table_to_save_listings = async () => {
+
+      var list_a_table = "listhub_listings_a"
+      var list_b_table = "listhub_listings_b"
+      var list_a_time_modified, list_b_time_modified;
+
+      const client = await pool().connect()
+        
+      // Get list_a_time_modifed
+      await client.query(
+        `SELECT * FROM ${listings_update_reference_table} WHERE table_name = $1)`,
+        [list_a_table],  (err, result) => {
+          list_a_time_modified = result.rows[0].last_modified;
+        }
+      );
+
+      await client.query(
+        `SELECT * FROM ${listings_update_reference_table} WHERE table_name = $1)`,
+        [list_b_table],
+        function(err, result) {
+          list_b_time_modified = result.rows[0].last_modified;
+        }
+      );
+
+      if(Date.parse(list_a_time_modified) > Date.parse(list_b_time_modified)){
+        
+        // Keep list_a and overwrite list_b
+
+        return ({table_to_save:list_b_table})
+        
+      }
+      else {
+
+        // Keep list_b and overwrite list_a
+
+        return ({table_to_save:list_a_table})
+
+      } // End else
+}
+
+// Update table status
+module.exports.update_table_status = async (table_name, live_status) => {
+  
+  try {
+    const client = await pool().connect()
+        
+    // Get list_a_time_modifed
+    const result = await client.query(
+      "UPDATE listings_update_reference SET live_status = $1 WHERE table_name = $2",
+      [live_status, table_name]
+      );
+      return ({updated:true, data: result.rows[0]})
+
+  } catch(err) {
+
+    console.log("Update status error"+err)
+    return ({updated:false, data: result.rows[0], error:err})    
+
+  }
+
+}

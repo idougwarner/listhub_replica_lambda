@@ -1,5 +1,6 @@
-const connectToDatabase = require("../models");
+const { connectToDatabase, pool} = require("../models");
 const TimeUtil = require("../utils/timeFunctions");
+const tbl_listings_meta="listings_meta";
 
 // Create and Save a new ProperyMeta
 module.exports.metaCreate = async (jsonData) => {
@@ -9,18 +10,6 @@ module.exports.metaCreate = async (jsonData) => {
 
     return result;
   }
-
-  /**
-   * {
-  /**
- * {
-  "AcceptRanges": "bytes",
-  "LastModified": "2019-12-18T13:55:20.000Z",
-  "ContentLength": 2866064774,
-  "ETag": "\"d967f79ad57127eacceb7f7e95270ff1\"",
-  "ContentType": "application/octet-stream"
-}
- */
 
   const propertymeta = {
     AcceptRanges: jsonData.AcceptRanges,
@@ -65,6 +54,52 @@ module.exports.metaCreate = async (jsonData) => {
     return result;
   }
 };
+
+
+module.exports.create_new_meta_data = async (data) => {
+
+  try {
+    await pool().connect((err, client, done) => {
+
+      client.query(
+        `INSERT INTO ${tbl_listings_meta} (id, last_modifed, content_length, etag, content_type) VALUES (DEFAULT, $1,$2,$3,$4) RETURNING id`, 
+        [data.LastModified, data.ContentLength, data.ETag, data.ContentType], (err, result) => {
+            if (err) {
+                console.log(err);
+
+                const result = {
+                  metadataAdded: false,
+                  error: "Could Not add Data",
+                  metadata: null,
+                };
+          
+                return result;
+            } else {
+                console.log('row inserted with id: ' + result.rows[0].id);
+                
+                const result = { metadataAdded: true, metadata: data, error: null };
+
+                return result;
+            }
+
+      })
+
+    })
+  }
+  catch(err) {
+    const result = {
+      metadataAdded: false,
+      statusCode: 500,
+      headers: { "Content-Type": "text/plain" },
+      body: "Could not create the PropertyMeta.",
+      error: err,
+      metadata: null,
+    };
+
+    return result;   
+  }
+
+}
 
 // Retrieve all Propertymeta from the database.
 module.exports.metaFindAll = async () => {
@@ -129,8 +164,10 @@ module.exports.metaDataExists = async () => {
 };
 
 module.exports.ismetadataNew = async (lastModified) => {
+
   // Check whether there is data before comparing otherwise store the new data
   try {
+
     const { listings_meta } = await connectToDatabase();
 
     const data = await PropertyMeta.findOne({
@@ -170,6 +207,7 @@ module.exports.ismetadataNew = async (lastModified) => {
     }
 
   } catch (err) {
+
     const result = {
       newUpdate: false,
       statusCode: 500,
@@ -179,7 +217,9 @@ module.exports.ismetadataNew = async (lastModified) => {
     };
 
     return result;
+
   }
+
 };
 
 // Delete all PropertyMetas from the database.
@@ -195,12 +235,15 @@ module.exports.metaDeleteAll = async () => {
       const result = { metadataDeleted: true, error: null };
 
       return result;
+
     } else {
       const result = { metadataDeleted: false, error: "Not deleted" };
 
       return result;
+
     }
   } catch (err) {
+    
     const result = {
       metadataDeleted: false,
       statusCode: 500,
@@ -210,5 +253,80 @@ module.exports.metaDeleteAll = async () => {
     };
 
     return result;
+
   }
 };
+
+module.exports.is_meta_data_new = async (newtime) => {
+
+  try {
+    await pool().connect((err, client, done) => {
+
+      client.query(`SELECT * from ${tbl_listings_meta}`, (err, res) => {
+        
+        if(res.row[0]) {
+  
+          var storedTime = res.row[0].last_modified
+          
+          let timeResult = TimeUtil.istimeANewerthantimeB(
+            newtime,
+            storedTime
+          );
+    
+          console.log("TimeResult"+JSON.stringify(timeResult))
+    
+          if (timeResult.newUpdate) {
+    
+            const result = { newUpdate: true, error: null };
+  
+            client.end()
+            
+            return result;
+            
+    
+          } else {
+            
+            const result = { newUpdate: false, error: "No Update" };
+  
+            client.end()
+
+            return result;
+    
+          }
+        }
+
+      });
+    })
+  }
+  catch(err) {
+    const result = {
+      newUpdate: false,
+      statusCode: 500,
+      headers: { "Content-Type": "text/plain" },
+      body: "Problem Deleting Property Info.",
+      error: err,
+    };
+
+    return result;    
+  }
+
+  /*client.query(
+    'INSERT INTO "listhub_listings_as" ("sequence","Property", "createdAt", "updatedAt") VALUES ($1,$2,$3,$4) RETURNING id', 
+    [data.sequence, data.Property, time, time], (err, result) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log('row inserted with id: ' + result.rows[0].id);
+        }
+
+        count++;
+
+        console.log('count = ' + count);
+        
+        if (count == listArray.length) {
+            console.log('Client will end now!!!');
+            
+        }
+    })*/
+
+}

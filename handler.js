@@ -177,9 +177,7 @@ const set_meta_table = async (meta_table) => {
    // return ({updated:false, data: result.rows[0], error:err}) 
 
   }
-
 }
-
 
 const set_listings_table = async (table_to_set) => {
 

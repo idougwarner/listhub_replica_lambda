@@ -52,7 +52,6 @@ const {
 
 const {
   metaCreate,
-  metaDataExists,
   metaDeleteAll,
   ismetadataNew,
   meta_data_exist,

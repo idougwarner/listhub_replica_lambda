@@ -198,7 +198,8 @@ module.exports.meta_data_exist = async () => {
     })
   }
   catch(err) {
-        result.dataExists = false
+    
+      result.dataExists = false
       result.statusCode = 500
       result.headers = { "Content-Type": "text/plain" }
       result.body = "Problem finding PropertyMeta Info."

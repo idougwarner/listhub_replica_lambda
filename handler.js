@@ -12,8 +12,6 @@ const lambda = new AWS.Lambda({
   region: "us-west-2"
 });
 
-var dbUrl = 'postgres://postgres:postgres@listhub-dev.crstoxoylybt.us-west-2.rds.amazonaws.com:5432/listhubdev';
-
 const { Pool, Client } = require("pg");
 const copyFrom = require('pg-copy-streams').from
 

@@ -184,7 +184,7 @@ module.exports.table_to_save_listings = async () => {
       var list_b_table = "listhub_listings_b"
       var list_a_time_modified, list_b_time_modified;
 
-      const client = await pool().connect()
+      const client = await pool.connect()
         
       // Get list_a_time_modifed
       await client.query(

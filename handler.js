@@ -275,7 +275,7 @@ const meta_data_exist = async () => {
             body: "" })
         }
 
-        console.log("Rows: "+res.rows)
+        console.log("Rows: "+res.rows.length)
 
         if(res.rows) {
 

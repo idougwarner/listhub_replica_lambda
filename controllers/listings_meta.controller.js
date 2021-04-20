@@ -165,7 +165,7 @@ module.exports.metaDataExists = async () => {
 
 module.exports.meta_data_exist = async () => {
 
-  const result = { metadataExists: false, metadata: null, error: null, statusCode: null,  headers: null,
+  const result = { dataExists: false, metadata: null, error: null, statusCode: null,  headers: null,
     body: "" }
 
   try {  
@@ -178,7 +178,7 @@ module.exports.meta_data_exist = async () => {
 
           console.log("Meta Data does not exist")
   
-          result.metadataExists = true 
+          result.dataExists = true 
           result.metadata = data
           result.error = null
 
@@ -187,7 +187,7 @@ module.exports.meta_data_exist = async () => {
 
           console.log("Meta Data does not exist")
 
-          result.metadataExists = false
+          result.dataExists = false
           result.metadata = null
           result.error = "No meta data"
     
@@ -198,7 +198,7 @@ module.exports.meta_data_exist = async () => {
     })
   }
   catch(err) {
-        result.metadataExists = false
+        result.dataExists = false
       result.statusCode = 500
       result.headers = { "Content-Type": "text/plain" }
       result.body = "Problem finding PropertyMeta Info."

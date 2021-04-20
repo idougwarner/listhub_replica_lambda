@@ -545,7 +545,7 @@ module.exports.listhubMonitor = async (event, context) => {
               const params = {
                 FunctionName: "streamExecutor",
                 InvocationType: "RequestResponse",
-                Payload: { range: range, table_name: table_to_save }
+                Payload:JSON.stringify({ range: range, table_name: table_to_save })
               };
           
               lambda.invoke(params, (error, data) => {
@@ -581,6 +581,8 @@ module.exports.listhubMonitor = async (event, context) => {
  * Streams the range and adds all listings in that range to the database 
  */
 module.exports.streamExecutor = async (event, context, callback) => {
+
+  console.log("From Monitor "+event)
   
   var ETag = event.range.values.ETag
   var startSequence = event.range.startSequence

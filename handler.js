@@ -240,7 +240,7 @@ module.exports.listhubMonitor = async (event, context) => {
     if (response) {
       
       // Check whether there is new meta_data
-      const {dataExists} = await metaDataExists();
+      const {dataExists} = await meta_data_exist();
 
       console.log("Data: dataExists"+dataExists)  
       // Store meta_data if none exists
@@ -359,7 +359,7 @@ module.exports.listhubMonitor = async (event, context) => {
         else {
 
           console.log("Problem creating meta Data Please try later")
-          
+
         }
       }// End If metadataExists
       else {

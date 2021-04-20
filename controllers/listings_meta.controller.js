@@ -60,7 +60,7 @@ module.exports.create_new_meta_data = async (data) => {
 
   console.log("Inside create new metadata")
 
-  var result = {metadataAdded: null, error: "", metadata: null}
+  var result = { metadataAdded: null, error: "", metadata: null}
 
   try {
     const client = await pool.connect()
@@ -137,7 +137,7 @@ module.exports.metaFindAll = async () => {
 // Check if there is Metadata data
 module.exports.metaDataExists = async () => {
 
-  const result = { dataExists:false, metadata:null, error:"" }
+  var result = { dataExists:false, metadata:null, error:"" }
   try {  
 
     await pool.connect((err, client, done) => {
@@ -146,7 +146,7 @@ module.exports.metaDataExists = async () => {
         
         if(res.rows) {
 
-          console.log("Meta Data does not exist")
+          console.log("Meta Data does exist")
 
           result = { dataExists:true, metadata:data, error:null };
         } else {

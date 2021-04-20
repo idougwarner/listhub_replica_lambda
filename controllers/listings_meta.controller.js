@@ -60,8 +60,6 @@ module.exports.create_new_meta_data = async (data) => {
 
   console.log("Inside create new metadata")
 
-  const result = {metadataAdded: null, metadata: null, error: null}
-
   try {
     const client = await pool.connect()
 
@@ -83,7 +81,6 @@ module.exports.create_new_meta_data = async (data) => {
                 result = { metadataAdded: true, metadata: data, error: null }
 
             }
-
       })
 
     return (result)

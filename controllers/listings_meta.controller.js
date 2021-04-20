@@ -204,6 +204,8 @@ module.exports.meta_data_exist = async () => {
       result.body = "Problem finding PropertyMeta Info."
       result.error = err
 
+      console.log("Error in meta"+err)
+
     return (result);   
   }
 };

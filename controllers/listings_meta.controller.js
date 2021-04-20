@@ -182,7 +182,7 @@ module.exports.metaDataExists = async () => {
 module.exports.meta_data_exist = async () => {
   
 
-  const result = { dataExists: false, metadata: null, error: null, statusCode: null,  headers: null,
+  var result = { dataExists: false, metadata: null, error: null, statusCode: null,  headers: null,
     body: "" }
 
   try {  
@@ -327,8 +327,9 @@ module.exports.is_meta_data_new = async (newtime) => {
   const result = {}
 
   try {
-    await pool.connect((err, client, done) => {
+    const client= await pool.connect()
 
+    return new Promise((resolve, reject) => {
       client.query(`SELECT * from ${tbl_listings_meta}`, (err, res) => {
         
         if(res.row[0]) {
@@ -343,26 +344,23 @@ module.exports.is_meta_data_new = async (newtime) => {
           console.log("TimeResult"+JSON.stringify(timeResult))
     
           if (timeResult.newUpdate) {
-    
-            result = { newUpdate: true, error: null };
   
             client.end()
-          
-            
+
+            resolve ({ newUpdate: true, error: null })            
     
           } else {
-            
-            const result = { newUpdate: false, error: "No Update" };
-  
+             
             client.end()
+
+            resolve ({ newUpdate: false, error: "No Update" })
     
           }
         }
 
       });
-    })
 
-    return result;
+    })
   }
   catch(err) {
     const result = {

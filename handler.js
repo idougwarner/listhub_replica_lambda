@@ -207,7 +207,7 @@ const set_listings_table = async (table_to_set) => {
           }
         })
 
-    })
+    })// End of Promise
         
     
 
@@ -225,27 +225,23 @@ const create_new_meta_data = async (data) => {
   console.log("Inside create new metadata")
 
   try {
-      const client = await pool.connect()  
-      client.query(`INSERT INTO ${tbl_listings_meta} (id, last_modifed, content_length, etag, content_type) VALUES (DEFAULT, $1,$2,$3,$4) RETURNING id`, 
-        [data.LastModified, data.ContentLength, data.ETag, data.ContentType], (err, res) => {
-            if (err) {
-                console.log(err);
+      const client = await pool.connect()
 
-                result = {
-                  metadataAdded: false,
-                  error: "Could Not add Data",
-                  metadata: null
-                }
+      return new Promise((resolve, reject) => { 
+        client.query(`INSERT INTO ${tbl_listings_meta} (id, last_modifed, content_length, etag, content_type) VALUES (DEFAULT, $1,$2,$3,$4) RETURNING id`, 
+          [data.LastModified, data.ContentLength, data.ETag, data.ContentType], (err, res) => {
+              if (err) {
+                  console.log(err);
+                  resolve({ metadataAdded: false, error: "Could Not add Data", metadata: null})
+          
+              } else {
+                  console.log('row inserted with id: ' + res.rows[0].id);
+                  
+                  resolve({ metadataAdded: true, metadata: data, error: null })
 
-                return ({ metadataAdded: false, error: "Could Not add Data", metadata: null})
-        
-            } else {
-                console.log('row inserted with id: ' + res.rows[0].id);
-                
-                return ({ metadataAdded: true, metadata: data, error: null })
-
-            }
-      })  
+              }
+        })
+    })// End of Promise
   }
   catch(err) {
 

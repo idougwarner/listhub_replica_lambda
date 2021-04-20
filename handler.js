@@ -545,7 +545,7 @@ module.exports.listhubMonitor = async (event, context) => {
               const params = {
                 FunctionName: "streamExecutor",
                 InvocationType: "RequestResponse",
-                Payload:JSON.stringify({ range: range, table_name: table_to_save })
+                Payload: JSON.stringify({ "range": range, "table_name": table_to_save })
               };
           
               lambda.invoke(params, (error, data) => {

@@ -166,22 +166,30 @@ module.exports.metaDataExists = async () => {
 module.exports.meta_data_exist = async () => {
 
   try {
+
+    const result = { metadataExists: false, metadata: null, error: null, statusCode: null,  headers: null,
+      body: "" };
+
     await pool.connect((err, client, done) => {
 
       client.query(`SELECT * from ${tbl_listings_meta}`, (err, res) => {
         
         if(res.rows) {
-          
+
           console.log("Meta Data does not exist")
   
-          const result = { metadataExists: true, metadata: data, error: null };
+          result.metadataExists = true 
+          result.metadata = data
+          result.error = null
 
           return result;
         } else {
 
           console.log("Meta Data does not exist")
 
-          const result = { metadataExists: false, metadata: null, error: "No Data" };
+          result.metadataExists = false
+          result.metadata = null
+          result.error = "No meta data"
     
           return result;
         }
@@ -190,13 +198,11 @@ module.exports.meta_data_exist = async () => {
     })
   }
   catch(err) {
-    const result = {
-      metadataExists: false,
-      statusCode: 500,
-      headers: { "Content-Type": "text/plain" },
-      body: "Problem finding PropertyMeta Info.",
-      error: err,
-    };
+        result.metadataExists = false
+      result.statusCode = 500
+      result.headers = { "Content-Type": "text/plain" }
+      result.body = "Problem finding PropertyMeta Info."
+      result.error = err
 
     return result;   
   }

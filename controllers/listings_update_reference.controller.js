@@ -1,4 +1,4 @@
-const { connectToDatabase, pool} = require("../models");
+const { connectToDatabase, pool } = require("../models");
 const TimeUtil = require("../utils/timeFunctions");
 const tbl_listings_update_reference="listings_update_reference";
 
@@ -222,7 +222,7 @@ module.exports.table_to_save_listings = async () => {
 module.exports.update_table_status = async (table_name, live_status) => {
   
   try {
-    const client = await pool().connect()
+    const client = await pool.connect()
         
     // Get list_a_time_modifed
     const result = await client.query(

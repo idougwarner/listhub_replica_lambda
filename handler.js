@@ -266,53 +266,44 @@ const meta_data_exist = async () => {
 
   try {  
 
-    await pool.connect((err, client, done) => {
+    const client = pool.connect();
 
+    return new Promise((resolve, reject) => {
       client.query(`SELECT * from ${tbl_listings_meta}`, (err, res) => {
         
         if(err) {
           console.log("Check error"+err)
 
-          result = { dataExists: false, metadata: null, error: err, statusCode: null,  headers: null,
-            body: "" }
+          resolve({ dataExists: false, metadata: null, error: err, statusCode: null,  headers: null,
+            body: "" })
         }
 
         if(res.rows) {
 
           console.log("Meta Data does exist")
-  
-          result.dataExists = true 
-          result.metadata = res.rows
-          result.error = null
 
-          result ={ dataExists: true, metadata: res.rows, error: null, statusCode: 200,  headers: null,
-            body: "Successfully created data" }
+          resolve ({ dataExists: true, metadata: res.rows, error: null, statusCode: 200,  headers: null,
+            body: "Successfully created data" })
             
         } else {
 
           console.log("Meta Data does not exist")
-
-          result.dataExists = false
-          result.metadata = null
-          result.error = "No meta data"
     
-          result ={ dataExists: false, metadata: null, error: null, statusCode: 500,  headers: null,
-            body: "Successfully created data" }
+          resolve ({ dataExists: false, metadata: null, error: null, statusCode: 500,  headers: null,
+            body: "Successfully created data" })
         }
         
-
       });
     })
+  
   }
   catch(err) {
 
       console.log("Error in meta"+err)
 
-      result = { dataExists: false, metadata: null, error: err, statusCode: 500,  headers: { "Content-Type": "text/plain" },
-        body: "Problem finding PropertyMeta Info." }   
+      return ({ dataExists: false, metadata: null, error: err, statusCode: 500,  headers: { "Content-Type": "text/plain" },
+        body: "Problem finding PropertyMeta Info." })
   }
-
-  return result
 };
 
 /**
@@ -374,7 +365,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
             if(i==1) {
 
-              startSequence = lastSequence - metaResponse.data.Metadata.totallinecount;
+              startSequence = lastSequence - response.data.Metadata.totallinecount;
               endSequence = startSequence+chunkSize;
               
               values = {
@@ -498,7 +489,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
               if(i==1) {
 
-                startSequence = lastSequence - metaResponse.data.Metadata.totallinecount;
+                startSequence = lastSequence - response.data.Metadata.totallinecount;
                 endSequence = startSequence+chunkSize;
                 
                 values = {
@@ -558,7 +549,7 @@ module.exports.listhubMonitor = async (event, context) => {
                 Payload: { range: range, table_name: table_to_save }
               };
           
-              lambda.invoke(params, function(error, data) {
+              lambda.invoke(params, (error, data) => {
                 if (error) {
                   console.error(JSON.stringify(error));
                   return new Error(`Error printing messages: ${JSON.stringify(error)}`);
@@ -635,8 +626,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
           for (i = 0; i < listArray.length; i++) {
 
-              client.query(
-                  `INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING id`, 
+              client.query(`INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING id`, 
                   [listArray[i].sequence, listArray[i].Property], (err, result) => {
                       if (err) {
                           console.log(err);

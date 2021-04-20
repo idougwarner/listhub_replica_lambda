@@ -266,7 +266,7 @@ const meta_data_exist = async () => {
 
   try {  
 
-    const client = pool.connect();
+    const client = await pool.connect();
 
     return new Promise((resolve, reject) => {
       client.query(`SELECT * from ${tbl_listings_meta}`, (err, res) => {
@@ -554,7 +554,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
                   console.error(JSON.stringify(error));
                   return new Error(`Error printing messages: ${JSON.stringify(error)}`);
-                  
+
                 } else if (data) {
                   console.log(data);
                 }

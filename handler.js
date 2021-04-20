@@ -249,7 +249,7 @@ module.exports.listhubMonitor = async (event, context) => {
         // Store the new Metadata
         const { metadataAdded } = await create_new_meta_data(response.data);
 
-        console.log("Meta Data Added"+metadataAdded)
+        console.log("Meta Data Added: "+metadataAdded)
   
         // Check if meta_data has been stored for the first time
         if (metadataAdded) {
@@ -355,6 +355,11 @@ module.exports.listhubMonitor = async (event, context) => {
               });
                                          
           }
+        }
+        else {
+
+          console.log("Problem creating meta Data Please try later")
+          
         }
       }// End If metadataExists
       else {

@@ -55,7 +55,6 @@ const {
   metaDeleteAll,
   metaDataExists,
   ismetadataNew,
-  meta_data_exist,
   create_new_meta_data,
   is_meta_data_new
 } = require("./controllers/listings_meta.controller");
@@ -215,6 +214,55 @@ const set_listings_table = async (table_to_set) => {
   }
   
 }
+
+const meta_data_exist = async () => {
+  const tbl_listings_meta="listings_meta"; 
+
+  var result = { dataExists: false, metadata: null, error: null, statusCode: null,  headers: null,
+    body: "" }
+
+  try {  
+
+    await pool.connect((err, client, done) => {
+
+      client.query(`SELECT * from ${tbl_listings_meta}`, (err, res) => {
+        
+        if(res.rows) {
+
+          console.log("Meta Data does not exist")
+  
+          result.dataExists = true 
+          result.metadata = data
+          result.error = null
+
+          return (result)
+        } else {
+
+          console.log("Meta Data does not exist")
+
+          result.dataExists = false
+          result.metadata = null
+          result.error = "No meta data"
+    
+          return (result)
+        }
+
+      });
+    })
+  }
+  catch(err) {
+
+      result.dataExists = false
+      result.statusCode = 500
+      result.headers = { "Content-Type": "text/plain" }
+      result.body = "Problem finding PropertyMeta Info."
+      result.error = err
+
+      console.log("Error in meta"+err)
+
+    return (result);   
+  }
+};
 
 /**
  *  ListHubMonitor

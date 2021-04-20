@@ -53,6 +53,7 @@ const {
 const {
   metaCreate,
   metaDeleteAll,
+  metaDataExists,
   ismetadataNew,
   meta_data_exist,
   create_new_meta_data,
@@ -239,8 +240,9 @@ module.exports.listhubMonitor = async (event, context) => {
     if (response) {
       
       // Check whether there is new meta_data
-      const { dataExists } = await meta_data_exist();
-        
+      const dataExists = await metaDataExists();
+
+      console.log("Data: dataExists"+dataExists)  
       // Store meta_data if none exists
       if (!dataExists) {
         

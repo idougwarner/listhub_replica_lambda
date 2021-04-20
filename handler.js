@@ -835,7 +835,6 @@ const fetchData = async () => {
           if (metadataAdded) {
 
             // Check table to update with list
-           const {}
 
             // Check between list_a and list_b to see which one is live. Table that is not live should receive update
  

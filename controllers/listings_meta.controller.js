@@ -60,7 +60,7 @@ module.exports.create_new_meta_data = async (data) => {
 
   console.log("Inside create new metadata")
 
-  var result = {}
+  var result = {metadataAdded: null, error: "", metadata: null}
 
   try {
     const client = await pool.connect()
@@ -85,7 +85,7 @@ module.exports.create_new_meta_data = async (data) => {
             }
       })
 
-    return (result)
+    return result
   }
   catch(err) {
 
@@ -98,11 +98,9 @@ module.exports.create_new_meta_data = async (data) => {
       metadata: null,
     }
 
-    console.log("Error"+err)
-
-    return result;
-       
+    console.log("Error "+err)    
   }
+  return result;
 }
 
 // Retrieve all Propertymeta from the database.

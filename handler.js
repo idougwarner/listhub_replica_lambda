@@ -870,7 +870,7 @@ const fetchData = async () => {
 const set_listings_table = async (table_to_set) => {
 
   try {
-    const client = await pool().connect()
+    const client = await pool.connect()
         
     // Get list_a_time_modifed
     client.query(`DROP TABLE IF EXISTS ${table_to_set} CASCADE`, (err, result) => {

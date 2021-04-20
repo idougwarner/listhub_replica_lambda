@@ -260,7 +260,7 @@ module.exports.metaDeleteAll = async () => {
 module.exports.is_meta_data_new = async (newtime) => {
 
   try {
-    await pool().connect((err, client, done) => {
+    await pool.connect((err, client, done) => {
 
       client.query(`SELECT * from ${tbl_listings_meta}`, (err, res) => {
         

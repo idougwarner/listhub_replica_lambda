@@ -330,6 +330,7 @@ module.exports.listhubMonitor = async (event, context) => {
     var meta_table = "listings_meta"
 
     const {table_created} = await set_listings_table(table_a)
+    
     await set_listings_table(table_b)
     await set_meta_table(meta_table)
     

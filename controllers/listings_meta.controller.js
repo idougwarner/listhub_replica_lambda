@@ -182,7 +182,7 @@ module.exports.meta_data_exist = async () => {
           result.metadata = data
           result.error = null
 
-          return result;
+          return (result);
         } else {
 
           console.log("Meta Data does not exist")
@@ -191,7 +191,7 @@ module.exports.meta_data_exist = async () => {
           result.metadata = null
           result.error = "No meta data"
     
-          return result;
+          return (result);
         }
 
       });
@@ -204,7 +204,7 @@ module.exports.meta_data_exist = async () => {
       result.body = "Problem finding PropertyMeta Info."
       result.error = err
 
-    return result;   
+    return (result);   
   }
 };
 

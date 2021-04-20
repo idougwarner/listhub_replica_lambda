@@ -551,8 +551,10 @@ module.exports.listhubMonitor = async (event, context) => {
           
               lambda.invoke(params, (error, data) => {
                 if (error) {
+
                   console.error(JSON.stringify(error));
                   return new Error(`Error printing messages: ${JSON.stringify(error)}`);
+                  
                 } else if (data) {
                   console.log(data);
                 }

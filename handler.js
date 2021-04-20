@@ -183,13 +183,12 @@ const set_listings_table = async (table_to_set) => {
   try {
     const client = await pool.connect()
 
-    var result;
-        
-    // Get list_a_time_modifed
-    client.query(`DROP TABLE IF EXISTS ${table_to_set} CASCADE`, (err, res) => {
+    return new Promise((resolve, reject) => {
+      // Get list_a_time_modifed
+      client.query(`DROP TABLE IF EXISTS ${table_to_set} CASCADE`, (err, res) => {
         if (err) {
             console.log(err);
-            result = { table_created:false }
+            resolve({ table_created:false })
         } else {
 
             console.log(`Table ${table_to_set} deleted successfully`);
@@ -202,20 +201,22 @@ const set_listings_table = async (table_to_set) => {
 
                   console.log(`Table ${table_to_set} created successfully"`);
 
-                  result = { table_created:true }   
+                  resolve({ table_created:true })
                 }
             })// End of Create Table
           }
         })
 
+    })
+        
+    
+
   } catch(err) {
 
     console.log("Create table listings error"+err)
-    result = {updated:false, data: result.rows[0], error:err}
+    return ({table_created:false, data: null, error:err})
 
   }
-
-  return result
   
 }
 

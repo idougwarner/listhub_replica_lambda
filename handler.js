@@ -182,17 +182,19 @@ const set_listings_table = async (table_to_set) => {
 
   try {
     const client = await pool.connect()
+
+    var result;
         
     // Get list_a_time_modifed
-    client.query(`DROP TABLE IF EXISTS ${table_to_set} CASCADE`, (err, result) => {
+    client.query(`DROP TABLE IF EXISTS ${table_to_set} CASCADE`, (err, res) => {
         if (err) {
             console.log(err);
-            return ({ table_created:false })
+            result = { table_created:false }
         } else {
 
             console.log(`Table ${table_to_set} deleted successfully`);
 
-            client.query(`CREATE TABLE IF NOT EXISTS ${table_to_set}(sequence TEXT UNIQUE, property JSON)`, (err, result) => {
+            client.query(`CREATE TABLE IF NOT EXISTS ${table_to_set}(sequence TEXT UNIQUE, property JSON)`, (err, res) => {
 
                 if (err) {
                     console.log(err);
@@ -200,7 +202,7 @@ const set_listings_table = async (table_to_set) => {
 
                   console.log(`Table ${table_to_set} created successfully"`);
 
-                  return ({ table_created:true })   
+                  result = { table_created:true }   
                 }
             })// End of Create Table
           }
@@ -209,9 +211,11 @@ const set_listings_table = async (table_to_set) => {
   } catch(err) {
 
     console.log("Create table listings error"+err)
-    return ({updated:false, data: result.rows[0], error:err})    
+    result = {updated:false, data: result.rows[0], error:err}
 
   }
+
+  return result
   
 }
 
@@ -327,6 +331,7 @@ module.exports.listhubMonitor = async (event, context) => {
     var meta_table = "listings_meta"
 
     const {table_created} = await set_listings_table(table_a)
+    console.log(table_a + " created "+table_created)
 
     await set_listings_table(table_b)
     await set_meta_table(meta_table)

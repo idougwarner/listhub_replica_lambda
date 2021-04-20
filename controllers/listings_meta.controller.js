@@ -322,6 +322,8 @@ module.exports.metaDeleteAll = async () => {
 
 module.exports.is_meta_data_new = async (newtime) => {
 
+  const result = {}
+
   try {
     await pool.connect((err, client, done) => {
 
@@ -340,11 +342,10 @@ module.exports.is_meta_data_new = async (newtime) => {
     
           if (timeResult.newUpdate) {
     
-            const result = { newUpdate: true, error: null };
+            result = { newUpdate: true, error: null };
   
             client.end()
-            
-            return result;
+          
             
     
           } else {
@@ -352,14 +353,14 @@ module.exports.is_meta_data_new = async (newtime) => {
             const result = { newUpdate: false, error: "No Update" };
   
             client.end()
-
-            return result;
     
           }
         }
 
       });
     })
+
+    return result;
   }
   catch(err) {
     const result = {

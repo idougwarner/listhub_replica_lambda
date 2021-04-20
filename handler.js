@@ -255,9 +255,7 @@ const create_new_meta_data = async (data) => {
       body: "Could not create the PropertyMeta.",
       error: err,
       metadata: null,
-    })
-
-       
+    })    
   }
 }
 

@@ -58,6 +58,8 @@ module.exports.metaCreate = async (jsonData) => {
 
 module.exports.create_new_meta_data = async (data) => {
 
+  console.log("Inside create new metadata")
+
   const result = {}
 
   try {
@@ -95,6 +97,8 @@ module.exports.create_new_meta_data = async (data) => {
       error: err,
       metadata: null,
     };
+
+    console.log("Error"+err)
 
        
   }
@@ -374,24 +378,5 @@ module.exports.is_meta_data_new = async (newtime) => {
 
     return result;    
   }
-
-  /*client.query(
-    'INSERT INTO "listhub_listings_as" ("sequence","Property", "createdAt", "updatedAt") VALUES ($1,$2,$3,$4) RETURNING id', 
-    [data.sequence, data.Property, time, time], (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log('row inserted with id: ' + result.rows[0].id);
-        }
-
-        count++;
-
-        console.log('count = ' + count);
-        
-        if (count == listArray.length) {
-            console.log('Client will end now!!!');
-            
-        }
-    })*/
 
 }

@@ -236,12 +236,12 @@ const create_new_meta_data = async (data) => {
                   metadata: null
                 }
 
-                resolve ({ metadataAdded: false, error: "Could Not add Data", metadata: null})
+                resolve({ metadataAdded: false, error: "Could Not add Data", metadata: null})
         
             } else {
                 console.log('row inserted with id: ' + res.rows[0].id);
                 
-                resolve ({ metadataAdded: true, metadata: data, error: null })
+                resolve({ metadataAdded: true, metadata: data, error: null })
 
             }
       })
@@ -253,7 +253,7 @@ const create_new_meta_data = async (data) => {
 
     console.log("Error "+err) 
 
-    resolve ({
+    resolve({
       metadataAdded: false,
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },

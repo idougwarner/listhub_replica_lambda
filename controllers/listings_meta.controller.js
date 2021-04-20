@@ -59,7 +59,7 @@ module.exports.metaCreate = async (jsonData) => {
 module.exports.create_new_meta_data = async (data) => {
 
   try {
-    await pool().connect((err, client, done) => {
+    await pool.connect((err, client, done) => {
 
       client.query(
         `INSERT INTO ${tbl_listings_meta} (id, last_modifed, content_length, etag, content_type) VALUES (DEFAULT, $1,$2,$3,$4) RETURNING id`, 
@@ -160,6 +160,41 @@ module.exports.metaDataExists = async () => {
     };
 
     return result;
+  }
+};
+
+module.exports.meta_data_exist = async () => {
+
+  try {
+    await pool.connect((err, client, done) => {
+
+      client.query(`SELECT * from ${tbl_listings_meta}`, (err, res) => {
+        
+        if(res.rows) {
+  
+          const result = { metadataExists: true, metadata: data, error: null };
+
+          return result;
+        } else {
+
+          const result = { metadataExists: false, metadata: null, error: "No Data" };
+    
+          return result;
+        }
+
+      });
+    })
+  }
+  catch(err) {
+    const result = {
+      metadataExists: false,
+      statusCode: 500,
+      headers: { "Content-Type": "text/plain" },
+      body: "Problem finding PropertyMeta Info.",
+      error: err,
+    };
+
+    return result;   
   }
 };
 

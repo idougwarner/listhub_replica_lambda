@@ -57,6 +57,7 @@ const {
   metaDataExists,
   metaDeleteAll,
   ismetadataNew,
+  meta_data_exist,
   create_new_meta_data,
   is_meta_data_new
 } = require("./controllers/listings_meta.controller");
@@ -144,6 +145,34 @@ const getMetaDataStream = async () => {
   })
 }
 
+const set_meta_table = async (meta_table) => {
+  
+  //id, last_modifed, content_length, etag, content_type
+  // Get list_a_time_modifed
+  client.query(`DROP TABLE IF EXISTS ${meta_table} CASCADE`, (err, result) => {
+    if (err) {
+        console.log(err);
+        return ({ table_created:false })
+    } else {
+
+        console.log(`Table ${meta_table} deleted successfully`);
+
+        client.query(`CREATE TABLE IF NOT EXISTS ${meta_table}(id SERIAL PRIMARY KEY, last_modifed TEXT, content_length BIGINT, etag TEXT UNIQUE, content_type TEXT)`, (err, result) => {
+
+            if (err) {
+                console.log(err);
+            } else {
+
+              console.log(`Table ${meta_table} created successfully"`);
+
+              return ({ table_created:true })   
+            }
+        })// End of Create Table
+      }
+    })
+
+}
+
 
 const set_listings_table = async (table_to_set) => {
 
@@ -192,9 +221,11 @@ module.exports.listhubMonitor = async (event, context) => {
 
     var table_a = "listhub_listings_a"
     var table_b = "listhub_listings_b"
+    var meta_table = "listings_meta"
 
     await set_listings_table(table_a)
     await set_listings_table(table_b)
+    await set_meta_table(meta_table)
     
     // Get meta_data info
     const response =  await getMetaDataStream();
@@ -202,7 +233,7 @@ module.exports.listhubMonitor = async (event, context) => {
     if (response) {
       
       // Check whether there is new meta_data
-      const { metadataExists } = await metaDataExists();
+      const { metadataExists } = await meta_data_exist();
         
       // Store meta_data if none exists
       if (!metadataExists) {

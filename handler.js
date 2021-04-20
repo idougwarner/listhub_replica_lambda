@@ -224,8 +224,7 @@ const create_new_meta_data = async (data) => {
     const client = pool.connect()
 
     
-      client.query(
-        `INSERT INTO ${tbl_listings_meta} (id, last_modifed, content_length, etag, content_type) VALUES (DEFAULT, $1,$2,$3,$4) RETURNING id`, 
+      client.query(`INSERT INTO ${tbl_listings_meta} (id, last_modifed, content_length, etag, content_type) VALUES (DEFAULT, $1,$2,$3,$4) RETURNING id`, 
         [data.LastModified, data.ContentLength, data.ETag, data.ContentType], (err, res) => {
             if (err) {
                 console.log(err);
@@ -244,10 +243,7 @@ const create_new_meta_data = async (data) => {
                 resolve({ metadataAdded: true, metadata: data, error: null })
 
             }
-      })
-
-    
-     
+      })  
   }
   catch(err) {
 

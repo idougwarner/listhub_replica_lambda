@@ -165,10 +165,10 @@ module.exports.metaDataExists = async () => {
 
 module.exports.meta_data_exist = async () => {
 
-  try {
+  const result = { metadataExists: false, metadata: null, error: null, statusCode: null,  headers: null,
+    body: "" };
 
-    const result = { metadataExists: false, metadata: null, error: null, statusCode: null,  headers: null,
-      body: "" };
+  try {  
 
     await pool.connect((err, client, done) => {
 

@@ -277,7 +277,7 @@ const meta_data_exist = async () => {
 
         console.log("Rows: "+JSON.stringify(res))
 
-        if(res.rows) {
+        if(res.rowCount!=0) {
 
           console.log("Meta Data does exist")
 

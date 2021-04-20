@@ -543,7 +543,7 @@ module.exports.listhubMonitor = async (event, context) => {
               // Get response of each save so that we update live status of table
               
               const params = {
-                FunctionName: "streamExecutor",
+                FunctionName: "listhub-replica-dev-streamExecutor",
                 InvocationType: "Event",
                 Payload: JSON.stringify({ "range":range, "table_name": table_to_save })
               };

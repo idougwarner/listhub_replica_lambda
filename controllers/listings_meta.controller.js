@@ -164,6 +164,7 @@ module.exports.metaDataExists = async () => {
 };
 
 module.exports.meta_data_exist = async () => {
+  
 
   const result = { dataExists: false, metadata: null, error: null, statusCode: null,  headers: null,
     body: "" }
@@ -198,7 +199,7 @@ module.exports.meta_data_exist = async () => {
     })
   }
   catch(err) {
-    
+
       result.dataExists = false
       result.statusCode = 500
       result.headers = { "Content-Type": "text/plain" }

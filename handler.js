@@ -277,8 +277,8 @@ const meta_data_exist = async () => {
         if(err) {
           console.log("Check error"+err)
 
-          return ({ dataExists: false, metadata: null, error: err, statusCode: null,  headers: null,
-            body: "" })
+          result = { dataExists: false, metadata: null, error: err, statusCode: null,  headers: null,
+            body: "" }
         }
 
         if(res.rows) {
@@ -289,8 +289,8 @@ const meta_data_exist = async () => {
           result.metadata = res.rows
           result.error = null
 
-          return ({ dataExists: true, metadata: res.rows, error: null, statusCode: 200,  headers: null,
-            body: "Successfully created data" })
+          result ={ dataExists: true, metadata: res.rows, error: null, statusCode: 200,  headers: null,
+            body: "Successfully created data" }
             
         } else {
 
@@ -300,8 +300,8 @@ const meta_data_exist = async () => {
           result.metadata = null
           result.error = "No meta data"
     
-          return ({ dataExists: false, metadata: null, error: null, statusCode: 500,  headers: null,
-            body: "Successfully created data" })
+          result ={ dataExists: false, metadata: null, error: null, statusCode: 500,  headers: null,
+            body: "Successfully created data" }
         }
         
 
@@ -318,9 +318,10 @@ const meta_data_exist = async () => {
 
       console.log("Error in meta"+err)
 
-      return ({ dataExists: false, metadata: null, error: err, statusCode: 500,  headers: { "Content-Type": "text/plain" },
-        body: "Problem finding PropertyMeta Info." })   
+      result = { dataExists: false, metadata: null, error: err, statusCode: 500,  headers: { "Content-Type": "text/plain" },
+        body: "Problem finding PropertyMeta Info." }   
   }
+  return result
 };
 
 /**
@@ -347,7 +348,7 @@ module.exports.listhubMonitor = async (event, context) => {
       // Check whether there is new meta_data
       const {dataExists} = await meta_data_exist();
 
-      console.log("Data: dataExists"+dataExists)  
+      console.log("Data: dataExists "+dataExists)  
       // Store meta_data if none exists
       if (!dataExists) {
         

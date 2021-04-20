@@ -906,7 +906,7 @@ const set_listings_table = async (table_to_set) => {
  *  ListHubMonitor
  *  Invokes every 1 hour and detects any update. 
  */
-module.exports.listhubMonitor = (event, context) => {
+module.exports.listhubMonitor = async (event, context) => {
 
   try {
 
@@ -1163,7 +1163,7 @@ module.exports.listhubMonitor = (event, context) => {
  * StreamExecutor
  * Streams the range and adds all listings in that range to the database 
  */
-module.exports.streamExecutor = (event, context, callback) => {
+module.exports.streamExecutor = async (event, context, callback) => {
   
   var ETag = event.range.values.ETag
   var startSequence = event.range.startSequence

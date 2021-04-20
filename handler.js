@@ -240,7 +240,7 @@ module.exports.listhubMonitor = async (event, context) => {
     if (response) {
       
       // Check whether there is new meta_data
-      const { meta} = await meta_data_exist();
+      const { metadataExists } = await meta_data_exist();
         
       // Store meta_data if none exists
       if (!metadataExists) {

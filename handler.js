@@ -310,17 +310,12 @@ const meta_data_exist = async () => {
   }
   catch(err) {
 
-      result.dataExists = false
-      result.statusCode = 500
-      result.headers = { "Content-Type": "text/plain" }
-      result.body = "Problem finding PropertyMeta Info."
-      result.error = err
-
       console.log("Error in meta"+err)
 
       result = { dataExists: false, metadata: null, error: err, statusCode: 500,  headers: { "Content-Type": "text/plain" },
         body: "Problem finding PropertyMeta Info." }   
   }
+  
   return result
 };
 

@@ -60,7 +60,7 @@ module.exports.create_new_meta_data = async (data) => {
 
   console.log("Inside create new metadata")
 
-  const result = {}
+  const result = {metadataAdded: null, metadata: null, error: null}
 
   try {
     await pool.connect((err, client, done) => {
@@ -74,22 +74,23 @@ module.exports.create_new_meta_data = async (data) => {
                 result = {
                   metadataAdded: false,
                   error: "Could Not add Data",
-                  metadata: null,
-                };
+                  metadata: null
+                }
         
             } else {
                 console.log('row inserted with id: ' + result.rows[0].id);
                 
-                result = { metadataAdded: true, metadata: data, error: null };
+                result = { metadataAdded: true, metadata: data, error: null }
 
             }
 
       })
 
     })
+    return (result)
   }
   catch(err) {
-    
+
     result = {
       metadataAdded: false,
       statusCode: 500,
@@ -97,14 +98,13 @@ module.exports.create_new_meta_data = async (data) => {
       body: "Could not create the PropertyMeta.",
       error: err,
       metadata: null,
-    };
+    }
 
     console.log("Error"+err)
 
+    return result;
        
   }
-  return result;
-
 }
 
 // Retrieve all Propertymeta from the database.

@@ -134,6 +134,8 @@ module.exports.metaFindAll = async () => {
 
 // Check if there is Metadata data
 module.exports.metaDataExists = async () => {
+
+  const result = { dataExists:false, metadata:null, error:"" }
   try {  
 
     await pool.connect((err, client, done) => {
@@ -144,7 +146,7 @@ module.exports.metaDataExists = async () => {
 
           console.log("Meta Data does not exist")
 
-          return ({dataExists:true,metadata:data, error:null});
+          result = { dataExists:true, metadata:data, error:null };
         } else {
 
           console.log("Meta Data does not exist")
@@ -153,7 +155,7 @@ module.exports.metaDataExists = async () => {
           result.metadata = null
           result.error = "No meta data"
     
-          return ({dataExists:false,metadata:null, error:"No meta Data"});
+          result = { dataExists:false, metadata:null, error:"No meta Data"};
         }
 
       });
@@ -170,9 +172,9 @@ module.exports.metaDataExists = async () => {
       }
 
       console.log("Error in meta"+err)
-
-    return (result);   
+  
   }
+  return result
 };
 
 module.exports.meta_data_exist = async () => {
@@ -195,7 +197,7 @@ module.exports.meta_data_exist = async () => {
           result.metadata = data
           result.error = null
 
-          return (result);
+          return (result)
         } else {
 
           console.log("Meta Data does not exist")
@@ -204,7 +206,7 @@ module.exports.meta_data_exist = async () => {
           result.metadata = null
           result.error = "No meta data"
     
-          return (result);
+          return (result)
         }
 
       });

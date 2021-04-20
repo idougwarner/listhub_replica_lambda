@@ -55,7 +55,6 @@ const {
   metaDeleteAll,
   metaDataExists,
   ismetadataNew,
-  create_new_meta_data,
   is_meta_data_new
 } = require("./controllers/listings_meta.controller");
 

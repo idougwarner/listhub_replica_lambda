@@ -219,12 +219,10 @@ const create_new_meta_data = async (data) => {
 
   console.log("Inside create new metadata")
 
-  var result = { metadataAdded: null, error: "", metadata: null}
-
   try {
     const client = await pool.connect()
 
-      client.query(
+     await client.query(
         `INSERT INTO ${tbl_listings_meta} (id, last_modifed, content_length, etag, content_type) VALUES (DEFAULT, $1,$2,$3,$4) RETURNING id`, 
         [data.LastModified, data.ContentLength, data.ETag, data.ContentType], (err, res) => {
             if (err) {
@@ -235,31 +233,32 @@ const create_new_meta_data = async (data) => {
                   error: "Could Not add Data",
                   metadata: null
                 }
+
+                return ({ metadataAdded: false, error: "Could Not add Data", metadata: null})
         
             } else {
                 console.log('row inserted with id: ' + res.rows[0].id);
                 
-                result = { metadataAdded: true, metadata: data, error: null }
+                return ({ metadataAdded: true, metadata: data, error: null })
 
             }
       })
-
-    return result
   }
   catch(err) {
 
-    result = {
+    console.log("Error "+err) 
+
+    return ({
       metadataAdded: false,
       statusCode: 500,
       headers: { "Content-Type": "text/plain" },
       body: "Could not create the PropertyMeta.",
       error: err,
       metadata: null,
-    }
+    })
 
-    console.log("Error "+err)    
+       
   }
-  return result;
 }
 
 const meta_data_exist = async () => {
@@ -315,7 +314,7 @@ const meta_data_exist = async () => {
       result = { dataExists: false, metadata: null, error: err, statusCode: 500,  headers: { "Content-Type": "text/plain" },
         body: "Problem finding PropertyMeta Info." }   
   }
-  
+
   return result
 };
 

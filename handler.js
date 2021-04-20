@@ -277,7 +277,7 @@ const meta_data_exist = async () => {
         if(err) {
           console.log("Check error"+err)
 
-          return ({ dataExists: false, metadata: null, error: null, statusCode: null,  headers: null,
+          return ({ dataExists: false, metadata: null, error: err, statusCode: null,  headers: null,
             body: "" })
         }
 

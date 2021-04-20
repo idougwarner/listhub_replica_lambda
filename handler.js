@@ -281,11 +281,7 @@ const getListingStream = async (values) => {
 
         console.log("Listing Data...\n"+listings)
         
-        propertyBulkCreate(listings1).then((response)=>{
-          console.log("Data Added To DB"+JSON.stringify(response))
-        }).catch((err)=>{
-          console.log("Error from DB"+err)
-        })
+        
           
         // If this works we will parse the entire array and bulkSave to database and resolve to return to our caller
         console.log("Finished reading data\n")

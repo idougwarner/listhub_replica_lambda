@@ -633,6 +633,12 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
       }))
 
+      stream.on("error", (err) => {
+        
+        console.log("Error in request"+err)
+        
+      })
+
       stream.on("complete", () => {
         
         console.log("Completed reading of data: "+listArray.length)

@@ -641,6 +641,14 @@ module.exports.streamExecutor = async (event, context, callback) => {
           }))
     
           stream.on("complete", () => {
+
+            let insertQuery = {};
+            
+            insertQuery.text = `INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2)`;
+            
+            let updateQuery = {};
+            updateQuery.text = `UPDATE ${table_name} SET sequence = $1, Property = $2 WHERE sequence = $3`;
+            
             
             console.log("Completed reading of data: "+listArray.length)
     
@@ -648,26 +656,38 @@ module.exports.streamExecutor = async (event, context, callback) => {
     
             pool.connect((err, client, done) => {
                   
-              var i = 0, count = 0;
+              var i = 0, count = 0; updateCount = 0;
     
               for (i = 0; i < listArray.length; i++) {
-    
-                  client.query(`INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING sequence`, 
-                      [listArray[i].sequence, listArray[i].Property], (err, result) => {
+
+                insertQuery.values = [ listArray[i].sequence, listArray[i].Property ];
+                updateQuery.value = [ listArray[i].sequence, listArray[i].Property, listArray[i].sequence ];
+
+                client.query (updateQuery, (err, result) => {
+
+                  try {
+                    if (err) console.log(err);
+                    if (result.rowCount > 0){
+
+                        updateCount++;
+                       //console.log ('Rows updated: ', result.rowCount);
+                       return;
+                     } else {
+
+                       client.query(insertQuery, (error, res) =>{
+                       
+                        try {
+                         
+                        if (error) console.log(error);
                           
-                          if (err) {
-                              console.log(err);
-                          } else {
-                              //console.log('row inserted with : ' + result.rows[0].sequence);
-                          }
-          
                           count++;
                           
                           if (count == listArray.length) {
 
-                            console.log("Start Sequence: " + startSequence + "End Sequence: "+endSequence + "Added")
-                            console.log("Records added - "+count)
-                              console.log('Lists added successfully Connections will end now!!!');
+                            console.log("Start Sequence - " + startSequence + "End Sequence - "+endSequence + "Added")
+                            console.log("Records added - " + count)
+                            console.log("Records updated - " + updateCount)
+                            console.log('Lists added successfully Connections will end now!!!');
     
                               const response = {
                                 statusCode: 200,
@@ -676,10 +696,52 @@ module.exports.streamExecutor = async (event, context, callback) => {
                                 })
                               };
     
-                              client.end();
                               callback(null, response);
                           }
-                    });        
+
+                       }catch(er){
+                         console.log(er);
+                        }
+                      });
+                    }
+                   }catch (e){
+                     console.log(e);
+                    }finally{
+                       client.release();
+                     }
+                });
+              
+
+    
+                  /*
+                  client.query(`INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING sequence`, 
+                      [listArray[i].sequence, listArray[i].Property], (err, result) => {
+                          
+                      if (err) {
+                          console.log(err);
+                      } else {
+                          //console.log('row inserted with : ' + result.rows[0].sequence);
+                      }
+      
+                      count++;
+                      
+                      if (count == listArray.length) {
+
+                        console.log("Start Sequence: " + startSequence + "End Sequence: "+endSequence + "Added")
+                        console.log("Records added - "+count)
+                        console.log('Lists added successfully Connections will end now!!!');
+
+                          const response = {
+                            statusCode: 200,
+                            body: JSON.stringify({
+                              message: 'Lists Added successfully'
+                            })
+                          };
+
+                          client.end();
+                          callback(null, response);
+                      }
+                  }); */      
               }
             });
             
@@ -719,23 +781,34 @@ module.exports.testfetchListingsData = (event, context, callback) => {
       context.succeed("Sucess")
       
       /*
-      const jsonfile = fs.createReadStream("/tmp/propertylisting.json");
+      client.query(`INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING sequence`, 
+                      [listArray[i].sequence, listArray[i].Property], (err, result) => {
+                          
+                          if (err) {
+                              console.log(err);
+                          } else {
+                              //console.log('row inserted with : ' + result.rows[0].sequence);
+                          }
+          
+                          count++;
+                          
+                          if (count == listArray.length) {
 
-      let rawdata = fs.readFileSync("/tmp/propertylisting.json");
-
-      console.log("RAW Data "+rawdata);
-
-      var myjson = jsonfile.toString().split("}{");
-
-      console.log(" Myjson with Ranges" + myjson);
-
-      console.log("After my JSON file reading A");
-
-      // Create a JSON object array
-      // [myjson.join('},{')]
-      var mylist = "[" + myjson.join("},{") + "]";
-
-      const listings1 = JSON.parse(mylist);
+                            console.log("Start Sequence: " + startSequence + "End Sequence: "+endSequence + "Added")
+                            console.log("Records added - "+count)
+                            console.log('Lists added successfully Connections will end now!!!');
+    
+                              const response = {
+                                statusCode: 200,
+                                body: JSON.stringify({
+                                  message: 'Lists Added successfully'
+                                })
+                              };
+    
+                              client.end();
+                              callback(null, response);
+                          }
+                    }); 
       */
 
     });

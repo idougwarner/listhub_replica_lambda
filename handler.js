@@ -422,7 +422,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
               const params1 = {
                 FunctionName: "listhub-replica-dev-streamExecutor",
-                InvocationType: "Event",
+                InvocationType: "RequestResponse",
                 Payload: JSON.stringify({ "range": range, "table_name": table_a })
               };
           
@@ -442,7 +442,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
               const params2 = {
                 FunctionName: "listhub-replica-dev-streamExecutor",
-                InvocationType: "Event",
+                InvocationType: "RequestResponse",
                 Payload: JSON.stringify({ "range": range, "table_name": table_b })
               };
           
@@ -558,7 +558,7 @@ module.exports.listhubMonitor = async (event, context) => {
               
               const params = {
                 FunctionName: "listhub-replica-dev-streamExecutor",
-                InvocationType: "EventResponse",
+                InvocationType: "RequestResponse",
                 Payload: JSON.stringify("Mark")
               };
           
@@ -600,10 +600,10 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
   callback(null, "Been called by Listmonitor");
   
-  var ETag = event.range.values.ETag
+  var ETag = event.range.ETag
   var startSequence = event.range.startSequence
   var endSequence = event.range.endSequence
-  var table_name = event.range.table_name
+  var table_name = event.table_name
   var listings = ""
   var listArray = []
 

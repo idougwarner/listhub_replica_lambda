@@ -656,7 +656,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     
             pool.connect((err, client, done) => {
                   
-              var i = 0, count = 0; updateCount = 0;
+              var i = 0, insertCount = 0, updateCount = 0;
     
               for (i = 0; i < listArray.length; i++) {
 
@@ -680,24 +680,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                          
                         if (error) console.log(error);
                           
-                          count++;
-                          
-                          if (count == listArray.length) {
-
-                            console.log("Start Sequence - " + startSequence + "End Sequence - "+endSequence + "Added")
-                            console.log("Records added - " + count)
-                            console.log("Records updated - " + updateCount)
-                            console.log('Lists added successfully Connections will end now!!!');
-    
-                              const response = {
-                                statusCode: 200,
-                                body: JSON.stringify({
-                                  message: 'Lists Added successfully'
-                                })
-                              };
-    
-                              callback(null, response);
-                          }
+                          insertCount++;
 
                        }catch(er){
                          console.log(er);
@@ -706,9 +689,25 @@ module.exports.streamExecutor = async (event, context, callback) => {
                     }
                    }catch (e){
                      console.log(e);
-                    }finally{
-                       client.release();
-                     }
+                    }
+
+                    console.log("UpdateCount + insertCount = " + insertCount+updateCount)
+
+                    if ((insertCount+updateCount) == listArray.length) {
+
+                      console.log("Start Sequence - " + startSequence + "End Sequence - "+endSequence + "Added")
+                      console.log("Records added - " + count)
+                      console.log("Records updated - " + updateCount)
+
+                      const response = {
+                        statusCode: 200,
+                        body: JSON.stringify({
+                          message: 'Lists Added successfully'
+                        })
+                      };
+
+                      // callback(null, response);
+                  }
                 });
               
 

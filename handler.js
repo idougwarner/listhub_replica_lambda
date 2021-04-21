@@ -209,8 +209,6 @@ const set_listings_table = async (table_to_set) => {
 
     })// End of Promise
         
-    
-
   } catch(err) {
 
     console.log("Create table listings error"+err)
@@ -417,9 +415,8 @@ module.exports.listhubMonitor = async (event, context) => {
           // We shall download to two tables at the same time
           for(var index=0; index<ranges.length; index++) {
 
-            console.log("Inside call lambda ")
+            console.log("Inside call lambda "+index)
             console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
-            
 
               var range = ranges[index]
 
@@ -429,7 +426,7 @@ module.exports.listhubMonitor = async (event, context) => {
                 Payload: JSON.stringify({ "range": range, "table_name": table_a })
               };
           
-               lambda.invoke(params1, function(error, data) {
+               lambda.invoke(params1, (error, data) => {
                 if (error) {
 
                   console.error("Error in call table_a: "+JSON.stringify(error));
@@ -449,7 +446,7 @@ module.exports.listhubMonitor = async (event, context) => {
                 Payload: JSON.stringify({ "range": range, "table_name": table_b })
               };
           
-              lambda.invoke(params2, function(error, data) {
+              lambda.invoke(params2, (error, data) => {
                 if (error) {
                   console.error("Error in call table_b"+JSON.stringify(error));
                   return new Error(`Error printing messages: ${JSON.stringify(error)}`);

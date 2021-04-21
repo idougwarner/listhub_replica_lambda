@@ -642,7 +642,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     
           stream.on("complete", () => {
 
-            console.log("Completed reading of data: "+listArray.length)
+            console.log("Completed reading API range, Data save is: "+ listArray.length + " records")
 
             let insertQuery = {};
             
@@ -687,7 +687,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
                           console.log("Added list")
                           insertCount++;
-                          
+
                         }
 
                       });

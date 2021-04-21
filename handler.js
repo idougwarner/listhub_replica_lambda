@@ -658,14 +658,15 @@ module.exports.streamExecutor = async (event, context, callback) => {
                           if (err) {
                               console.log(err);
                           } else {
-                              console.log('row inserted with : ' + result.rows[0].sequence);
+                              //console.log('row inserted with : ' + result.rows[0].sequence);
                           }
           
                           count++;
-                          console.log('count = ' + count);
+                          
                           if (count == listArray.length) {
 
                             console.log("Start Sequence: " + startSequence + "End Sequence: "+endSequence + "Added")
+                            console.log("Records added - "+count)
                               console.log('Lists added successfully Connections will end now!!!');
     
                               const response = {

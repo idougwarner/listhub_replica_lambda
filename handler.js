@@ -404,6 +404,7 @@ module.exports.listhubMonitor = async (event, context) => {
               };
 
               console.log("Start Sequence:"+ startSequence + "End Sequence:" + endSequence)
+
               ranges.push(values)
             }
 
@@ -413,12 +414,12 @@ module.exports.listhubMonitor = async (event, context) => {
           
           // Download new listings by calling StreamExecutor with table_name and ranges
           // We shall download to two tables at the same time
-          for(var index=0; index<ranges.length; index++) {
-
-            console.log("Inside call lambda "+index)
-            console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
+          for(var index=1; index<=ranges.length; index++) {
 
               var range = ranges[index]
+
+              console.log("Inside call lambda "+index)
+              console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
 
               const params1 = {
                 FunctionName: "listhub-replica-dev-streamExecutor",

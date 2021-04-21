@@ -410,6 +410,8 @@ module.exports.listhubMonitor = async (event, context) => {
             }
 
           }
+
+          console.log("Ranges.lenght "+ranges.length)
           
           // Download new listings by calling StreamExecutor with table_name and ranges
           // We shall download to two tables at the same time

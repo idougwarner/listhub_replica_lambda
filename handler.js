@@ -414,7 +414,7 @@ module.exports.listhubMonitor = async (event, context) => {
           
           // Download new listings by calling StreamExecutor with table_name and ranges
           // We shall download to two tables at the same time
-          for(var index=1; index<=ranges.length; index++) {
+          for(var index=0; index<ranges.length; index++) {
 
               var range = ranges[index]
 

@@ -13,7 +13,7 @@ provider:
       statements: # permissions for all of your functions can be set here
         - Effect: Allow
           Action: # Gives permission to lambda functions
-            - lambda:InvokeFunction
+            - lambda:Invoke
           Resource: '*'
   region: us-west-2
   environment:

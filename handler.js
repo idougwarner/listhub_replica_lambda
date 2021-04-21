@@ -437,7 +437,9 @@ module.exports.listhubMonitor = async (event, context) => {
                   return new Error(`Error printing messages: ${JSON.stringify(error)}`);
 
                 } else if (data) {
+
                   console.log(data);
+                  
                 }
               });
 

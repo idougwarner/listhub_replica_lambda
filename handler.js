@@ -597,6 +597,8 @@ module.exports.listhubMonitor = async (event, context) => {
 module.exports.streamExecutor = async (event, context, callback) => {
 
   console.log("From List Hub Monitor "+event)
+
+  callback(null, "Been called by Listmonitor");
   
   var ETag = event.range.values.ETag
   var startSequence = event.range.startSequence

@@ -660,10 +660,12 @@ module.exports.streamExecutor = async (event, context, callback) => {
     
               for (i = 0; i < listArray.length; i++) {
 
+                var sequence=listArray[i].sequence
+                var Property=listArray[i].Property
+               
                 client.query(updateQuery.text, 
                   [listArray[i].sequence, listArray[i].Property, listArray[i].sequence], (err, result) => {
 
-                  
                     if (err) console.log(err);
                     if (result.rowCount > 0){
 
@@ -672,7 +674,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                      } else {
 
                        client.query(insertQuery.text,
-                        [ listArray[i].sequence, listArray[i].Property ], (error, res) =>{
+                        [ sequence, Property ], (error, res) =>{
                          
                         if (error) {
                           console.log(error);
@@ -682,6 +684,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                         }                      
                       });
                     }
+
                     console.log("UpdateCount + insertCount = " + insertCount+updateCount)
 
                     if ((insertCount+updateCount) == listArray.length) {

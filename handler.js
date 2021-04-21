@@ -422,11 +422,11 @@ module.exports.listhubMonitor = async (event, context) => {
 
               const params1 = {
                 FunctionName: "listhub-replica-dev-streamExecutor",
-                InvocationType: "RequestResponse",
+                InvocationType: "DryRun",
                 Payload: JSON.stringify({ "range": range, "table_name": table_a })
               };
           
-               lambda.invoke(params1, (error, data) => {
+               lambda.invokeAsync(params1, (error, data) => {
                 if (error) {
 
                   console.error("Error in call table_a: "+JSON.stringify(error));
@@ -442,11 +442,11 @@ module.exports.listhubMonitor = async (event, context) => {
 
               const params2 = {
                 FunctionName: "listhub-replica-dev-streamExecutor",
-                InvocationType: "RequestResponse",
+                InvocationType: "DryRun",
                 Payload: JSON.stringify({ "range": range, "table_name": table_b })
               };
           
-              lambda.invoke(params2, (error, data) => {
+              lambda.invokeAsync(params2, (error, data) => {
                 if (error) {
                   console.error("Error in call table_b"+JSON.stringify(error));
                   return new Error(`Error printing messages: ${JSON.stringify(error)}`);
@@ -636,7 +636,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
       stream.on("error", (err) => {
         
         console.log("Error in request"+err)
-        
+
       })
 
       stream.on("complete", () => {

@@ -660,10 +660,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     
               for (i = 0; i < listArray.length; i++) {
 
-                insertQuery.values = [ listArray[i].sequence, listArray[i].Property ];
-                updateQuery.value = [ listArray[i].sequence, listArray[i].Property, listArray[i].sequence ];
-
-                client.query (updateQuery, (err, result) => {
+                client.query (updateQuery.text, [listArray[i].sequence, listArray[i].Property, listArray[i].sequence], (err, result) => {
 
                   try {
                     if (err) console.log(err);
@@ -674,7 +671,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                        return;
                      } else {
 
-                       client.query(insertQuery, (error, res) =>{
+                       client.query(insertQuery.text, [listArray[i].sequence, listArray[i].Property ], (error, res) =>{
                        
                         try {
                          
@@ -710,8 +707,6 @@ module.exports.streamExecutor = async (event, context, callback) => {
                   }
                 });
               
-
-    
                   /*
                   client.query(`INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING sequence`, 
                       [listArray[i].sequence, listArray[i].Property], (err, result) => {

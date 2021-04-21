@@ -598,7 +598,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
   console.log("ETag "+event.range.ETag)
   console.log("StartSequence "+event.range.startSequence)
   console.log("EndSequence "+event.range.endSequence)
-  console.log("Table_Name "+event.range.table_name)
+  console.log("Table_Name "+event.table_name)
   
   var ETag = event.range.ETag
   var startSequence = event.range.startSequence
@@ -632,12 +632,6 @@ module.exports.streamExecutor = async (event, context, callback) => {
           listArray.push(data)
 
       }))
-
-      stream.on("error", (err) => {
-        
-        console.log("Error in request"+err)
-
-      })
 
       stream.on("complete", () => {
         
@@ -676,16 +670,16 @@ module.exports.streamExecutor = async (event, context, callback) => {
                       }
                 });        
           }
-      });
+        });
         
+      })
+      .on("error", (err) => {
+        
+        console.log("Error in request"+err)
+
       })
 
 }
-
-
-module.exports.fetchListingsData = (event, context) => {
-  fetchData();
-};
 
 module.exports.testfetchListingsData = (event, context, callback) => {
   // getData();

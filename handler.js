@@ -440,6 +440,7 @@ module.exports.listhubMonitor = async (event, context) => {
                 }
               });
 
+              /*
               const params2 = {
                 FunctionName: "listhub-replica-dev-streamExecutor",
                 InvokeArgs: JSON.stringify({ "range": range, "table_name": table_b })
@@ -453,6 +454,7 @@ module.exports.listhubMonitor = async (event, context) => {
                   console.log("table_b_results"+data);
                 }
               });
+              */
                                          
           }
         }
@@ -662,6 +664,8 @@ module.exports.streamExecutor = async (event, context, callback) => {
                           count++;
                           console.log('count = ' + count);
                           if (count == listArray.length) {
+
+                            console.log("Start Sequence: " + startSequence + "End Sequence: "+endSequence + "Added")
                               console.log('Lists added successfully Connections will end now!!!');
     
                               const response = {

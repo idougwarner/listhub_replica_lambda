@@ -414,14 +414,14 @@ module.exports.listhubMonitor = async (event, context) => {
               var range = ranges[index]
 
               const params1 = {
-                FunctionName: "streamExecutor",
+                FunctionName: "listhub-replica-dev-streamExecutor",
                 InvocationType: "RequestResponse",
-                Payload: { range: range, table_name: table_a }
+                Payload: JSON.stringify({ "range": range, "table_name": table_a })
               };
           
                lambda.invoke(params1, function(error, data) {
                 if (error) {
-                  console.error(JSON.stringify(error));
+                  console.error("Error in call: "+JSON.stringify(error));
                   return new Error(`Error printing messages: ${JSON.stringify(error)}`);
                 } else if (data) {
                   console.log(data);
@@ -429,9 +429,9 @@ module.exports.listhubMonitor = async (event, context) => {
               });
 
               const params2 = {
-                FunctionName: "streamExecutor",
+                FunctionName: "listhub-replica-dev-streamExecutor",
                 InvocationType: "RequestResponse",
-                Payload: { range: range, table_name: table_a }
+                Payload: JSON.stringify({ "range": range, "table_name": table_b })
               };
           
               lambda.invoke(params2, function(error, data) {

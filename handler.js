@@ -417,11 +417,15 @@ module.exports.listhubMonitor = async (event, context) => {
           // We shall download to two tables at the same time
           for(var index=1; index<ranges.length; index++) {
 
+            console.log("Inside call lambda ")
+            console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
+            
+
               var range = ranges[index]
 
               const params1 = {
                 FunctionName: "streamExecutor",
-                InvocationType: "RequestResponse",
+                InvocationType: "Event",
                 Payload: JSON.stringify({ "range": range, "table_name": table_a })
               };
           
@@ -431,7 +435,7 @@ module.exports.listhubMonitor = async (event, context) => {
                   console.error("Error in call table_a: "+JSON.stringify(error));
                   
                   return new Error(`Error printing messages: ${JSON.stringify(error)}`);
-                  
+
                 } else if (data) {
                   console.log(data);
                 }
@@ -439,7 +443,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
               const params2 = {
                 FunctionName: "streamExecutor",
-                InvocationType: "RequestResponse",
+                InvocationType: "Event",
                 Payload: JSON.stringify({ "range": range, "table_name": table_b })
               };
           

@@ -642,15 +642,14 @@ module.exports.streamExecutor = async (event, context, callback) => {
     
           stream.on("complete", () => {
 
+            console.log("Completed reading of data: "+listArray.length)
+
             let insertQuery = {};
             
             insertQuery.text = `INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2)`;
             
             let updateQuery = {};
             updateQuery.text = `UPDATE ${table_name} SET sequence = $1, Property = $2 WHERE sequence = $3`;
-            
-            
-            console.log("Completed reading of data: "+listArray.length)
     
             var time = new Date()
     
@@ -666,22 +665,28 @@ module.exports.streamExecutor = async (event, context, callback) => {
                 client.query(updateQuery.text, 
                   [listArray[i].sequence, listArray[i].Property, listArray[i].sequence], (err, result) => {
 
-                    if (err) console.log(err);
-                    if (result.rowCount > 0){
+                    if(err) {
+
+                      console.log(err);
+
+                    } 
+                    else if (result.rowCount > 0) {
 
                         updateCount++;
                        //console.log ('Rows updated: ', result.rowCount);
-                     } else {
+                    } 
+                    else if(result.rowCount == 0) {
 
-                       client.query(insertQuery.text,
-                        [ sequence, Property ], (error, res) =>{
-                         
+                      client.query(insertQuery.text,
+                      [ sequence, Property ], (error, res) => {
+                        
                         if (error) {
                           console.log(error);
                         }
                         else {
                           insertCount++;
-                        }                      
+                        }
+
                       });
                     }
 
@@ -701,7 +706,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                       };
 
                       // callback(null, response);
-                  }
+                    }
                 });
               
                   /*

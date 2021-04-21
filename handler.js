@@ -541,6 +541,8 @@ module.exports.listhubMonitor = async (event, context) => {
 
               // This will call the lambdas asynchronously
               // Get response of each save so that we update live status of table
+
+              console.log("Stringify options"+JSON.stringify({range, table_to_save}))
               
               const params = {
                 FunctionName: "listhub-replica-dev-streamExecutor",

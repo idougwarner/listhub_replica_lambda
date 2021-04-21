@@ -619,7 +619,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
       })
 
       // STREAMING WITH JSON STREAM
-      // var startTime, endTime
+      var startTime, endTime
 
       startTime=new Date()
       

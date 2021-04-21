@@ -514,8 +514,8 @@ module.exports.listhubMonitor = async (event, context) => {
 
               else if(i==range) {
 
-                startSequence = endSequence + 1
-                endSequence = startSequence + chunkSize
+                startSequence = (endSequence + 1)
+                endSequence = (startSequence + chunkSize)
 
                 values = {
                   ETag: ETag,
@@ -530,8 +530,8 @@ module.exports.listhubMonitor = async (event, context) => {
               // All chunks in between 1 and the last
               else {
 
-                startSequence = endSequence + 1
-                endSequence = startSequence + chunkSize
+                startSequence = ( endSequence + 1 )
+                endSequence = (startSequence + chunkSize)
 
                 values = {
                   ETag: ETag,
@@ -571,17 +571,6 @@ module.exports.listhubMonitor = async (event, context) => {
 
                 }
               });
-          
-              /*lambda.invokeAsync(params, (error, data) => {
-                if (error) {
-
-                  console.error("Payload Error"+JSON.stringify(error));
-                  return new Error(`Error printing messages: ${JSON.stringify(error)}`);
-
-                } else if (data) {
-                  console.log(data);
-                }
-              });*/
                                           
             }
 

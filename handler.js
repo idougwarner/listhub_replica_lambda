@@ -618,71 +618,76 @@ module.exports.streamExecutor = async (event, context, callback) => {
         }
       })
 
+     const readAPI = async () => {
       return new Promise((resolve, reject) => {
+    
+          // STREAMING WITH JSON STREAM
+          var startTime, endTime
+    
+          startTime = new Date()
+          
+          console.log("Start Time: " + startTime)
+    
+          stream
+          .pipe(JSONStream.parse())
+          .pipe(es.mapSync((data) => {
+    
+              listArray.push(data)
+              console.log("List Array"+listArray.length)
+    
+          }))
+    
+          stream.on("complete", () => {
+            
+            console.log("Completed reading of data: "+listArray.length)
+    
+            var time = new Date()
+    
+            pool.connect((err, client, done) => {
+                  
+              var i = 0, count = 0;
+    
+              for (i = 0; i < listArray.length; i++) {
+    
+                  client.query(`INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING id`, 
+                      [listArray[i].sequence, listArray[i].Property], (err, result) => {
+                          
+                          if (err) {
+                              console.log(err);
+                          } else {
+                              console.log('row inserted with id: ' + result.rows[0].id);
+                          }
+          
+                          count++;
+                          console.log('count = ' + count);
+                          if (count == listArray.length) {
+                              console.log('Lists added successfully Connections will end now!!!');
+    
+                              const response = {
+                                statusCode: 200,
+                                body: JSON.stringify({
+                                  message: 'Lists Added successfully'
+                                })
+                              };
+    
+                              client.end();
+                              callback(null, response);
+                          }
+                    });        
+              }
+            });
+            
+          })
+          .on("error", (err) => {
+            
+            console.log("Error in request"+err)
+    
+          })
+        })
 
-      // STREAMING WITH JSON STREAM
-      var startTime, endTime
+     }
 
-      startTime = new Date()
-      
-      console.log("Start Time: " + startTime)
-
-      stream
-      .pipe(JSONStream.parse())
-      .pipe(es.mapSync((data) => {
-
-          listArray.push(data)
-          console.log("List Array"+listArray.length)
-
-      }))
-
-      stream.on("complete", () => {
-        
-        console.log("Completed reading of data: "+listArray.length)
-
-        var time = new Date()
-
-        pool.connect((err, client, done) => {
-              
-          var i = 0, count = 0;
-
-          for (i = 0; i < listArray.length; i++) {
-
-              client.query(`INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING id`, 
-                  [listArray[i].sequence, listArray[i].Property], (err, result) => {
-                      
-                      if (err) {
-                          console.log(err);
-                      } else {
-                          console.log('row inserted with id: ' + result.rows[0].id);
-                      }
-      
-                      count++;
-                      console.log('count = ' + count);
-                      if (count == listArray.length) {
-                          console.log('Lists added successfully Connections will end now!!!');
-
-                          const response = {
-                            statusCode: 200,
-                            body: JSON.stringify({
-                              message: 'Lists Added successfully'
-                            })
-                          };
-
-                          client.end();
-                          callback(null, response);
-                      }
-                });        
-          }
-        });
-        
-      })
-      .on("error", (err) => {
-        
-        console.log("Error in request"+err)
-
-      })
-    })
+     await readAPI()
 }
 
 module.exports.testfetchListingsData = (event, context, callback) => {

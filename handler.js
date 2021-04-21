@@ -550,7 +550,7 @@ module.exports.listhubMonitor = async (event, context) => {
                 Payload: JSON.stringify("Mark")
               };
           
-              lambda.invoke(params, (error, data) => {
+              /*lambda.invoke(params, (error, data) => {
                 if (error) {
 
                   console.error("Payload Error"+JSON.stringify(error));
@@ -559,7 +559,7 @@ module.exports.listhubMonitor = async (event, context) => {
                 } else if (data) {
                   console.log(data);
                 }
-              });
+              });*/
                                           
             }
 

@@ -422,7 +422,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
               const params1 = {
                 FunctionName: "listhub-replica-dev-streamExecutor",
-                InvocationType: "DryRun",
+                InvocationType: "Event",
                 Payload: JSON.stringify({ "range": range, "table_name": table_a })
               };
           
@@ -442,7 +442,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
               const params2 = {
                 FunctionName: "listhub-replica-dev-streamExecutor",
-                InvocationType: "DryRun",
+                InvocationType: "Event",
                 Payload: JSON.stringify({ "range": range, "table_name": table_b })
               };
           

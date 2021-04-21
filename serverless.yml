@@ -12,6 +12,7 @@ provider:
     - Effect: Allow
       Action:
         - 'lambda:InvokeFunction'
+        - 'lambda:InvokeAsync'
       Resource: '*'
   region: us-west-2
   environment:

@@ -660,34 +660,28 @@ module.exports.streamExecutor = async (event, context, callback) => {
     
               for (i = 0; i < listArray.length; i++) {
 
-                client.query (updateQuery.text, [listArray[i].sequence, listArray[i].Property, listArray[i].sequence], (err, result) => {
+                client.query(updateQuery.text, 
+                  [listArray[i].sequence, listArray[i].Property, listArray[i].sequence], (err, result) => {
 
-                  try {
+                  
                     if (err) console.log(err);
                     if (result.rowCount > 0){
 
                         updateCount++;
                        //console.log ('Rows updated: ', result.rowCount);
-                       return;
                      } else {
 
-                       client.query(insertQuery.text, [listArray[i].sequence, listArray[i].Property ], (error, res) =>{
-                       
-                        try {
+                       client.query(insertQuery.text,
+                        [ listArray[i].sequence, listArray[i].Property ], (error, res) =>{
                          
-                        if (error) console.log(error);
-                          
-                          insertCount++;
-
-                       }catch(er){
-                         console.log(er);
+                        if (error) {
+                          console.log(error);
                         }
+                        else {
+                          insertCount++;
+                        }                      
                       });
                     }
-                   }catch (e){
-                     console.log(e);
-                    }
-
                     console.log("UpdateCount + insertCount = " + insertCount+updateCount)
 
                     if ((insertCount+updateCount) == listArray.length) {

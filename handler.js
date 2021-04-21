@@ -633,7 +633,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
           .pipe(es.mapSync((data) => {
     
               listArray.push(data)
-              console.log("List Array"+listArray.length)
+              // console.log("List Array"+listArray.length)
     
           }))
     

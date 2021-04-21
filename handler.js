@@ -380,12 +380,12 @@ module.exports.listhubMonitor = async (event, context) => {
             else if(i==range) {
 
               startSequence = endSequence + 1
-              endSequence = startSequence + chunkSize
+              endSequence = ""
 
               values = {
                 ETag: ETag,
                 startSequence: startSequence,
-                endSequence: "",
+                endSequence: endSequence,
               };
 
               console.log("Start Sequence:"+ startSequence + "End Sequence:" + endSequence)

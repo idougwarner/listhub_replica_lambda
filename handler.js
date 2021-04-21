@@ -372,6 +372,8 @@ module.exports.listhubMonitor = async (event, context) => {
                 startSequence: startSequence,
                 endSequence: endSequence,
               };
+
+              console.log("Start Sequence:"+ startSequence + "End Sequence:" + endSequence)
               ranges.push(values)
             }
 
@@ -386,6 +388,7 @@ module.exports.listhubMonitor = async (event, context) => {
                 endSequence: "",
               };
 
+              console.log("Start Sequence:"+ startSequence + "End Sequence:" + endSequence)
               ranges.push(values)
 
             }
@@ -402,6 +405,7 @@ module.exports.listhubMonitor = async (event, context) => {
                 endSequence: endSequence,
               };
 
+              console.log("Start Sequence:"+ startSequence + "End Sequence:" + endSequence)
               ranges.push(values)
             }
 
@@ -414,14 +418,14 @@ module.exports.listhubMonitor = async (event, context) => {
               var range = ranges[index]
 
               const params1 = {
-                FunctionName: "listhub-replica-dev-streamExecutor",
+                FunctionName: "streamExecutor",
                 InvocationType: "RequestResponse",
                 Payload: JSON.stringify({ "range": range, "table_name": table_a })
               };
           
                lambda.invoke(params1, function(error, data) {
                 if (error) {
-                  console.error("Error in call: "+JSON.stringify(error));
+                  console.error("Error in call table_a: "+JSON.stringify(error));
                   return new Error(`Error printing messages: ${JSON.stringify(error)}`);
                 } else if (data) {
                   console.log(data);
@@ -429,14 +433,14 @@ module.exports.listhubMonitor = async (event, context) => {
               });
 
               const params2 = {
-                FunctionName: "listhub-replica-dev-streamExecutor",
+                FunctionName: "streamExecutor",
                 InvocationType: "RequestResponse",
                 Payload: JSON.stringify({ "range": range, "table_name": table_b })
               };
           
               lambda.invoke(params2, function(error, data) {
                 if (error) {
-                  console.error(JSON.stringify(error));
+                  console.error("Error in call table_b"+JSON.stringify(error));
                   return new Error(`Error printing messages: ${JSON.stringify(error)}`);
                 } else if (data) {
                   console.log(data);

@@ -364,8 +364,8 @@ module.exports.listhubMonitor = async (event, context) => {
 
             if(i==1) {
 
-              startSequence = lastSequence - response.data.Metadata.totallinecount;
-              endSequence = startSequence+chunkSize;
+              startSequence = (lastSequence - response.data.Metadata.totallinecount);
+              endSequence = (startSequence+chunkSize);
               
               values = {
                 ETag: ETag,
@@ -379,7 +379,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
             else if(i==range) {
 
-              startSequence = endSequence + 1
+              startSequence = (endSequence + 1)
               endSequence = ""
 
               values = {
@@ -396,8 +396,8 @@ module.exports.listhubMonitor = async (event, context) => {
             // All chunks in between 1 and the last
             else {
 
-              startSequence = endSequence + 1
-              endSequence = startSequence + chunkSize
+              startSequence = (endSequence + 1)
+              endSequence = (startSequence + chunkSize)
 
               values = {
                 ETag: ETag,

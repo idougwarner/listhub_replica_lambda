@@ -595,7 +595,10 @@ module.exports.listhubMonitor = async (event, context) => {
 module.exports.streamExecutor = async (event, context, callback) => {
 
   console.log("From List Hub Monitor "+JSON.stringify(event))
-  console.log("ETag"+event.range.ETag)
+  console.log("ETag "+event.range.ETag)
+  console.log("StartSequence "+event.range.startSequence)
+  console.log("EndSequence "+event.range.endSequence)
+  console.log("Table_Name "+event.range.table_name)
   
   var ETag = event.range.ETag
   var startSequence = event.range.startSequence
@@ -618,7 +621,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
       // STREAMING WITH JSON STREAM
       // var startTime, endTime
 
-      // startTime=new Date()
+      startTime=new Date()
       
       console.log("Start Time: "+startTime)
 

@@ -411,7 +411,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
           }
 
-          console.log("Ranges.lenght "+ranges.length)
+          console.log("Ranges.length "+ranges.length)
           
           // Download new listings by calling StreamExecutor with table_name and ranges
           // We shall download to two tables at the same time
@@ -427,8 +427,11 @@ module.exports.listhubMonitor = async (event, context) => {
           
                lambda.invoke(params1, function(error, data) {
                 if (error) {
+
                   console.error("Error in call table_a: "+JSON.stringify(error));
+                  
                   return new Error(`Error printing messages: ${JSON.stringify(error)}`);
+                  
                 } else if (data) {
                   console.log(data);
                 }

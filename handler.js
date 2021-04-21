@@ -683,8 +683,11 @@ module.exports.streamExecutor = async (event, context, callback) => {
                         if (error) {
                           console.log(error);
                         }
-                        else {
+                        else if(res.rowCount>0) {
+
+                          console.log("Added list")
                           insertCount++;
+                          
                         }
 
                       });

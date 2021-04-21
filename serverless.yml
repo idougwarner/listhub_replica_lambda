@@ -43,7 +43,7 @@ functions:
       - schedule: rate(1 hour)
   streamExecutor:
     handler: handler.streamExecutor
-    timeout: 900
+    timeout: 890
   
 plugins:
   - serverless-plugin-lambda-insights

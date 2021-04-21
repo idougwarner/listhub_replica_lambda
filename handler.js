@@ -623,13 +623,14 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
       startTime=new Date()
       
-      console.log("Start Time: "+startTime)
+      console.log("Start Time: " + startTime)
 
       stream
       .pipe(JSONStream.parse())
       .pipe(es.mapSync((data) => {
 
           listArray.push(data)
+          console.log("List Array"+listArray.length)
 
       }))
 
@@ -637,7 +638,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
         
         console.log("Completed reading of data: "+listArray.length)
 
-        var time=new Date()
+        var time = new Date()
 
         pool.connect((err, client, done) => {
               
@@ -647,6 +648,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
               client.query(`INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING id`, 
                   [listArray[i].sequence, listArray[i].Property], (err, result) => {
+                      
                       if (err) {
                           console.log(err);
                       } else {

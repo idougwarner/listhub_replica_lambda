@@ -673,7 +673,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                     else if (result.rowCount > 0) {
 
                         updateCount++;
-                       //console.log ('Rows updated: ', result.rowCount);
+                       console.log ('Rows updated: ', result.rowCount);
                     } 
                     else if(result.rowCount == 0) {
 

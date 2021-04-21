@@ -649,13 +649,13 @@ module.exports.streamExecutor = async (event, context, callback) => {
     
               for (i = 0; i < listArray.length; i++) {
     
-                  client.query(`INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING id`, 
+                  client.query(`INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING sequence`, 
                       [listArray[i].sequence, listArray[i].Property], (err, result) => {
                           
                           if (err) {
                               console.log(err);
                           } else {
-                              console.log('row inserted with id: ' + result.rows[0].id);
+                              console.log('row inserted with : ' + result.rows[0].sequence);
                           }
           
                           count++;

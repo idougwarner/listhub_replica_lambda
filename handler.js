@@ -349,7 +349,7 @@ module.exports.listhubMonitor = async (event, context) => {
           var ETag = response.data.ETag;
           
           var i, range;
-          range = 15
+          range = 20
 
           const totallinecount = response.data.Metadata.totallinecount;
   
@@ -418,8 +418,8 @@ module.exports.listhubMonitor = async (event, context) => {
 
               var range = ranges[index]
 
-              console.log("Inside call lambda "+index)
-              console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
+              //console.log("Inside call lambda "+index)
+              //console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
 
               const params1 = {
                 FunctionName: "listhub-replica-dev-streamExecutor",
@@ -435,7 +435,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
                 } else if (data) {
 
-                  console.log(data);
+                  console.log("table_a_results"+data);
 
                 }
               });
@@ -450,7 +450,7 @@ module.exports.listhubMonitor = async (event, context) => {
                   console.error("Error in call table_b"+JSON.stringify(error));
                   return new Error(`Error printing messages: ${JSON.stringify(error)}`);
                 } else if (data) {
-                  console.log(data);
+                  console.log("table_b_results"+data);
                 }
               });
                                          
@@ -486,7 +486,7 @@ module.exports.listhubMonitor = async (event, context) => {
             var ETag = response.data.ETag;
             
             var i, range;
-            range = 15
+            range = 20
 
             const totallinecount = response.data.Metadata.totallinecount;
     
@@ -550,15 +550,27 @@ module.exports.listhubMonitor = async (event, context) => {
 
               var range = ranges[index]
 
-              // This will call the lambdas asynchronously
-              // Get response of each save so that we update live status of table
+              //console.log("Inside call lambda "+index)
+              //console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
 
-              console.log("Stringify options"+JSON.stringify({range, table_to_save}))
-              
               const params = {
                 FunctionName: "listhub-replica-dev-streamExecutor",
-                InvocationArgs: JSON.stringify("Mark")
+                InvokeArgs: JSON.stringify({ "range": range, "table_name": table_to_save })
               };
+          
+               lambda.invokeAsync(params, (error, data) => {
+                if (error) {
+
+                  console.error("Error in call table_a: "+JSON.stringify(error));
+                  
+                  return new Error(`Error printing messages: ${JSON.stringify(error)}`);
+
+                } else if (data) {
+
+                  console.log("table_a_results"+data);
+
+                }
+              });
           
               /*lambda.invokeAsync(params, (error, data) => {
                 if (error) {

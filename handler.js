@@ -618,6 +618,8 @@ module.exports.streamExecutor = async (event, context, callback) => {
         }
       })
 
+      return new Promise((resolve, reject) => {
+
       // STREAMING WITH JSON STREAM
       var startTime, endTime
 
@@ -680,7 +682,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
         console.log("Error in request"+err)
 
       })
-
+    })
 }
 
 module.exports.testfetchListingsData = (event, context, callback) => {

@@ -194,7 +194,7 @@ const set_listings_table = async (table_to_set) => {
 
             console.log(`Table ${table_to_set} deleted successfully`);
 
-            client.query(`CREATE TABLE IF NOT EXISTS ${table_to_set}(sequence TEXT UNIQUE, property JSON)`, (err, res) => {
+            client.query(`CREATE TABLE IF NOT EXISTS ${table_to_set}(sequence TEXT, property JSON)`, (err, res) => {
 
                 if (err) {
                     console.log(err);

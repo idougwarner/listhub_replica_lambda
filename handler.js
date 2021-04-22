@@ -753,7 +753,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                       [listArray[i].sequence, listArray[i].Property], (err, result) => {
                           
                       if (err) {
-                          console.log(err.code);
+                          console.log((err.code==2305)?"Duplicate Data":"");
 
                       } else {
                           //console.log('row inserted with : ' + result.rows[0].sequence);

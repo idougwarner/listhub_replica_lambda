@@ -676,6 +676,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
                        updateCount++;
                        console.log ('Rows updated: ', result.rowCount);
+                       console.log("UpdateCount + insertCount = " + insertCount+updateCount)
                     } 
                     else if(result.rowCount == 0) {
 
@@ -683,6 +684,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                       [ sequence, Property ], (error, res) => {
                         
                         console.log("Inside INSERT query")
+
                         if (error) {
                           console.log(error);
                         }
@@ -691,12 +693,12 @@ module.exports.streamExecutor = async (event, context, callback) => {
                           console.log("Added list")
                           insertCount++;
 
+                          console.log("InsertCount + UpdateCount = " + insertCount+updateCount)
+
                         }
 
                       });
                     }
-
-                    console.log("UpdateCount + insertCount = " + insertCount+updateCount)
 
                     if ((insertCount+updateCount) == listArray.length) {
 

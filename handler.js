@@ -516,7 +516,7 @@ module.exports.listhubMonitor = async (event, context) => {
             const totallinecount = response.data.Metadata.totallinecount;
 
             const lastSequence = bigInt(lastSequence);
-            
+
             const count = totallinecount;
             const chunkSize = 30000;
 
@@ -596,13 +596,13 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
   console.log("From List Hub Monitor "+JSON.stringify(event))
   console.log("ETag "+event.range.ETag)
-  console.log("StartSequence "+event.range.startSequence)
-  console.log("EndSequence "+event.range.endSequence)
+  console.log("Start "+event.range.start)
+  console.log("End "+event.range.end)
   console.log("Table_Name "+event.table_name)
   
   var ETag = event.range.ETag
-  var startSequence = event.range.startSequence
-  var endSequence = event.range.endSequence
+  var start = event.range.start
+  var end = event.range.end
   var table_name = event.table_name
   var listings = ""
   var listArray = []
@@ -614,7 +614,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
           Accept: "application/json",
           Authorization: "Bearer " + token,
           "If-Range": ETag,
-          Range: "sequence=" + startSequence + "-" + endSequence
+          Range: "sequence=" + start + "-" + end
         }
       })
 
@@ -760,7 +760,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                       
                       if (count == listArray.length) {
 
-                        console.log("Start Sequence: " + startSequence + "End Sequence: "+endSequence + "Added")
+                        console.log("Start - " + start + "End - " + end + "Added")
                         console.log("Records added - "+count)
                         console.log('Lists added successfully Connections will end now!!!');
 

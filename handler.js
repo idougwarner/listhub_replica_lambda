@@ -661,6 +661,8 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
                 var sequence=listArray[i].sequence
                 var Property=listArray[i].Property
+
+                //`INSERT INTO ${table_name} (sequence, Property) VALUES (1$, $2) ON CONFLICT (sequence) DO NOTHING`
                
                 client.query(updateQuery.text, 
                   [listArray[i].sequence, listArray[i].Property, listArray[i].sequence], (err, result) => {

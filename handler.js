@@ -656,6 +656,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
             pool.connect((err, client, done) => {
                   
               var i = 0, insertCount = 0, updateCount = 0;
+              var maintainCount = 0;
     
               for (i = 0; i < listArray.length; i++) {
 
@@ -663,7 +664,33 @@ module.exports.streamExecutor = async (event, context, callback) => {
                 var Property=listArray[i].Property
 
                 //`INSERT INTO ${table_name} (sequence, Property) VALUES (1$, $2) ON CONFLICT (sequence) DO NOTHING`
+                client.query(`INSERT INTO ${table_name} (sequence, Property) VALUES (1$, $2) ON CONFLICT (sequence) DO NOTHING`, 
+                [listArray[i].sequence, listArray[i].Property], (err, result) => {
+
+                  console.log("Inside UPDATE query")
+
+                  if(err) {
+
+                    console.log(err);
+
+                  }
+                  else if(result.rowCount == 0) {
+
+                     maintainCount++;
+                     console.log ('Rows maintained: ', result.rowCount);
+                     console.log("MaintainCount + InsertCount = " + maintainCount+insertCount)
+
+                  }
+                  else if(result.rowCount > 0) {
+
+                     insertCount++;
+                     console.log ('Rows inserted: ', result.rowCount);
+                     console.log("UpdateCount + insertCount = " + insertCount+updateCount)
+
+                  }
+                });
                
+                /*
                 client.query(updateQuery.text, 
                   [listArray[i].sequence, listArray[i].Property, listArray[i].sequence], (err, result) => {
 
@@ -679,6 +706,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                        updateCount++;
                        console.log ('Rows updated: ', result.rowCount);
                        console.log("UpdateCount + insertCount = " + insertCount+updateCount)
+
                     } 
                     else if(result.rowCount == 0) {
 
@@ -717,7 +745,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
                       // callback(null, response);
                     }
-                });
+                });*/
               
                   /*
                   client.query(`INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING sequence`, 

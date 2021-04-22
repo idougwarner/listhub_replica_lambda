@@ -654,7 +654,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     
           }))
     
-          stream.on("complete", () => {
+          stream.on("complete", async () => {
 
             console.log("Completed reading API range, Data save is: "+ listArray.length + " records")
 
@@ -667,7 +667,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     
             var time = new Date()
     
-            pool.connect((err, client, done) => {
+            await pool.connect((err, client, done) => {
                   
               var i = 0, insertCount = 0, updateCount = 0, count = 0;
               var maintainCount = 0;

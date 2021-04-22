@@ -655,7 +655,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     
             pool.connect((err, client, done) => {
                   
-              var i = 0, insertCount = 0, updateCount = 0;
+              var i = 0, insertCount = 0, updateCount = 0, count = 0;
               var maintainCount = 0;
     
               for (i = 0; i < listArray.length; i++) {
@@ -754,6 +754,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                           
                       if (err) {
                           console.log(err);
+
                       } else {
                           //console.log('row inserted with : ' + result.rows[0].sequence);
                       }

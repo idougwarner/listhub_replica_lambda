@@ -274,7 +274,7 @@ const meta_data_exist = async () => {
             body: "" })
         }
 
-        console.log("Rows: "+JSON.stringify(res))
+       // console.log("Rows: "+JSON.stringify(res))
 
         if(res.rowCount!=0) {
 
@@ -354,6 +354,9 @@ module.exports.listhubMonitor = async (event, context) => {
   
           //var chunkSize = parseInt(totallinecount/range);
           //var ranges = []
+          
+          console.log("Last sequence - " + lastsequencemeta)
+          console.log("Last sequence toString - " + lastsequencemeta.toString())
           
           const lastSequence = bigInt(lastsequencemeta.toString());
           const count = totallinecount;

@@ -350,11 +350,12 @@ module.exports.listhubMonitor = async (event, context) => {
           range = 20
 
           const totallinecount = response.data.Metadata.totallinecount;
+          const lastsequencemeta = response.data.Metadata.lastsequence
   
           //var chunkSize = parseInt(totallinecount/range);
           //var ranges = []
           
-          const lastSequence = bigInt(lastSequence);
+          const lastSequence = bigInt(lastsequencemeta.toString());
           const count = totallinecount;
           const chunkSize = 30000;
 
@@ -365,18 +366,31 @@ module.exports.listhubMonitor = async (event, context) => {
           while (1) {
 
             if (rangeFirstSequence.add(chunkSize).gt(lastSequence)) {
+
+              var start = rangeFirstSequence.toString()
+              var end = lastSequence.toString()
+
               ranges.push({
-                start: rangeFirstSequence.toString(),
-                end: lastSequence.toString(),
+                start: start,
+                end: end,
                 ETag: ETag
               });
+
+              console.log("Start - " + rangeFirstSequence.toString() + " End - " + end )
               break;
+
             } else {
+
+              var start = rangeFirstSequence.toString()
+              var end = rangeFirstSequence.add(chunkSize).toString()
+              
               ranges.push({
-                start: rangeFirstSequence.toNumber(),
-                end: rangeFirstSequence.add(chunkSize).toNumber(),
+                start: start ,
+                end: end,
                 ETag: ETag
               });
+
+              console.log("Start - " + rangeFirstSequence.toString() + " End - " + end )
             }
             
             rangeFirstSequence = rangeFirstSequence.add(chunkSize).add(1);
@@ -481,7 +495,7 @@ module.exports.listhubMonitor = async (event, context) => {
                 }
               });
               */
-                                         
+
           }
         }
         else {

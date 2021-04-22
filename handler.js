@@ -663,6 +663,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                 var sequence=listArray[i].sequence
                 var Property=listArray[i].Property
 
+                /*
                 //`INSERT INTO ${table_name} (sequence, Property) VALUES (1$, $2) ON CONFLICT (sequence) DO NOTHING`
                 client.query(`INSERT INTO ${table_name} (sequence, Property) VALUES ($1, $2) ON CONFLICT (sequence) DO NOTHING`, 
                 [listArray[i].sequence, listArray[i].Property], (err, result) => {
@@ -690,7 +691,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                   }
                 });
                
-                /*
+                
                 client.query(updateQuery.text, 
                   [listArray[i].sequence, listArray[i].Property, listArray[i].sequence], (err, result) => {
 
@@ -747,7 +748,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                     }
                 });*/
               
-                  /*
+                  
                   client.query(`INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING sequence`, 
                       [listArray[i].sequence, listArray[i].Property], (err, result) => {
                           
@@ -775,7 +776,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                           client.end();
                           callback(null, response);
                       }
-                  }); */      
+                  });     
               }
             });
             

@@ -749,11 +749,11 @@ module.exports.streamExecutor = async (event, context, callback) => {
                 });*/
               
                   
-                  client.query(`INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING sequence`, 
+                  client.query(`INSERT INTO ${table_name} (sequence, Property) VALUES ($1,$2) RETURNING sequence`, 
                       [listArray[i].sequence, listArray[i].Property], (err, result) => {
                           
                       if (err) {
-                          console.log(err);
+                          console.log(err.code);
 
                       } else {
                           //console.log('row inserted with : ' + result.rows[0].sequence);

@@ -510,7 +510,7 @@ module.exports.listhubMonitor = async (event, context) => {
       else {
 
         // Compare stored meta_data and new meta_data coming in from listhub to see if we have new listings
-        const { newUpdate } = await is_meta_data_new(response.data.metadata.lastmodifiedtimestamp);
+        const { newUpdate } = await is_meta_data_new(response.data.Metadata.lastmodifiedtimestamp);
 
         if(newUpdate) {
           // Delete old meta and Download new Meta Data
@@ -767,7 +767,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                       [listArray[i].sequence, listArray[i].Property], (err, result) => {
                           
                       if (err) {
-                          console.log((err.code==2305)?"Duplicate Data":"");
+                          console.log(err);
 
                       } else {
                           //console.log('row inserted with : ' + result.rows[0].sequence);

@@ -8,6 +8,7 @@ const JSONStream = require('JSONStream');
 const es = require('event-stream');
 var pg = require('pg');
 const AWS = require('aws-sdk');
+const bigInt = require("big-integer");
 const lambda = new AWS.Lambda({
   region: "us-west-2"
 });
@@ -343,9 +344,6 @@ module.exports.listhubMonitor = async (event, context) => {
           
           console.log("New metadata has been created");
 
-          var lastSequence = response.data.Metadata.lastsequence;
-          var startSequence = lastSequence - response.data.Metadata.totallinecount;
-          var endSequence=0
           var ETag = response.data.ETag;
           
           var i, range;
@@ -353,11 +351,39 @@ module.exports.listhubMonitor = async (event, context) => {
 
           const totallinecount = response.data.Metadata.totallinecount;
   
-          var chunkSize = parseInt(totallinecount/range);
+          //var chunkSize = parseInt(totallinecount/range);
+          //var ranges = []
+          
+          const lastSequence = bigInt(lastSequence);
+          const count = totallinecount;
+          const chunkSize = 30000;
 
-          var values;
-          var ranges = []
+          const firstSequence = lastSequence.minus(count).add(1);
+          let rangeFirstSequence = firstSequence;
+          let ranges = [];
 
+          while (1) {
+
+            if (rangeFirstSequence.add(chunkSize).gt(lastSequence)) {
+              ranges.push({
+                start: rangeFirstSequence.toString(),
+                end: lastSequence.toString(),
+                ETag: ETag
+              });
+              break;
+            } else {
+              ranges.push({
+                start: rangeFirstSequence.toNumber(),
+                end: rangeFirstSequence.add(chunkSize).toNumber(),
+                ETag: ETag
+              });
+            }
+            
+            rangeFirstSequence = rangeFirstSequence.add(chunkSize).add(1);
+
+          }
+          
+          /*
           for(i=1; i<=range; i++) {
 
             if(i==1) {
@@ -408,7 +434,7 @@ module.exports.listhubMonitor = async (event, context) => {
               ranges.push(values)
             }
 
-          }
+          }*/
 
           console.log("Ranges.length "+ranges.length)
           
@@ -467,7 +493,7 @@ module.exports.listhubMonitor = async (event, context) => {
       else {
 
         // Compare stored meta_data and new meta_data coming in from listhub to see if we have new listings
-        const { newUpdate } = await is_meta_data_new(response.data.LastModified);
+        const { newUpdate } = await is_meta_data_new(response.data.metadata.lastmodifiedtimestamp);
 
         if(newUpdate) {
           // Delete old meta and Download new Meta Data
@@ -482,68 +508,39 @@ module.exports.listhubMonitor = async (event, context) => {
             const {table_to_save} = await table_to_save_listings()
 
             // Call StreamExecutor with table_to_save and ranges
-            var lastSequence = response.data.Metadata.lastsequence;
-            var startSequence = lastSequence - response.data.Metadata.totallinecount;
-            var endSequence=0
             var ETag = response.data.ETag;
             
             var i, range;
             range = 20
 
             const totallinecount = response.data.Metadata.totallinecount;
-    
-            var chunkSize = parseInt(totallinecount/range);
 
-            var values;
-            var ranges = []
+            const lastSequence = bigInt(lastSequence);
+            
+            const count = totallinecount;
+            const chunkSize = 30000;
 
-            for(i=1; i<=range; i++) {
+            const firstSequence = lastSequence.minus(count).add(1);
+            let rangeFirstSequence = firstSequence;
+            let ranges = [];
 
-              if(i==1) {
-
-                startSequence = lastSequence - response.data.Metadata.totallinecount;
-                endSequence = startSequence+chunkSize;
-                
-                values = {
-                  ETag: ETag,
-                  startSequence: startSequence,
-                  endSequence: endSequence,
-                };
-
-                ranges.push(values)
-
+            while (1) {
+              if (rangeFirstSequence.add(chunkSize).gt(lastSequence)) {
+                ranges.push({
+                  start: rangeFirstSequence.toString(),
+                  end: lastSequence.toString(),
+                  ETag: ETag
+                });
+                break;
+              } else {
+                ranges.push({
+                  start: rangeFirstSequence.toNumber(),
+                  end: rangeFirstSequence.add(chunkSize).toNumber(),
+                  ETag: ETag
+                });
               }
-
-              else if(i==range) {
-
-                startSequence = (endSequence + 1)
-                endSequence = (startSequence + chunkSize)
-
-                values = {
-                  ETag: ETag,
-                  startSequence: startSequence,
-                  endSequence: "",
-                };
-
-                ranges.push(values)
-
-              }
-
-              // All chunks in between 1 and the last
-              else {
-
-                startSequence = ( endSequence + 1 )
-                endSequence = (startSequence + chunkSize)
-
-                values = {
-                  ETag: ETag,
-                  startSequence: startSequence,
-                  endSequence: endSequence,
-                };
-
-                ranges.push(values)
-              }
-
+              
+              rangeFirstSequence = rangeFirstSequence.add(chunkSize).add(1);
             }
             
             // Download new listings by calling StreamExecutor with table_name and ranges

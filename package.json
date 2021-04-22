@@ -9,6 +9,7 @@
     "async": "^3.2.0",
     "aws-sdk": "^2.888.0",
     "axios": "^0.21.1",
+    "big-integer": "^1.6.48",
     "body-parser": "^1.19.0",
     "content-range": "^2.0.0",
     "cors": "^2.8.5",

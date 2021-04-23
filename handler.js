@@ -402,12 +402,11 @@ module.exports.listhubMonitor = async (event, context) => {
             if (rangeFirstSequence.add(chunkSize).gt(lastSequence)) {
               var start = rangeFirstSequence.toString();
               var end = lastSequence.toString();
-              ETag = ETag.replace('"', '')
-
+              
               ranges.push({
                 start: start,
                 end: end,
-                ETag: "\"\\\""+ETag+"\\\"\"",
+                ETag: ETag,
               });
               // "\"03478d76d2c596ab36b4b8c87a5f46d3\""
               // ETag: "\"\\"+ETag+"\\"+"\"\"",
@@ -416,12 +415,11 @@ module.exports.listhubMonitor = async (event, context) => {
             } else {
               var start = rangeFirstSequence.toString();
               var end = rangeFirstSequence.add(chunkSize).toString();
-              ETag = ETag.replace('"', '')
-
+             
               ranges.push({
                 start: start,
                 end: end,
-                ETag: "\"\\\""+ETag+"\\\"\"",
+                ETag: ETag,
               });
 
             }
@@ -551,19 +549,19 @@ module.exports.listhubMonitor = async (event, context) => {
 
             while (1) {
               if (rangeFirstSequence.add(chunkSize).gt(lastSequence)) {
-                ETag = ETag.replace('"', '')
+                
                 ranges.push({
                   start: rangeFirstSequence.toString(),
                   end: lastSequence.toString(),
-                  ETag: "\"\\\""+ETag+"\\\"\"",
+                  ETag: ETag,
                 });
                 break;
               } else {
-                ETag = ETag.replace('"', '')
+          
                 ranges.push({
                   start: rangeFirstSequence.toNumber(),
                   end: rangeFirstSequence.add(chunkSize).toNumber(),
-                  ETag: "\"\\\""+ETag+"\\\"\"",
+                  ETag: ETag,
                 });
               }
 
@@ -664,6 +662,10 @@ module.exports.streamExecutor = async (event, context, callback) => {
   console.log("End " + event.range.end);
   console.log("Table_Name " + event.table_name);
 
+  var ETag = ETag.replace('"', '')
+  ETag = "\"\\\""+ETag+"\\\"\"";
+
+
   const ETag = event.range.ETag;
   const start = event.range.start;
   const end = event.range.end;
@@ -681,6 +683,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     },
   });
   
+  // "\"be6f62bee986a250dbd580e018dfd635\""
   
   const streamingPromise = new Promise((resolve, reject) => {
     // STREAMING WITH JSON STREAM
@@ -696,12 +699,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     stream.pipe(ndjson.parse())
     .on('data', (data) => {
       listingArray.push(data);
-      console.log("Data Sequence " + data.sequence)
-      // obj is a javascript object
-    })
-
-    stream
-      .on("complete", async () => {
+      console.log("Data Sequence " + JSON.toString(data))
         
         console.log(
           "Completed reading API range, Data to save is: " +

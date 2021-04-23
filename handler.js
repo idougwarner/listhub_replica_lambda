@@ -462,9 +462,10 @@ module.exports.listhubMonitor = async (event, context) => {
             console.log("Start - " + range.start + " End - " + range.end + " ETag" + range.ETag);
             //console.log("Inside call lambda "+index)
             //console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
+            //arn:aws:lambda:us-west-2:123456789012:function:
 
             const params1 = {
-              FunctionName: "arn:aws:iam::465423866483:function:streamExecutor",
+              FunctionName: "arn:aws:lambda:us-west-2:465423866483:function:streamExecutor",
               InvokeArgs: JSON.stringify({ "range": range, "table_name": table_a }),
             };
 
@@ -565,7 +566,7 @@ module.exports.listhubMonitor = async (event, context) => {
               //console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
 
               const params = {
-                FunctionName: "listhub-replica-dev-streamExecutor",
+                FunctionName: "arn:aws:lambda:us-west-2:465423866483:function:streamExecutor",
                 InvokeArgs: JSON.stringify({
                   range: range,
                   table_name: table_to_save,

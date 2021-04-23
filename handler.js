@@ -614,8 +614,8 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
     stream.pipe(ndjson.parse())
     .on('data', (data) => {
-      //listingArray.push(data);
-      console.log("Data Sequence " + JSON.stringify(data))
+      listingArray.push(data);
+      console.log("Data Sequence " + data.sequence)
       // obj is a javascript object
     })
 

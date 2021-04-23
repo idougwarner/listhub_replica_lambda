@@ -634,7 +634,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     stream.pipe(JSONStream.parse()).pipe(
       es.mapSync((data) => {
         listingArray.push(data);
-        // console.log("List Array"+listingArray.length)
+        console.log("Data " + data)
       })
     );
 

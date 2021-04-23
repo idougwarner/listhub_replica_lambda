@@ -623,8 +623,6 @@ module.exports.streamExecutor = async (event, context, callback) => {
     },
   });
 
-
-  /*
   const streamingPromise = new Promise((resolve, reject) => {
     // STREAMING WITH JSON STREAM
     console.log("Start Time: " + new Date());
@@ -682,7 +680,6 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
   await streamingPromise;
 
-  */
 };
 
 module.exports.checkDataInTables = async () => {

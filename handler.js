@@ -632,8 +632,9 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
     stream
       .on("complete", async () => {
+        
         console.log(
-          "Completed reading API range, Data save is: " +
+          "Completed reading API range, Data to save is: " +
             listingArray.length +
             " records"
         );

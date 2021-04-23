@@ -9,8 +9,8 @@ const es = require("event-stream");
 var pg = require("pg");
 const AWS = require("aws-sdk");
 const bigInt = require("big-integer");
-const ndjson = require('ndjson');
-const ndjsonParser = require('ndjson-parse');
+const ndjson = require("ndjson");
+const ndjsonParser = require("ndjson-parse");
 const lambda = new AWS.Lambda({
   region: "us-west-2",
 });
@@ -50,7 +50,7 @@ const {
   listBulkList,
   listDataExists,
   listDeleteAll,
-  table_to_save_listings,
+  table_to_save_listings: tableToSaveListings,
 } = require("./controllers/listings_update_reference.controller");
 
 const {
@@ -58,7 +58,7 @@ const {
   metaDeleteAll,
   metaDataExists,
   ismetadataNew,
-  is_meta_data_new,
+  is_meta_data_new: isMetaDataNew,
 } = require("./controllers/listings_meta.controller");
 
 const { metaURL, replicationURL, token } = require("./config/url");
@@ -140,7 +140,7 @@ const readWriteListingData = async (values) => {
   });
 };
 
-const set_meta_table = async (meta_table) => {
+const setMetaTable = async (meta_table) => {
   try {
     const client = await pool.connect();
 
@@ -176,7 +176,7 @@ const set_meta_table = async (meta_table) => {
   }
 };
 
-const set_listings_table = async (table_to_set) => {
+const setListingsTable = async (table_to_set) => {
   try {
     const client = await pool.connect();
 
@@ -213,7 +213,7 @@ const set_listings_table = async (table_to_set) => {
   }
 };
 
-const create_new_meta_data = async (data) => {
+const createNewMetaData = async (data) => {
   console.log("Inside create new metadata");
 
   try {
@@ -253,7 +253,7 @@ const create_new_meta_data = async (data) => {
   }
 };
 
-const meta_data_exist = async () => {
+const metaDataExist = async () => {
   const tbl_listings_meta = "listings_meta";
 
   try {
@@ -323,30 +323,20 @@ module.exports.listhubMonitor = async (event, context) => {
   /*
   const params = {
     FunctionName: "listhub-replica-dev-streamExecutor1",
-    InvocationType: "Event", 
-    Payload: JSON.stringify({ "range": [{
-      start: '111111111',
-      end: '2222222'
-    }],"table_name": 'listhub_listing_a' }),
+    InvocationType: "Event",
+    Payload: payload,
   };
 
-  const invocationPromise = new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     lambda.invoke(params, (error, data) => {
       if (error) {
         reject(error);
-        console.error(
-          "Error in call table_a: " + JSON.stringify(error)
-        );
-
-        return new Error(
-          `Error printing messages: ${JSON.stringify(error)}`
-        );
       } else if (data) {
         resolve(data);
-        console.log("table_a_results" + data);
       }
     });
   });
+};
 
   try {
     const result = await invocationPromise;
@@ -377,8 +367,7 @@ module.exports.listhubMonitor = async (event, context) => {
       // Store meta_data if none exists
       if (!dataExists) {
         // Store the new Metadata
-        const { metadataAdded } = await create_new_meta_data(response.data);
-
+        const { metadataAdded } = await createNewMetaData(response.data);
         console.log("Meta Data Added: " + metadataAdded);
 
         // Check if meta_data has been stored for the first time
@@ -648,7 +637,15 @@ module.exports.listhubMonitor = async (event, context) => {
 };
 
 module.exports.streamExecutor1 = async (event, context, callback) => {
-  console.log('streamExecutor1 called');
+  console.log("streamExecutor1 called");
+  const promise = new Promise((resolve) => {
+    setTimeout(() => {
+      console.log("streaming finished");
+      resolve();
+    }, 60000);
+  });
+
+  await promise;
 };
 
 /**

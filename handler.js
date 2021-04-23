@@ -465,7 +465,7 @@ module.exports.listhubMonitor = async (event, context) => {
               //console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
 
               const params1 = {
-                FunctionName: "listhub-replica-dev-streamExecutor",
+                FunctionName: "streamExecutor",
                 InvokeArgs: JSON.stringify({ "range": range, "table_name": table_a })
               };
           
@@ -570,7 +570,7 @@ module.exports.listhubMonitor = async (event, context) => {
               //console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
 
               const params = {
-                FunctionName: "listhub-replica-dev-streamExecutor",
+                FunctionName: "streamExecutor",
                 InvokeArgs: JSON.stringify({ "range": range, "table_name": table_to_save })
               };
           

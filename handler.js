@@ -406,10 +406,10 @@ module.exports.listhubMonitor = async (event, context) => {
               ranges.push({
                 start: start,
                 end: end,
-                ETag: "\"\\"+ETag+"\\"+"\"\"",
+                ETag: ETag,
               });
               // "\"03478d76d2c596ab36b4b8c87a5f46d3\""
-              // 
+              // ETag: "\"\\"+ETag+"\\"+"\"\"",
 
               break;
             } else {
@@ -419,7 +419,7 @@ module.exports.listhubMonitor = async (event, context) => {
               ranges.push({
                 start: start,
                 end: end,
-                ETag: "\"\\"+ETag+"\\"+"\"\"",
+                ETag: ETag,
               });
 
             }

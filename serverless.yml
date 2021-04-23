@@ -29,13 +29,6 @@ functions:
   rateHandler:
     handler: handler.run
     timeout: 900
-    events:
-      - schedule: rate(1 hour)
-  fetchListingsData:
-    handler: handler.fetchListingsData
-    timeout: 890
-    events:
-      - schedule: rate(1 hour)
   listhubMonitor:
     handler: handler.listhubMonitor
     timeout: 900

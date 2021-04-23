@@ -808,6 +808,30 @@ module.exports.streamExecutor = async (event, context, callback) => {
      await readAPI()
 }
 
+module.exports.confirm_data = async () => {
+  // Read the json data one by one and compare to see if it is in database and confirm
+
+  // Read the listings from the database
+
+  const client = await pool.connect() 
+    
+      await client.query(`SELECT * FROM ${table_a}`, 
+      (err, res) => {
+
+            if (err) {
+                console.log(err);
+                        
+            } 
+            if(res.rowCount>0) {
+              console.log("Found - " + res.rowCount + " records")
+            }
+
+      })
+
+  //console.log(" Items checked "+fileCount + "Items Found" + foundCount + " Duplicates Found" + duplicateFound)
+  
+}
+
 module.exports.testfetchListingsData = (event, context, callback) => {
   // getData();
   // Call stream with Ranges

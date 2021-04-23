@@ -37,6 +37,10 @@ functions:
   streamExecutor:
     handler: handler.streamExecutor
     timeout: 890
+
+  check_data_in_tables:
+    handler: handler.check_data_in_tables
+    timeout: 890
   
 plugins:
   - serverless-plugin-lambda-insights

@@ -9,6 +9,8 @@ const es = require("event-stream");
 var pg = require("pg");
 const AWS = require("aws-sdk");
 const bigInt = require("big-integer");
+const ndjson = require('ndjson');
+const ndjsonParser = require('ndjson-parse');
 const lambda = new AWS.Lambda({
   region: "us-west-2",
 });
@@ -603,12 +605,19 @@ module.exports.streamExecutor = async (event, context, callback) => {
     // STREAMING WITH JSON STREAM
     console.log("Start Time: " + new Date());
 
-    stream.pipe(JSONStream.parse()).pipe(
+    /*stream.pipe(JSONStream.parse()).pipe(
       es.mapSync((data) => {
         listingArray.push(data);
-        console.log("Data Sequence " + data.sequence )
+        console.log("Data Sequence " + JSON.stringify(data) )
       })
-    );
+    );*/
+
+    stream.pipe(ndjson.parse())
+    .on('data', (data) => {
+      //listingArray.push(data);
+      console.log("Data Sequence " + JSON.stringify(data))
+      // obj is a javascript object
+    })
 
     stream
       .on("complete", async () => {

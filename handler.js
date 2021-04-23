@@ -327,19 +327,30 @@ module.exports.listhubMonitor = async (event, context) => {
     }],"table_name": 'listhub_listing_a' }),
   };
 
-  lambda.invoke(params, (error, data) => {
-    if (error) {
-      console.error(
-        "Error in call table_a: " + JSON.stringify(error)
-      );
+  const invocationPromise = new Promise((resolve, reject) => {
+    lambda.invoke(params, (error, data) => {
+      if (error) {
+        reject(error);
+        console.error(
+          "Error in call table_a: " + JSON.stringify(error)
+        );
 
-      return new Error(
-        `Error printing messages: ${JSON.stringify(error)}`
-      );
-    } else if (data) {
-      console.log("table_a_results" + data);
-    }
+        return new Error(
+          `Error printing messages: ${JSON.stringify(error)}`
+        );
+      } else if (data) {
+        resolve(data);
+        console.log("table_a_results" + data);
+      }
+    });
   });
+
+  try {
+    const result = await invocationPromise;
+    console.log('streamExecutor is invoked', result);
+  } catch (error) {
+    console.log('streamExecutor invocation error', error);
+  }
 
   // try {
   //   var table_a = "listhub_listings_a";

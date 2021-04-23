@@ -623,7 +623,8 @@ module.exports.streamExecutor = async (event, context, callback) => {
       Range: "sequence=" + start + "-" + end,
     },
   });
-
+  
+  /*
   const streamingPromise = new Promise((resolve, reject) => {
     // STREAMING WITH JSON STREAM
     console.log("Start Time: " + new Date());
@@ -679,7 +680,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
       });
   });
 
-  await streamingPromise;
+  await streamingPromise; */
 
 };
 

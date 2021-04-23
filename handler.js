@@ -646,9 +646,9 @@ module.exports.streamExecutor = async (event, context, callback) => {
             " records"
         );
 
-        const dbOperationPromise = new Promise((resolve, reject) => {
-          const client = await pool.connect();
+        const client = await pool.connect();
 
+        const dbOperationPromise = new Promise((resolve, reject) => {
           const promises = listingArray.map((listing) => new Promise((resolve, reject) => {
             client.query(
               `INSERT INTO ${table_name} (sequence, Property) VALUES ($1,$2) RETURNING sequence`,

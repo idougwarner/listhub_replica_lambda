@@ -551,17 +551,19 @@ module.exports.listhubMonitor = async (event, context) => {
 
             while (1) {
               if (rangeFirstSequence.add(chunkSize).gt(lastSequence)) {
+                ETag = ETag.replace('"', '')
                 ranges.push({
                   start: rangeFirstSequence.toString(),
                   end: lastSequence.toString(),
-                  ETag: ETag,
+                  ETag: "\"\\\""+ETag+"\\\"\"",
                 });
                 break;
               } else {
+                ETag = ETag.replace('"', '')
                 ranges.push({
                   start: rangeFirstSequence.toNumber(),
                   end: rangeFirstSequence.add(chunkSize).toNumber(),
-                  ETag: ETag,
+                  ETag: "\"\\\""+ETag+"\\\"\"",
                 });
               }
 
@@ -680,70 +682,70 @@ module.exports.streamExecutor = async (event, context, callback) => {
   });
   
   
-  // const streamingPromise = new Promise((resolve, reject) => {
-  //   // STREAMING WITH JSON STREAM
-  //   console.log("Start Time: " + new Date());
+  const streamingPromise = new Promise((resolve, reject) => {
+    // STREAMING WITH JSON STREAM
+    console.log("Start Time: " + new Date());
 
-  //   /*stream.pipe(JSONStream.parse()).pipe(
-  //     es.mapSync((data) => {
-  //       listingArray.push(data);
-  //       console.log("Data Sequence " + JSON.stringify(data) )
-  //     })
-  //   );*/
+    /*stream.pipe(JSONStream.parse()).pipe(
+      es.mapSync((data) => {
+        listingArray.push(data);
+        console.log("Data Sequence " + JSON.stringify(data) )
+      })
+    );*/
 
-  //   stream.pipe(ndjson.parse())
-  //   .on('data', (data) => {
-  //     listingArray.push(data);
-  //     console.log("Data Sequence " + data.sequence)
-  //     // obj is a javascript object
-  //   })
+    stream.pipe(ndjson.parse())
+    .on('data', (data) => {
+      listingArray.push(data);
+      console.log("Data Sequence " + data.sequence)
+      // obj is a javascript object
+    })
 
-  //   stream
-  //     .on("complete", async () => {
+    stream
+      .on("complete", async () => {
         
-  //       console.log(
-  //         "Completed reading API range, Data to save is: " +
-  //           listingArray.length +
-  //           " records"
-  //       );
+        console.log(
+          "Completed reading API range, Data to save is: " +
+            listingArray.length +
+            " records"
+        );
 
-  //       const client = await pool.connect();
+        const client = await pool.connect();
 
-  //       const dbOperationPromise = new Promise((resolve, reject) => {
-  //         const promises = listingArray.map((listing) => new Promise((resolve, reject) => {
-  //           client.query(
-  //             `INSERT INTO ${table_name} (sequence, Property) VALUES ($1,$2) RETURNING sequence`,
-  //             [listing.sequence, listing.Property],
-  //             (err) => {
-  //               if (err) {
-  //                 console.log(err);
-  //                 reject();
-  //               } else {
-  //                 resolve();
-  //               }
-  //             }
-  //           );
-  //         }));
+        const dbOperationPromise = new Promise((resolve, reject) => {
+          const promises = listingArray.map((listing) => new Promise((resolve, reject) => {
+            client.query(
+              `INSERT INTO ${table_name} (sequence, Property) VALUES ($1,$2) RETURNING sequence`,
+              [listing.sequence, listing.Property],
+              (err) => {
+                if (err) {
+                  console.log(err);
+                  reject();
+                } else {
+                  resolve();
+                }
+              }
+            );
+          }));
 
-  //         Promise.all(promises).then(resolve).catch(reject);
-  //       });
+          Promise.all(promises).then(resolve).catch(reject);
+        });
 
-  //       try {
-  //         await dbOperationPromise;
-  //         console.log('Listings are added successfully!');
-  //         resolve();
-  //       } catch (error) {
-  //         console.log('Something went wrong while adding the listings', error);
-  //         reject(error);
-  //       }
-  //     })
-  //     .on("error", (err) => {
-  //       console.log("Error in request" + err);
-  //       reject(err);
-  //     });
-  // });
+        try {
+          await dbOperationPromise;
+          console.log('Listings are added successfully!');
+          resolve();
+        } catch (error) {
+          console.log('Something went wrong while adding the listings', error);
+          reject(error);
+        }
+      })
+      .on("error", (err) => {
+        console.log("Error in request" + err);
+        reject(err);
+      });
+  });
 
-  // await streamingPromise;
+  await streamingPromise;
 
 };
 

@@ -360,7 +360,7 @@ module.exports.listhubMonitor = async (event, context) => {
           
           const lastSequence = bigInt(lastsequencemeta.toString());
           const count = totallinecount;
-          const chunkSize = 30000;
+          const chunkSize = 20000;
 
           const firstSequence = lastSequence.minus(count).add(1);
           let rangeFirstSequence = firstSequence;
@@ -535,7 +535,7 @@ module.exports.listhubMonitor = async (event, context) => {
             const lastSequence = bigInt(lastSequence);
 
             const count = totallinecount;
-            const chunkSize = 30000;
+            const chunkSize = 20000;
 
             const firstSequence = lastSequence.minus(count).add(1);
             let rangeFirstSequence = firstSequence;
@@ -808,7 +808,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
      await readAPI()
 }
 
-module.exports.confirm_data = async () => {
+module.exports.check_data_in_tables = async () => {
   // Read the json data one by one and compare to see if it is in database and confirm
 
   // Read the listings from the database

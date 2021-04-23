@@ -563,6 +563,7 @@ module.exports.listhubMonitor = async (event, context) => {
             // Download new listings by calling StreamExecutor with table_name and ranges
             // We shall download to two tables at the same time
             for (var index = 1; index < ranges.length; index++) {
+              console.log("Inside Forloop for calling stream executor")
               var range = ranges[index];
 
               //console.log("Inside call lambda "+index)

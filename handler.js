@@ -535,7 +535,7 @@ module.exports.listhubMonitor = async (event, context) => {
             const lastSequence = bigInt(lastSequence);
 
             const count = totallinecount;
-            const chunkSize = 20000;
+            const chunkSize = 5000;
 
             const firstSequence = lastSequence.minus(count).add(1);
             let rangeFirstSequence = firstSequence;

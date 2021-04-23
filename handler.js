@@ -402,11 +402,12 @@ module.exports.listhubMonitor = async (event, context) => {
             if (rangeFirstSequence.add(chunkSize).gt(lastSequence)) {
               var start = rangeFirstSequence.toString();
               var end = lastSequence.toString();
+              ETag = ETag.replace('"', '')
 
               ranges.push({
                 start: start,
                 end: end,
-                ETag: ETag,
+                ETag: "\"\\\""+ETag+"\\\"\"",
               });
               // "\"03478d76d2c596ab36b4b8c87a5f46d3\""
               // ETag: "\"\\"+ETag+"\\"+"\"\"",
@@ -415,11 +416,12 @@ module.exports.listhubMonitor = async (event, context) => {
             } else {
               var start = rangeFirstSequence.toString();
               var end = rangeFirstSequence.add(chunkSize).toString();
+              ETag = ETag.replace('"', '')
 
               ranges.push({
                 start: start,
                 end: end,
-                ETag: ETag,
+                ETag: "\"\\\""+ETag+"\\\"\"",
               });
 
             }

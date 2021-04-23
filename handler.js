@@ -465,7 +465,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
             const params1 = {
               FunctionName: "arn:aws:iam::465423866483:function:streamExecutor",
-              InvokeArgs: JSON.stringify({ range: range, table_name: table_a }),
+              InvokeArgs: JSON.stringify({ "range": range, "table_name": table_a }),
             };
 
             lambda.invokeAsync(params1, (error, data) => {

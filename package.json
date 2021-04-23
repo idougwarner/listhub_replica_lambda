@@ -17,6 +17,7 @@
     "express": "^4.17.1",
     "got": "^11.8.2",
     "ndjson": "^2.0.0",
+    "ndjson-parse": "^1.0.4",
     "pg": "^8.6.0",
     "pg-copy-streams": "^5.1.1",
     "pg-hstore": "^2.3.3",

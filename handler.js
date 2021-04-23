@@ -383,9 +383,6 @@ module.exports.listhubMonitor = async (event, context) => {
                 ETag: ETag,
               });
 
-              console.log(
-                "Start - " + rangeFirstSequence.toString() + " End - " + end
-              );
               break;
             } else {
               var start = rangeFirstSequence.toString();
@@ -397,9 +394,6 @@ module.exports.listhubMonitor = async (event, context) => {
                 ETag: ETag,
               });
 
-              console.log(
-                "Start - " + rangeFirstSequence.toString() + " End - " + end
-              );
             }
 
             rangeFirstSequence = rangeFirstSequence.add(chunkSize).add(1);
@@ -464,7 +458,8 @@ module.exports.listhubMonitor = async (event, context) => {
           // We shall download to two tables at the same time
           for (var index = 0; index < ranges.length; index++) {
             var range = ranges[index];
-
+            
+            console.log("Start - " + range.start + " End - " + start.end);
             //console.log("Inside call lambda "+index)
             //console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
 

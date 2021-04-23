@@ -50,7 +50,7 @@ const {
   listBulkList,
   listDataExists,
   listDeleteAll,
-  table_to_save_listings,
+  table_to_save_listings: tableToSaveListings,
 } = require("./controllers/listings_update_reference.controller");
 
 const {
@@ -140,7 +140,7 @@ const readWriteListingData = async (values) => {
   });
 };
 
-const set_meta_table = async (meta_table) => {
+const setMetaTable = async (meta_table) => {
   try {
     const client = await pool.connect();
 
@@ -176,7 +176,7 @@ const set_meta_table = async (meta_table) => {
   }
 };
 
-const set_listings_table = async (table_to_set) => {
+const setListingsTable = async (table_to_set) => {
   try {
     const client = await pool.connect();
 
@@ -213,7 +213,7 @@ const set_listings_table = async (table_to_set) => {
   }
 };
 
-const create_new_meta_data = async (data) => {
+const createNewMetaData = async (data) => {
   console.log("Inside create new metadata");
 
   try {
@@ -253,7 +253,7 @@ const create_new_meta_data = async (data) => {
   }
 };
 
-const meta_data_exist = async () => {
+const metaDataExist = async () => {
   const tbl_listings_meta = "listings_meta";
 
   try {
@@ -315,272 +315,149 @@ const meta_data_exist = async () => {
   }
 };
 
+const invokeStreamExecutor = (payload) => {
+  const params = {
+    FunctionName: "listhub-replica-dev-streamExecutor1",
+    InvocationType: "Event", 
+    Payload: payload,
+  };
+
+  return new Promise((resolve, reject) => {
+    lambda.invoke(params, (error, data) => {
+      if (error) {
+        reject(error);
+      } else if (data) {
+        resolve(data);
+      }
+    });
+  });
+};
+
+const getRangesFromMetadata = (metadata, chunkSize = 20000) => {
+  const ETag = metadata.ETag;
+  const lastSequence = bigInt(metadata.Metadata.lastsequence.toString());
+  const count = metadata.Metadata.totallinecount;
+  const firstSequence = lastSequence.minus(count).add(1);
+  let rangeFirstSequence = firstSequence;
+  let ranges = [];
+
+  while (1) {
+    if (rangeFirstSequence.add(chunkSize).gt(lastSequence)) {
+      const start = rangeFirstSequence.toString();
+      const end = lastSequence.toString();
+
+      ranges.push({ start: start, end: end, ETag: ETag });
+
+      break;
+    } else {
+      const start = rangeFirstSequence.toString();
+      const end = rangeFirstSequence.add(chunkSize).toString();
+
+      ranges.push({ start: start, end: end, ETag: ETag });
+    }
+
+    rangeFirstSequence = rangeFirstSequence.add(chunkSize).add(1);
+  }
+
+  return ranges;
+};
+
 /**
  *  ListHubMonitor
  *  Invokes every 1 hour and detects any update.
  */
 module.exports.listhubMonitor = async (event, context) => {
-  const params = {
-    FunctionName: "listhub-replica-dev-streamExecutor1",
-    InvocationType: "Event", 
-    Payload: JSON.stringify({ "range": [{
-      start: '111111111',
-      end: '2222222'
-    }],"table_name": 'listhub_listing_a' }),
-  };
-
-  const invocationPromise = new Promise((resolve, reject) => {
-    lambda.invoke(params, (error, data) => {
-      if (error) {
-        reject(error);
-        console.error(
-          "Error in call table_a: " + JSON.stringify(error)
-        );
-
-        return new Error(
-          `Error printing messages: ${JSON.stringify(error)}`
-        );
-      } else if (data) {
-        resolve(data);
-        console.log("table_a_results" + data);
-      }
-    });
-  });
-
   try {
-    const result = await invocationPromise;
-    console.log('streamExecutor is invoked', result);
-  } catch (error) {
-    console.log('streamExecutor invocation error', error);
-  }
+    const table_a = "listhub_listings_a";
+    const table_b = "listhub_listings_b";
+    const meta_table = "listings_meta";
 
-  // try {
-  //   var table_a = "listhub_listings_a";
-  //   var table_b = "listhub_listings_b";
-  //   var meta_table = "listings_meta";
+    const { table_created } = await setListingsTable(table_a);
+    console.log(table_a + " created " + table_created);
 
-  //   const { table_created } = await set_listings_table(table_a);
-  //   console.log(table_a + " created " + table_created);
+    await setListingsTable(table_b);
+    await setMetaTable(meta_table);
 
-  //   await set_listings_table(table_b);
-  //   await set_meta_table(meta_table);
+    // Get meta_data info
+    const response = await getMetaDataStream();
 
-  //   // Get meta_data info
-  //   const response = await getMetaDataStream();
+    if (response) {
+      // Check whether there is new meta_data
+      const { dataExists } = await metaDataExist();
 
-  //   if (response) {
-  //     // Check whether there is new meta_data
-  //     const { dataExists } = await meta_data_exist();
+      console.log("Data: dataExists " + dataExists);
+      // Store meta_data if none exists
+      if (!dataExists) {
+        // Store the new Metadata
+        const { metadataAdded } = await createNewMetaData(response.data);
 
-  //     console.log("Data: dataExists " + dataExists);
-  //     // Store meta_data if none exists
-  //     if (!dataExists) {
-  //       // Store the new Metadata
-  //       const { metadataAdded } = await create_new_meta_data(response.data);
+        console.log("Meta Data Added: " + metadataAdded);
 
-  //       console.log("Meta Data Added: " + metadataAdded);
+        // Check if meta_data has been stored for the first time
+        if (metadataAdded) {
+          console.log("New metadata has been created");
 
-  //       // Check if meta_data has been stored for the first time
-  //       if (metadataAdded) {
-  //         console.log("New metadata has been created");
+          const ranges = getRangesFromMetadata(response.data);
+          console.log("Ranges.length " + ranges.length);
 
-  //         var ETag = response.data.ETag;
-
-  //         var i, range;
-  //         range = 20;
-
-  //         const totallinecount = response.data.Metadata.totallinecount;
-  //         const lastsequencemeta = response.data.Metadata.lastsequence;
-
-  //         //var chunkSize = parseInt(totallinecount/range);
-  //         //var ranges = []
-
-  //         console.log("Last sequence - " + lastsequencemeta);
-  //         console.log(
-  //           "Last sequence toString - " + lastsequencemeta.toString()
-  //         );
-
-  //         const lastSequence = bigInt(lastsequencemeta.toString());
-  //         const count = totallinecount;
-  //         const chunkSize = 20000;
-
-  //         const firstSequence = lastSequence.minus(count).add(1);
-  //         let rangeFirstSequence = firstSequence;
-  //         let ranges = [];
-
-  //         while (1) {
-  //           if (rangeFirstSequence.add(chunkSize).gt(lastSequence)) {
-  //             var start = rangeFirstSequence.toString();
-  //             var end = lastSequence.toString();
-
-  //             ranges.push({
-  //               start: start,
-  //               end: end,
-  //               ETag: ETag,
-  //             });
-
-  //             break;
-  //           } else {
-  //             var start = rangeFirstSequence.toString();
-  //             var end = rangeFirstSequence.add(chunkSize).toString();
-
-  //             ranges.push({
-  //               start: start,
-  //               end: end,
-  //               ETag: ETag,
-  //             });
-
-  //           }
-
-  //           rangeFirstSequence = rangeFirstSequence.add(chunkSize).add(1);
-  //         }
-
-  //         console.log("Ranges.length " + ranges.length);
-
-  //         // Download new listings by calling StreamExecutor with table_name and ranges
-  //         // We shall download to two tables at the same time
-  //         for (var index = 0; index < ranges.length; index++) {
-  //           var range = ranges[index];
+          // Download new listings by calling StreamExecutor with table_name and ranges
+          // We shall download to two tables at the same time
+          for (let index = 0; index < ranges.length; index++) {
+            let range = ranges[index];
             
-  //           console.log("Start - " + range.start + " End - " + range.end + " ETag" + range.ETag);
-  //           //console.log("Inside call lambda "+index)
-  //           //console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
-  //           //arn:aws:lambda:us-west-2:123456789012:function:
-  //           // arn:aws:lambda:us-west-2:465423866483:function:streamExecutor
+            console.log("Start - " + range.start + " End - " + range.end + " ETag" + range.ETag);
 
-  //           const params1 = {
-  //             FunctionName: "listhub-replica-dev-streamExecutor1",
-  //             InvocationType: "Event", 
-  //             Payload: JSON.stringify({ "range": range,"table_name": table_a }),
-  //           };
+            await invokeStreamExecutor(JSON.stringify({ range, table_name: table_a }));
+          }
+        } else {
+          console.log("Problem creating meta Data. Please try later");
+        }
+      } else {
+        // Compare stored meta_data and new meta_data coming in from listhub to see if we have new listings
+        const { newUpdate } = await is_meta_data_new(response.data.Metadata.lastmodifiedtimestamp);
 
-  //           lambda.invoke(params1, (error, data) => {
-  //             if (error) {
-  //               console.error(
-  //                 "Error in call table_a: " + JSON.stringify(error)
-  //               );
+        if (newUpdate) {
+          // Delete old meta and Download new Meta Data
 
-  //               return new Error(
-  //                 `Error printing messages: ${JSON.stringify(error)}`
-  //               );
-  //             } else if (data) {
-  //               console.log("table_a_results" + data);
-  //             }
-  //           });
+          const { metadataDeleted, error } = await metaDeleteAll();
 
-  //           /*
-  //             const params2 = {
-  //               FunctionName: "listhub-replica-dev-streamExecutor",
-  //               InvokeArgs: JSON.stringify({ "range": range, "table_name": table_b })
-  //             };
-          
-  //             lambda.invokeAsync(params2, (error, data) => {
-  //               if (error) {
-  //                 console.error("Error in call table_b"+JSON.stringify(error));
-  //                 return new Error(`Error printing messages: ${JSON.stringify(error)}`);
-  //               } else if (data) {
-  //                 console.log("table_b_results"+data);
-  //               }
-  //             });
-  //             */
-  //         }
-  //       } else {
-  //         console.log("Problem creating meta Data Please try later");
-  //       }
-  //     } // End If metadataExists
-  //     else {
-  //       // Compare stored meta_data and new meta_data coming in from listhub to see if we have new listings
-  //       const { newUpdate } = await is_meta_data_new(
-  //         response.data.Metadata.lastmodifiedtimestamp
-  //       );
+          if (metadataDeleted) {
+            const { metadataAdded } = await createNewMetaData(response.data);
 
-  //       if (newUpdate) {
-  //         // Delete old meta and Download new Meta Data
+            // Check which table to save new data
+            const { table_to_save } = await tableToSaveListings();
 
-  //         const { metadataDeleted, error } = await metaDeleteAll();
-
-  //         if (metadataDeleted) {
-  //           const { metadataAdded } = await create_new_meta_data(response.data);
-
-  //           // Check which table to save new data
-  //           const { table_to_save } = await table_to_save_listings();
-
-  //           // Call StreamExecutor with table_to_save and ranges
-  //           var ETag = response.data.ETag;
-
-  //           var i, range;
-  //           range = 20;
-
-  //           const totallinecount = response.data.Metadata.totallinecount;
-
-  //           const lastSequence = bigInt(lastSequence);
-
-  //           const count = totallinecount;
-  //           const chunkSize = 20000;
-
-  //           const firstSequence = lastSequence.minus(count).add(1);
-  //           let rangeFirstSequence = firstSequence;
-  //           let ranges = [];
-
-  //           while (1) {
-  //             if (rangeFirstSequence.add(chunkSize).gt(lastSequence)) {
-  //               ranges.push({
-  //                 start: rangeFirstSequence.toString(),
-  //                 end: lastSequence.toString(),
-  //                 ETag: ETag,
-  //               });
-  //               break;
-  //             } else {
-  //               ranges.push({
-  //                 start: rangeFirstSequence.toNumber(),
-  //                 end: rangeFirstSequence.add(chunkSize).toNumber(),
-  //                 ETag: ETag,
-  //               });
-  //             }
-
-  //             rangeFirstSequence = rangeFirstSequence.add(chunkSize).add(1);
-  //           }
-
-  //           // Download new listings by calling StreamExecutor with table_name and ranges
-  //           // We shall download to two tables at the same time
-  //           for (var index = 1; index < ranges.length; index++) {
-  //             console.log("Inside Forloop for calling stream executor")
-  //             var range = ranges[index];
-
-  //             //console.log("Inside call lambda "+index)
-  //             //console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
-
-  //             const params = {
-  //               FunctionName: "listhub-replica-dev-streamExecutor1",
-  //               InvocationType: "Event", 
-  //               Payload: JSON.stringify({"range": range,"table_name": table_to_save}),
-  //             };
-
-  //             lambda.invoke(params, (error, data) => {
-  //               if (error) {
-  //                 console.error(
-  //                   "Error in call table_a: " + JSON.stringify(error)
-  //                 );
-
-  //                 return new Error(
-  //                   `Error printing messages: ${JSON.stringify(error)}`
-  //                 );
-  //               } else if (data) {
-  //                 console.log("table_a_results" + data);
-  //               }
-  //             });
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // } catch (err) {
-  //   console.log("Error: " + err);
-  // }
+            const ranges = getRangesFromMetadata(response.data);
+            console.log("Ranges.length " + ranges.length);
+  
+            // Download new listings by calling StreamExecutor with table_name and ranges
+            // We shall download to two tables at the same time
+            for (let index = 0; index < ranges.length; index++) {
+              let range = ranges[index];
+              
+              console.log("Start - " + range.start + " End - " + range.end + " ETag" + range.ETag);
+  
+              await invokeStreamExecutor(JSON.stringify({ range, table_name: table_to_save }));
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.log("Error: " + err);
+  }
 };
 
 module.exports.streamExecutor1 = async (event, context, callback) => {
   console.log('streamExecutor1 called');
+  const promise = new Promise((resolve) => {
+    setTimeout(() => {
+      console.log('streaming finished');
+      resolve();
+    }, 60000);
+  });
+
+  await promise;
 };
 
 /**

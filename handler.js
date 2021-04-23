@@ -140,7 +140,7 @@ const readWriteListingData = async (values) => {
   });
 };
 
-const setMetaTable = async (meta_table) => {
+const set_meta_table = async (meta_table) => {
   try {
     const client = await pool.connect();
 
@@ -176,7 +176,7 @@ const setMetaTable = async (meta_table) => {
   }
 };
 
-const setListingsTable = async (table_to_set) => {
+const set_listings_table = async (table_to_set) => {
   try {
     const client = await pool.connect();
 
@@ -213,7 +213,7 @@ const setListingsTable = async (table_to_set) => {
   }
 };
 
-const createNewMetaData = async (data) => {
+const create_new_meta_data = async (data) => {
   console.log("Inside create new metadata");
 
   try {
@@ -253,7 +253,7 @@ const createNewMetaData = async (data) => {
   }
 };
 
-const metaDataExist = async () => {
+const meta_data_exist = async () => {
   const tbl_listings_meta = "listings_meta";
 
   try {
@@ -367,7 +367,7 @@ module.exports.listhubMonitor = async (event, context) => {
       // Store meta_data if none exists
       if (!dataExists) {
         // Store the new Metadata
-        const { metadataAdded } = await createNewMetaData(response.data);
+        const { metadataAdded } = await create_new_meta_data(response.data);
         console.log("Meta Data Added: " + metadataAdded);
 
         // Check if meta_data has been stored for the first time

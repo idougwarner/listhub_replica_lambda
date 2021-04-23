@@ -464,7 +464,7 @@ module.exports.listhubMonitor = async (event, context) => {
             //console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
 
             const params1 = {
-              FunctionName: "listhub-replica-dev-streamExecutor",
+              FunctionName: "arn:aws:iam::465423866483:function:listhubMonitor",
               InvokeArgs: JSON.stringify({ range: range, table_name: table_a }),
             };
 

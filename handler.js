@@ -685,7 +685,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
   await streamingPromise;
 };
 
-module.exports.check_data_in_tables = async () => {
+module.exports.checkDataInTables = async () => {
   // Read the json data one by one and compare to see if it is in database and confirm
 
   // Read the listings from the database

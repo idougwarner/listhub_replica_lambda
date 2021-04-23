@@ -36,8 +36,8 @@ functions:
     handler: handler.streamExecutor
     timeout: 890
 
-  check_data_in_tables:
-    handler: handler.check_data_in_tables
+  checkDataInTables:
+    handler: handler.checkDataInTables
     timeout: 890
   
 plugins:

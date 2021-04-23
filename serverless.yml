@@ -36,7 +36,7 @@ functions:
     handler: handler.streamExecutor
     timeout: 890
 
-  streamExecutor:
+  streamExecutor1:
     handler: handler.streamExecutor1
     timeout: 890
 

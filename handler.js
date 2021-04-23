@@ -459,7 +459,7 @@ module.exports.listhubMonitor = async (event, context) => {
           for (var index = 0; index < ranges.length; index++) {
             var range = ranges[index];
             
-            console.log("Start - " + range.start + " End - " + start.end);
+            console.log("Start - " + range.start + " End - " + range.end + " ETag" + range.ETag);
             //console.log("Inside call lambda "+index)
             //console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
 

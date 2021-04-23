@@ -683,6 +683,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                             
                         if (err) {
                             console.log(err);
+                            reject({databaseCreated: false})
   
                         } else {
                             //console.log('row inserted with : ' + result.rows[0].sequence);
@@ -703,15 +704,26 @@ module.exports.streamExecutor = async (event, context, callback) => {
                               })
                             };
   
-                            client.end();
-                            callback(null, response);
+                            resolve({databaseCreated: true})
+                            //callback(null, response);
                         }
                     });     
                 }
               });                            
             }) 
     
-            await promise; 
+            const {databaseCreated} = await promise;
+            
+            if(databaseCreated){
+              
+              console.log("Tables created successfully")
+
+            }
+            else {
+
+              console.log("Tables have been created well")
+
+            }
           })
           .on("error", (err) => {
             

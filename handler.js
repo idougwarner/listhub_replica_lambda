@@ -624,7 +624,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     },
   });
   
-  /*
+  
   const streamingPromise = new Promise((resolve, reject) => {
     // STREAMING WITH JSON STREAM
     console.log("Start Time: " + new Date());
@@ -632,7 +632,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     stream.pipe(JSONStream.parse()).pipe(
       es.mapSync((data) => {
         listingArray.push(data);
-        console.log("Data Sequence " + data.sequence + " Property " + data.Property)
+        console.log("Data Sequence " + data.sequence )
       })
     );
 
@@ -680,7 +680,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
       });
   });
 
-  await streamingPromise; */
+  await streamingPromise;
 
 };
 

@@ -366,7 +366,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
           const lastSequence = bigInt(lastsequencemeta.toString());
           const count = totallinecount;
-          const chunkSize = 5000;
+          const chunkSize = 20000;
 
           const firstSequence = lastSequence.minus(count).add(1);
           let rangeFirstSequence = firstSequence;
@@ -535,7 +535,7 @@ module.exports.listhubMonitor = async (event, context) => {
             const lastSequence = bigInt(lastSequence);
 
             const count = totallinecount;
-            const chunkSize = 5000;
+            const chunkSize = 20000;
 
             const firstSequence = lastSequence.minus(count).add(1);
             let rangeFirstSequence = firstSequence;
@@ -628,6 +628,8 @@ module.exports.streamExecutor = async (event, context, callback) => {
     },
   });
 
+
+  /*
   const streamingPromise = new Promise((resolve, reject) => {
     // STREAMING WITH JSON STREAM
     console.log("Start Time: " + new Date());
@@ -684,6 +686,8 @@ module.exports.streamExecutor = async (event, context, callback) => {
   });
 
   await streamingPromise;
+
+  */
 };
 
 module.exports.checkDataInTables = async () => {

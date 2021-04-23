@@ -58,7 +58,7 @@ const {
   metaDeleteAll,
   metaDataExists,
   ismetadataNew,
-  is_meta_data_new,
+  is_meta_data_new: isMetaDataNew,
 } = require("./controllers/listings_meta.controller");
 
 const { metaURL, replicationURL, token } = require("./config/url");
@@ -362,6 +362,21 @@ const getRangesFromMetadata = (metadata, chunkSize = 20000) => {
   return ranges;
 };
 
+const syncListhub = async (metadata, targetTable) => {
+  const ranges = getRangesFromMetadata(metadata);
+  console.log("Ranges.length " + ranges.length);
+
+  for (let index = 0; index < ranges.length; index++) {
+    let range = ranges[index];
+
+    console.log(`Range: ${range.start} - ${range.end}`);
+
+    await invokeStreamExecutor(
+      JSON.stringify({ range, table_name: targetTable })
+    );
+  }
+};
+
 /**
  * Lambda handler that invokes every 1 hour to check if ListHub has any updates.
  * This lambda handler allows us to sync our database up with the listhub database.
@@ -390,61 +405,30 @@ module.exports.listhubMonitor = async (event, context) => {
       if (!dataExists) {
         // Store the new Metadata
         const { metadataAdded } = await createNewMetaData(response.data);
-
         console.log("Meta Data Added: " + metadataAdded);
 
         // Check if meta_data has been stored for the first time
         if (metadataAdded) {
           console.log("New metadata has been created");
-
-          const ranges = getRangesFromMetadata(response.data);
-          console.log("Ranges.length " + ranges.length);
-
-          // Download new listings by calling StreamExecutor with table_name and ranges
-          // We shall download to two tables at the same time
-          for (let index = 0; index < ranges.length; index++) {
-            let range = ranges[index];
-
-            console.log(`Range: ${range.start} - ${range.end}`);
-
-            await invokeStreamExecutor(
-              JSON.stringify({ range, table_name: table_a })
-            );
-          }
+          await syncListhub(response.data, table_a);
         } else {
           console.log("Problem creating meta Data. Please try later");
         }
       } else {
         // Compare stored meta_data and new meta_data coming in from listhub to see if we have new listings
-        const { newUpdate } = await is_meta_data_new(
+        const { newUpdate } = await isMetaDataNew(
           response.data.Metadata.lastmodifiedtimestamp
         );
 
         if (newUpdate) {
           // Delete old meta and Download new Meta Data
-
           const { metadataDeleted, error } = await metaDeleteAll();
-
           if (metadataDeleted) {
-            const { metadataAdded } = await createNewMetaData(response.data);
+            await createNewMetaData(response.data);
 
             // Check which table to save new data
             const { table_to_save } = await tableToSaveListings();
-
-            const ranges = getRangesFromMetadata(response.data);
-            console.log("Ranges.length " + ranges.length);
-
-            // Download new listings by calling StreamExecutor with table_name and ranges
-            // We shall download to two tables at the same time
-            for (let index = 0; index < ranges.length; index++) {
-              let range = ranges[index];
-
-              console.log(`Range: ${range.start} - ${range.end}`);
-
-              await invokeStreamExecutor(
-                JSON.stringify({ range, table_name: table_to_save })
-              );
-            }
+            await syncListhub(response.data, table_to_save);
           }
         }
       }

@@ -466,7 +466,7 @@ module.exports.listhubMonitor = async (event, context) => {
             // arn:aws:lambda:us-west-2:465423866483:function:streamExecutor
 
             const params1 = {
-              FunctionName: "streamExecutor",
+              FunctionName: "listhub-replica-dev-streamExecutor1",
               InvokeArgs: JSON.stringify({ "range": range, "table_name": table_a }),
             };
 
@@ -567,7 +567,7 @@ module.exports.listhubMonitor = async (event, context) => {
               //console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
 
               const params = {
-                FunctionName: "streamExecutor",
+                FunctionName: "listhub-replica-dev-streamExecutor1",
                 InvokeArgs: JSON.stringify({
                   "range": range,
                   "table_name": table_to_save,
@@ -595,6 +595,10 @@ module.exports.listhubMonitor = async (event, context) => {
   } catch (err) {
     console.log("Error: " + err);
   }
+};
+
+module.exports.streamExecutor1 = async (event, context, callback) => {
+  console.log('streamExecutor1 called');
 };
 
 /**

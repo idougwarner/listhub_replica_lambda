@@ -466,11 +466,12 @@ module.exports.listhubMonitor = async (event, context) => {
             // arn:aws:lambda:us-west-2:465423866483:function:streamExecutor
 
             const params1 = {
-              FunctionName: "streamExecutor",
-              InvokeArgs: JSON.stringify({ "range": range, "table_name": table_a }),
+              FunctionName: "listhub-replica-dev-streamExecutor",
+              InvocationType: "Event", 
+              Payload: JSON.stringify({ "range": range,"table_name": table_a }),
             };
 
-            lambda.invokeAsync(params1, (error, data) => {
+            lambda.invoke(params1, (error, data) => {
               if (error) {
                 console.error(
                   "Error in call table_a: " + JSON.stringify(error)
@@ -567,14 +568,12 @@ module.exports.listhubMonitor = async (event, context) => {
               //console.log("Range details: "+JSON.stringify({ "range": range, "table_name": table_a }))
 
               const params = {
-                FunctionName: "streamExecutor",
-                InvokeArgs: JSON.stringify({
-                  "range": range,
-                  "table_name": table_to_save,
-                }),
+                FunctionName: "listhub-replica-dev-streamExecutor",
+                InvocationType: "Event", 
+                Payload: JSON.stringify({"range": range,"table_name": table_to_save}),
               };
 
-              lambda.invokeAsync(params, (error, data) => {
+              lambda.invoke(params, (error, data) => {
                 if (error) {
                   console.error(
                     "Error in call table_a: " + JSON.stringify(error)

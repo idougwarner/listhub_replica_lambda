@@ -36,6 +36,10 @@ functions:
     handler: handler.streamExecutor
     timeout: 890
 
+  streamExecutor:
+    handler: handler.streamExecutor1
+    timeout: 890
+
   checkDataInTables:
     handler: handler.checkDataInTables
     timeout: 890

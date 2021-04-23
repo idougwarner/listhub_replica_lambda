@@ -9,8 +9,8 @@ const es = require("event-stream");
 var pg = require("pg");
 const AWS = require("aws-sdk");
 const bigInt = require("big-integer");
-const ndjson = require('ndjson');
-const ndjsonParser = require('ndjson-parse');
+const ndjson = require("ndjson");
+const ndjsonParser = require("ndjson-parse");
 const lambda = new AWS.Lambda({
   region: "us-west-2",
 });
@@ -318,7 +318,7 @@ const metaDataExist = async () => {
 const invokeStreamExecutor = (payload) => {
   const params = {
     FunctionName: "listhub-replica-dev-streamExecutor1",
-    InvocationType: "Event", 
+    InvocationType: "Event",
     Payload: payload,
   };
 
@@ -363,8 +363,8 @@ const getRangesFromMetadata = (metadata, chunkSize = 20000) => {
 };
 
 /**
- *  ListHubMonitor
- *  Invokes every 1 hour and detects any update.
+ * Lambda handler that invokes every 1 hour to check if ListHub has any updates.
+ * This lambda handler allows us to sync our database up with the listhub database.
  */
 module.exports.listhubMonitor = async (event, context) => {
   try {
@@ -404,17 +404,21 @@ module.exports.listhubMonitor = async (event, context) => {
           // We shall download to two tables at the same time
           for (let index = 0; index < ranges.length; index++) {
             let range = ranges[index];
-            
-            console.log("Start - " + range.start + " End - " + range.end + " ETag" + range.ETag);
 
-            await invokeStreamExecutor(JSON.stringify({ range, table_name: table_a }));
+            console.log(`Range: ${range.start} - ${range.end}`);
+
+            await invokeStreamExecutor(
+              JSON.stringify({ range, table_name: table_a })
+            );
           }
         } else {
           console.log("Problem creating meta Data. Please try later");
         }
       } else {
         // Compare stored meta_data and new meta_data coming in from listhub to see if we have new listings
-        const { newUpdate } = await is_meta_data_new(response.data.Metadata.lastmodifiedtimestamp);
+        const { newUpdate } = await is_meta_data_new(
+          response.data.Metadata.lastmodifiedtimestamp
+        );
 
         if (newUpdate) {
           // Delete old meta and Download new Meta Data
@@ -429,15 +433,17 @@ module.exports.listhubMonitor = async (event, context) => {
 
             const ranges = getRangesFromMetadata(response.data);
             console.log("Ranges.length " + ranges.length);
-  
+
             // Download new listings by calling StreamExecutor with table_name and ranges
             // We shall download to two tables at the same time
             for (let index = 0; index < ranges.length; index++) {
               let range = ranges[index];
-              
-              console.log("Start - " + range.start + " End - " + range.end + " ETag" + range.ETag);
-  
-              await invokeStreamExecutor(JSON.stringify({ range, table_name: table_to_save }));
+
+              console.log(`Range: ${range.start} - ${range.end}`);
+
+              await invokeStreamExecutor(
+                JSON.stringify({ range, table_name: table_to_save })
+              );
             }
           }
         }
@@ -449,10 +455,10 @@ module.exports.listhubMonitor = async (event, context) => {
 };
 
 module.exports.streamExecutor1 = async (event, context, callback) => {
-  console.log('streamExecutor1 called');
+  console.log("streamExecutor1 called");
   const promise = new Promise((resolve) => {
     setTimeout(() => {
-      console.log('streaming finished');
+      console.log("streaming finished");
       resolve();
     }, 60000);
   });
@@ -487,8 +493,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
       Range: "sequence=" + start + "-" + end,
     },
   });
-  
-  
+
   const streamingPromise = new Promise((resolve, reject) => {
     // STREAMING WITH JSON STREAM
     console.log("Start Time: " + new Date());
@@ -500,16 +505,14 @@ module.exports.streamExecutor = async (event, context, callback) => {
       })
     );*/
 
-    stream.pipe(ndjson.parse())
-    .on('data', (data) => {
+    stream.pipe(ndjson.parse()).on("data", (data) => {
       listingArray.push(data);
-      console.log("Data Sequence " + data.sequence)
+      console.log("Data Sequence " + data.sequence);
       // obj is a javascript object
-    })
+    });
 
     stream
       .on("complete", async () => {
-        
         console.log(
           "Completed reading API range, Data to save is: " +
             listingArray.length +
@@ -519,30 +522,33 @@ module.exports.streamExecutor = async (event, context, callback) => {
         const client = await pool.connect();
 
         const dbOperationPromise = new Promise((resolve, reject) => {
-          const promises = listingArray.map((listing) => new Promise((resolve, reject) => {
-            client.query(
-              `INSERT INTO ${table_name} (sequence, Property) VALUES ($1,$2) RETURNING sequence`,
-              [listing.sequence, listing.Property],
-              (err) => {
-                if (err) {
-                  console.log(err);
-                  reject();
-                } else {
-                  resolve();
-                }
-              }
-            );
-          }));
+          const promises = listingArray.map(
+            (listing) =>
+              new Promise((resolve, reject) => {
+                client.query(
+                  `INSERT INTO ${table_name} (sequence, Property) VALUES ($1,$2) RETURNING sequence`,
+                  [listing.sequence, listing.Property],
+                  (err) => {
+                    if (err) {
+                      console.log(err);
+                      reject();
+                    } else {
+                      resolve();
+                    }
+                  }
+                );
+              })
+          );
 
           Promise.all(promises).then(resolve).catch(reject);
         });
 
         try {
           await dbOperationPromise;
-          console.log('Listings are added successfully!');
+          console.log("Listings are added successfully!");
           resolve();
         } catch (error) {
-          console.log('Something went wrong while adding the listings', error);
+          console.log("Something went wrong while adding the listings", error);
           reject(error);
         }
       })
@@ -553,7 +559,6 @@ module.exports.streamExecutor = async (event, context, callback) => {
   });
 
   await streamingPromise;
-
 };
 
 module.exports.checkDataInTables = async () => {

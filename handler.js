@@ -431,6 +431,32 @@ const is_meta_data_new = async (newtime) => {
 
 }
 
+const clear_data_from = async (table_name) => {
+
+  const client = await pool.connect()
+  const result = await client.query(`SELECT * FROM ${table_name}`);
+
+  return new Promise((resolve, reject) => {
+    
+    if(result.rowCount>0)
+    {
+      // Delete all from table
+      const rslt = await db.query(`DELETE * FROM ${table_name}`);
+      if(rslt.rowCount>0)
+      {
+        resolve({ deleted:true, tableOk: true })
+      }
+      else {
+        resolve({ deleted:false, tableOk: false })
+      }
+    }
+    else {
+      resolve({ deleted:false, tableOk: true })
+    }
+  })
+
+}
+
 const table_to_save_listings = async () => {
 
   var list_a_table = "listhub_listings_a"
@@ -589,7 +615,12 @@ module.exports.listhubMonitor = async (event, context) => {
 
           // Update listhub_replica data with new timestamp and check which table to now set data to
           const { table_to_save } = await table_to_save_listings();
-          await syncListhub(response.data, table_to_save);
+          // Clear data from the table if existing data then save data
+          const { deleted, tableOk } = await clear_data_from(table_to_save);
+          if(deleted || tableOk)
+          {
+            await syncListhub(response.data, table_to_save);
+          }          
 
         }
       }

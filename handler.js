@@ -140,7 +140,57 @@ const readWriteListingData = async (values) => {
   });
 };
 
+<<<<<<< Updated upstream
 const setMetaTable = async (meta_table) => {
+=======
+const create_listhub_replica = async (meta_table) => {
+
+      /*id
+      last_modified
+      table_recent (one of listhub_listings_a and listhub_listings_b)
+      table_stale (one of listhub_listings_a and listhub_listings_b)
+      jobs_count
+      fulfulled_jobs_count
+      syncing*/
+  var table_name = "listhub_replica"
+
+  try {
+    const client = await pool.connect();
+
+    // id, last_modifed, content_length, etag, content_type
+    // Get list_a_time_modifed
+    client.query(
+      `DROP TABLE IF EXISTS ${table_name} CASCADE`,
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          return { table_created: false };
+        } else {
+          console.log(`Table ${table_name} deleted successfully`);
+
+          client.query(
+            `CREATE TABLE IF NOT EXISTS ${table_name}(id SERIAL PRIMARY KEY, last_modifed TEXT, table_recent TEXT, table_stale TEXT, jobs_count BIGINT, fulfilled_jobs_count BIGINT, syncing TEXT)`,
+            (err, result) => {
+              if (err) {
+                console.log(err);
+              } else {
+                console.log(`Table ${table_name} created successfully"`);
+
+                return { table_created: true };
+              }
+            }
+          ); // End of Create Table
+        }
+      }
+    );
+  } catch (err) {
+    console.log(`Create ${table_name} listings error` + err);
+    // return ({updated:false, data: result.rows[0], error:err})
+  }
+};
+
+const set_meta_table = async (meta_table) => {
+>>>>>>> Stashed changes
   try {
     const client = await pool.connect();
 

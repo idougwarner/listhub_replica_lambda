@@ -740,7 +740,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
           console.log("Listings are added successfully!");
           // fulfilled_jobs_count of listhub_replica by 1 in transaction mode
           
-          const {increasedJobCount} = await increase_job_count();
+          const { increasedJobCount } = await increase_job_count();
           if(increase_job_count)
           {
             resolve();

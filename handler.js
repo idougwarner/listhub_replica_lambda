@@ -688,17 +688,14 @@ module.exports.streamExecutor = async (event, context, callback) => {
     // STREAMING WITH JSON STREAM
     console.log("Start Time: " + new Date());
 
-    /*stream.pipe(JSONStream.parse()).pipe(
-      es.mapSync((data) => {
+    stream.pipe(ndjson.parse())
+    .on("data", (data) => {
         listingArray.push(data);
         console.log("Data Sequence " + JSON.stringify(data) )
       })
-    );*/
 
     stream.pipe(ndjson.parse())
-    .on('data', async (data) => {
-      listingArray.push(data);
-      console.log("Data Sequence " + JSON.toString(data))
+    .on('complete', async () => {
         
         console.log(
           "Completed reading API range, Data to save is: " +

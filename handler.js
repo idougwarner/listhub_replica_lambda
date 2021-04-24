@@ -668,7 +668,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
   const table_name = event.table_name;
   const listingArray = [];
 
-  ETag = ETag.replace('"', '')
+  //ETag = ETag.replace('"', '')
   // ETag = "\"\\\""+ETag+"\\\"\"";
 
   // Get inputStream from replication request with range headers
@@ -677,7 +677,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     headers: {
       Accept: "application/json",
       Authorization: "Bearer " + token,
-      "If-Range": `\"${ETag}\"`,
+      "If-Range": ETag,
       Range: "sequence=" + start + "-" + end,
     },
   });

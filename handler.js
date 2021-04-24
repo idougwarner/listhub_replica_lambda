@@ -662,15 +662,14 @@ module.exports.streamExecutor = async (event, context, callback) => {
   console.log("End " + event.range.end);
   console.log("Table_Name " + event.table_name);
 
-  var ETag = ETag.replace('"', '')
-  // ETag = "\"\\\""+ETag+"\\\"\"";
-
-
-  const ETag = event.range.ETag;
+  var ETag = event.range.ETag;
   const start = event.range.start;
   const end = event.range.end;
   const table_name = event.table_name;
   const listingArray = [];
+
+  ETag = ETag.replace('"', '')
+  // ETag = "\"\\\""+ETag+"\\\"\"";
 
   // Get inputStream from replication request with range headers
   const stream = request({

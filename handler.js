@@ -662,7 +662,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
   console.log("End " + event.range.end);
   console.log("Table_Name " + event.table_name);
 
-  // var ETag = ETag.replace('"', '')
+  var ETag = ETag.replace('"', '')
   // ETag = "\"\\\""+ETag+"\\\"\"";
 
 

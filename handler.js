@@ -26,8 +26,6 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-const { syncDB } = require("./models");
-
 const { metaURL, replicationURL, token } = require("./config/url");
 const { response } = require("express");
 const { reject } = require("async");

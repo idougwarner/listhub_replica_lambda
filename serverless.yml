@@ -50,6 +50,10 @@ functions:
   checkDataInTables:
     handler: handler.checkDataInTables
     timeout: 890
+
+  prepareListhubTables:
+    handler: handler.prepareListhubTables
+    timeout: 890
   
 plugins:
   - serverless-plugin-lambda-insights

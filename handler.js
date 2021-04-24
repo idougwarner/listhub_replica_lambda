@@ -108,30 +108,32 @@ const create_listhub_replica_table = async () => {
 
     // id, last_modifed, content_length, etag, content_type
     // Get list_a_time_modifed
-    client.query(
-      `DROP TABLE IF EXISTS ${tbl_listhub_replica} CASCADE`,
-      (err, result) => {
-        if (err) {
-          console.log(err);
-          return { table_created: false };
-        } else {
-          console.log(`Table ${tbl_listhub_replica} deleted successfully`);
+    return new Promise((resolve, reject) => {
+      client.query(
+        `DROP TABLE IF EXISTS ${tbl_listhub_replica} CASCADE`,
+        (err, result) => {
+          if (err) {
+            console.log(err);
+            resolve({ listhub_table_created: false });
+          } else {
+            console.log(`Table ${tbl_listhub_replica} deleted successfully`);
 
-          client.query(
-            `CREATE TABLE IF NOT EXISTS ${tbl_listhub_replica}(id SERIAL PRIMARY KEY, last_modifed TEXT, table_recent TEXT, table_stale TEXT, jobs_count BIGINT, fulfilled_jobs_count BIGINT, syncing TEXT)`,
-            (err, result) => {
-              if (err) {
-                console.log(err);
-              } else {
-                console.log(`Table ${tbl_listhub_replica} created successfully"`);
+            client.query(
+              `CREATE TABLE IF NOT EXISTS ${tbl_listhub_replica}(id SERIAL PRIMARY KEY, last_modifed TEXT, table_recent TEXT, table_stale TEXT, jobs_count BIGINT, fulfilled_jobs_count BIGINT, syncing TEXT)`,
+              (err, result) => {
+                if (err) {
+                  console.log(err);
+                } else {
+                  console.log(`Table ${tbl_listhub_replica} created successfully"`);
 
-                return { table_created: true };
+                  resolve({ listhub_table_created: true });
+                }
               }
-            }
-          ); // End of Create Table
+            ); // End of Create Table
+          }
         }
-      }
-    );
+      );
+    })
   } catch (err) {
     console.log(`Create ${tbl_listhub_replica} listings error` + err);
     // return ({updated:false, data: result.rows[0], error:err})
@@ -142,14 +144,13 @@ const set_meta_table = async (meta_table) => {
   try {
     const client = await pool.connect();
 
-    //id, last_modifed, content_length, etag, content_type
-    // Get list_a_time_modifed
+    return new Promise((resolve, reject) => {
     client.query(
       `DROP TABLE IF EXISTS ${meta_table} CASCADE`,
       (err, result) => {
         if (err) {
           console.log(err);
-          return { table_created: false };
+          resolve({ meta_table_created: false });
         } else {
           console.log(`Table ${meta_table} deleted successfully`);
 
@@ -161,15 +162,16 @@ const set_meta_table = async (meta_table) => {
               } else {
                 console.log(`Table ${meta_table} created successfully"`);
 
-                return { table_created: true };
+                resolve({ meta_table_created: true });
               }
             }
           ); // End of Create Table
         }
       }
     );
+    })
   } catch (err) {
-    console.log("Create table listings error" + err);
+    console.log(`Create table ${meta_table} error ${err}`);
     // return ({updated:false, data: result.rows[0], error:err})
   }
 };
@@ -185,7 +187,7 @@ const setListingsTable = async (table_to_set) => {
         (err, res) => {
           if (err) {
             console.log(err);
-            resolve({ table_created: false });
+            resolve({ table_created: false, table_name: table_to_set });
           } else {
             console.log(`Table ${table_to_set} deleted successfully`);
 
@@ -197,7 +199,7 @@ const setListingsTable = async (table_to_set) => {
                 } else {
                   console.log(`Table ${table_to_set} created successfully"`);
 
-                  resolve({ table_created: true });
+                  resolve({ table_created: true, table_name: table_to_set });
                 }
               }
             ); // End of Create Table
@@ -573,6 +575,18 @@ const increase_job_count = async () => {
 
 module.exports.prepareListhubTables = async () => {
 
+  const { table_created, table_name } = await setListingsTable(listings_a);
+  console.log(table_name + " created? " + table_created);
+
+  const { table_created, table_name } = await setListingsTable(listings_b);
+  console.log(table_name + " created? " + table_created);
+
+  const {meta_table_created} = await set_meta_table(meta_table);
+  console.log(meta_table + " created? " + meta_table_created);
+
+  const {listhub_table_created} = await create_listhub_replica_table()
+  console.log("Lishub_replica table" + " created? " + listhub_table_created);
+
 }
 
 /**
@@ -581,13 +595,6 @@ module.exports.prepareListhubTables = async () => {
  */
 module.exports.listhubMonitor = async (event, context) => {
   try {
-    
-    const { table_created } = await setListingsTable(listings_a);
-    console.log(listings_a + " created " + table_created);
-
-    await setListingsTable(listings_b);
-    await set_meta_table(meta_table);
-    await create_listhub_replica_table()
 
     // Get meta_data info
     const response = await getMetaDataStream();

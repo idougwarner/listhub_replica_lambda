@@ -317,7 +317,7 @@ const metaDataExist = async () => {
 
 const invokeStreamExecutor = (payload) => {
   const params = {
-    FunctionName: "listhub-replica-dev-streamExecutor1",
+    FunctionName: "listhub-replica-dev-streamExecutor",
     InvocationType: "Event",
     Payload: payload,
   };

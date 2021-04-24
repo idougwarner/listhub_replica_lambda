@@ -696,7 +696,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     );*/
 
     stream.pipe(ndjson.parse())
-    .on('data', (data) => {
+    .on('data', async (data) => {
       listingArray.push(data);
       console.log("Data Sequence " + JSON.toString(data))
         

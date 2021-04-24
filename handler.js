@@ -784,7 +784,7 @@ module.exports.monitorSync = async (event, context, callback) => {
             // Update set syncing to false
             client.query(
               `UPDATE ${tbl_listhub_replica} SET syncing=$1 WHERE id=$2 RETURNING *`,
-              [true, id],
+              [false, id],
               (err, res) => {
                 if (err) {
                   console.log(err);

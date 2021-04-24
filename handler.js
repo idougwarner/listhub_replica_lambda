@@ -586,8 +586,7 @@ const increase_job_count = async () => {
             
             resolve({ increasedJobCount: false });
           }
-        }
-      );
+        });
     }
 
     })
@@ -765,7 +764,67 @@ module.exports.streamExecutor = async (event, context, callback) => {
 };
 
 module.exports.monitorSync = async (event, context, callback) => {
-  
+  // Get the l
+  /**
+   * Get last record of listhub. If value of syncing is true and jobcount is equal to fulfilled then set syncing to false
+   * 
+   */
+   try {
+    const client = await pool.connect();
+
+    return new Promise((resolve, reject) => {
+      client.query(`SELECT * from ${tbl_listhub_replica}`, (err, res) => {
+        if (err) {
+          console.log("Check error" + err);
+
+          resolve ({
+            dataExists: false,
+          });
+        }
+
+        if (res.rowCount != 0) {
+          // Check the condition if syncing == true and jobcount is equal 
+          // last_modified, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing
+
+          var id = res.rows[0].id
+
+          if(res.rows[0].syncing == true && (res.rows[0].jobs_count==res.rows[0].fulfilled_jobs_count)) {
+            // Update set syncing to false
+            client.query(
+              `UPDATE ${tbl_listhub_replica} SET syncing=$1 WHERE id=$2 RETURNING *`,
+              [true, id],
+              (err, res) => {
+                if (err) {
+                  console.log(err);
+                  
+                  resolve({
+                    synced: false
+                  });
+      
+                } else {
+                  
+                  resolve({ synced: true });
+                }
+              });
+
+          }
+        } else {
+          console.log("Problems accessing listhub data");
+
+          resolve ({
+            synced: false,
+          });
+        }
+      });
+    });
+  } catch (err) {
+    console.log("Error in syncing" + err);
+
+    resolve ({
+      synced: false,
+    })
+  }
+
 } 
 
 module.exports.checkDataInTables = async () => {

@@ -571,6 +571,9 @@ const increase_job_count = async () => {
       var fulfilled_jobs_count = result.rows[0].fulfilled_jobs_count;
       fulfilled_jobs_count = fulfilled_jobs_count + 1
 
+      client.query('BEGIN')
+
+      client.query(`LOCK TABLE ${tbl_listhub_replica}`)
       client.query(
         `UPDATE ${tbl_listhub_replica} SET fulfilled_jobs_count=$1 WHERE id=$2 RETURNING *`,
         [fulfilled_jobs_count, id],
@@ -582,9 +585,16 @@ const increase_job_count = async () => {
               increasedJobCount: true
             });
 
+            await client.query('COMMIT')
+            client.release()
+
           } else {
             
             resolve({ increasedJobCount: false });
+
+            await client.query('ROLLBACK')
+            client.release()
+            
           }
         });
     }
@@ -740,7 +750,6 @@ module.exports.streamExecutor = async (event, context, callback) => {
           
           console.log("Listings are added successfully!");
           // fulfilled_jobs_count of listhub_replica by 1 in transaction mode
-          
           const { increasedJobCount } = await increase_job_count();
 
           if(increasedJobCount)

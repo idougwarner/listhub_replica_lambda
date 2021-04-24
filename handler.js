@@ -68,25 +68,6 @@ const listings_a = "listhub_listings_a";
 const listings_b = "listhub_listings_b";
 const meta_table = "listings_meta";
 
-class JsonLinesTransform extends stream.Transform {
-  _transform(chunk, env, cb) {
-    if (!this.chunks) {
-      this.chunks = "";
-    }
-
-    this.chunks += chunk;
-
-    var lines = this.chunks.split(/\n/);
-
-    this.chunks = lines.pop();
-
-    for (let i = 0; i < lines.length; i++) {
-      this.push(lines[i]);
-    }
-
-    cb();
-  }
-}
 
 // Fetch MetaData
 const getMetaDataStream = async () => {
@@ -240,7 +221,7 @@ const setListingsTable = async (table_to_set) => {
             console.log(`Table ${table_to_set} deleted successfully`);
 
             client.query(
-              `CREATE TABLE IF NOT EXISTS ${table_to_set}(sequence TEXT, property JSON)`,
+              `CREATE TABLE IF NOT EXISTS ${table_to_set}(id SERIAL PRIMARY KEY, sequence TEXT, property JSON)`,
               (err, res) => {
                 if (err) {
                   console.log(err);
@@ -275,7 +256,7 @@ const create_listhub_replica_metadata = async (data) => {
       return new Promise((resolve, reject) => {
 
         // Check if there is any metadata
-        "UPDATE fishes SET name=$1, type=$2 WHERE id=$3 RETURNING *"
+        //"UPDATE fishes SET name=$1, type=$2 WHERE id=$3 RETURNING *"
   
         client.query(
           `UPDATE ${tbl_listhub_replica} SET last_modified=$1, table_recent=$2, table_stale=$3, jobs_count=$4, fulfilled_jobs_count=$5, syncing=$6 WHERE id=$6 RETURNING *`,
@@ -459,8 +440,6 @@ const clear_data_from = async (table_name) => {
 
 const table_to_save_listings = async () => {
 
-  var list_a_table = "listhub_listings_a"
-  var list_b_table = "listhub_listings_b"
   var table_stale;
 
   const client = await pool.connect()
@@ -577,6 +556,42 @@ const syncListhub = async (metadata, targetTable) => {
   }
 
 };
+
+const increase_job_count = async () => {
+
+  // select fulfilled job count and increment by one then update the table in transaction mode
+  const client = await pool.connect()
+  const result = await client.query(`SELECT * FROM ${tbl_listhub_replica}`);
+
+  return new Promise((resolve, reject) => {
+    
+    if(result.rowCount>0)
+    {
+      var id = result.rows[0].id;
+      var fulfilled_jobs_count = result.rows[0].fulfilled_jobs_count;
+      fulfilled_jobs_count = fulfilled_jobs_count + 1
+
+      client.query(
+        `UPDATE ${tbl_listhub_replica} SET fulfilled_jobs_count=$1 WHERE id=$2 RETURNING *`,
+        [fulfilled_jobs_count, id],
+        (err, res) => {
+          if (err) {
+            console.log(err);
+            
+            resolve({
+              increasedJobCount: true
+            });
+
+          } else {
+            
+            resolve({ increasedJobCount: false });
+          }
+        }
+      );
+    }
+
+    })
+}
 
 /**
  * Lambda handler that invokes every 1 hour to check if ListHub has any updates.
@@ -721,8 +736,20 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
         try {
           await dbOperationPromise;
+          
           console.log("Listings are added successfully!");
-          resolve();
+          // fulfilled_jobs_count of listhub_replica by 1 in transaction mode
+          
+          const {increasedJobCount} = await increase_job_count();
+          if(increase_job_count)
+          {
+            resolve();
+          }else {
+            console.log("Problem with adding job count")
+            reject();
+          }
+          
+
         } catch (error) {
           console.log("Something went wrong while adding the listings", error);
           reject(error);

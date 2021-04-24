@@ -1366,6 +1366,36 @@ module.exports.testfetchListingsData = (event, context, callback) => {
 
       const listings1 = JSON.parse(mylist);
       */
+
+      /*
+      client.query(`INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING sequence`, 
+          [listArray[i].sequence, listArray[i].Property], (err, result) => {
+              
+              if (err) {
+                  console.log(err);
+              } else {
+                  //console.log('row inserted with : ' + result.rows[0].sequence);
+              }
+
+              count++;
+              
+              if (count == listArray.length) {
+
+                console.log("Start Sequence: " + startSequence + "End Sequence: "+endSequence + "Added")
+                console.log("Records added - "+count)
+                console.log('Lists added successfully Connections will end now!!!');
+
+                  const response = {
+                    statusCode: 200,
+                    body: JSON.stringify({
+                      message: 'Lists Added successfully'
+                    })
+                  };
+
+                  client.end();
+                  callback(null, response);
+              }
+        });*/
     });
 };
 

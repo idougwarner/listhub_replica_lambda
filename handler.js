@@ -28,37 +28,6 @@ const pool = new Pool({
 
 const { syncDB } = require("./models");
 
-const {
-  list_a_Create,
-  list_a_BulkCreate,
-  list_a_BulkList,
-  list_a_DataExists,
-  list_a_DeleteAll,
-} = require("./controllers/listhub_listings_a.controller");
-
-const {
-  list_b_Create,
-  list_b_BulkCreate,
-  list_b_BulkList,
-  list_b_DataExists,
-  list_b_DeleteAll,
-} = require("./controllers/listhub_listings_b.controller");
-
-const {
-  listCreate,
-  listBulkCreate,
-  listBulkList,
-  listDataExists,
-  listDeleteAll
-} = require("./controllers/listings_update_reference.controller");
-
-const {
-  metaCreate,
-  metaDeleteAll,
-  ismetadataNew,
-  is_meta_data_new: isMetaDataNew,
-} = require("./controllers/listings_meta.controller");
-
 const { metaURL, replicationURL, token } = require("./config/url");
 const { response } = require("express");
 const { reject } = require("async");
@@ -602,6 +571,10 @@ const increase_job_count = async () => {
     })
 }
 
+module.exports.prepareListhubTables = async () => {
+
+}
+
 /**
  * Lambda handler that invokes every 1 hour to check if ListHub has any updates.
  * This lambda handler allows us to sync our database up with the listhub database.
@@ -844,7 +817,7 @@ module.exports.checkDataInTables = async () => {
 
   const client = await pool.connect();
 
-  await client.query(`SELECT * FROM ${table_a}`, (err, res) => {
+  await client.query(`SELECT * FROM ${listings_a}`, (err, res) => {
     if (err) {
       console.log(err);
     }
@@ -854,57 +827,4 @@ module.exports.checkDataInTables = async () => {
   });
 
   //console.log(" Items checked "+fileCount + "Items Found" + foundCount + " Duplicates Found" + duplicateFound)
-};
-
-module.exports.testfetchListingsData = (event, context, callback) => {
-  // getData();
-  // Call stream with Ranges
-  request({
-    url: replicationURL,
-    headers: {
-      Accept: "application/json",
-      Authorization: "Bearer " + token,
-    },
-  })
-    .on("data", (response) => {
-      console.log("Data: " + response);
-    })
-    .on("error", (err) => {
-      console.log("Error is" + err);
-      context.done(null, "FAILURE");
-    })
-    .on("finish", () => {
-      context.succeed("Sucess");
-
-      /*
-      client.query(`INSERT INTO ${table_name} (sequence,Property) VALUES ($1,$2) RETURNING sequence`, 
-                      [listArray[i].sequence, listArray[i].Property], (err, result) => {
-                          
-                          if (err) {
-                              console.log(err);
-                          } else {
-                              //console.log('row inserted with : ' + result.rows[0].sequence);
-                          }
-          
-                          count++;
-                          
-                          if (count == listArray.length) {
-
-                            console.log("Start Sequence: " + startSequence + "End Sequence: "+endSequence + "Added")
-                            console.log("Records added - "+count)
-                            console.log('Lists added successfully Connections will end now!!!');
-    
-                              const response = {
-                                statusCode: 200,
-                                body: JSON.stringify({
-                                  message: 'Lists Added successfully'
-                                })
-                              };
-    
-                              client.end();
-                              callback(null, response);
-                          }
-                    }); 
-      */
-    });
 };

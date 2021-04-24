@@ -603,7 +603,8 @@ module.exports.listhubMonitor = async (event, context) => {
     console.log(listings_a + " created " + table_created);
 
     await setListingsTable(listings_b);
-    await setMetaTable(meta_table);
+    await set_meta_table(meta_table);
+    await create_listhub_replica_table()
 
     // Get meta_data info
     const response = await getMetaDataStream();
@@ -614,10 +615,11 @@ module.exports.listhubMonitor = async (event, context) => {
       const { dataExists } = await listhub_data_exist();
 
       console.log("Data: dataExists " + dataExists);
+
       // Store new listhub replica data if none exists
       if (!dataExists) {
 
-        // Call SyncListhub with metadata and listings a
+        // Call SyncListhub with metadata and create listings a table
         await syncListhub(response.data, listings_a);
         
       } else {
@@ -740,7 +742,8 @@ module.exports.streamExecutor = async (event, context, callback) => {
           // fulfilled_jobs_count of listhub_replica by 1 in transaction mode
           
           const { increasedJobCount } = await increase_job_count();
-          if(increase_job_count)
+
+          if(increasedJobCount)
           {
             resolve();
           }else {
@@ -755,7 +758,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
         }
       })
       .on("error", (err) => {
-        console.log("Error in request" + err);
+        console.log("Error in getting listings" + err);
         reject(err);
       });
   });
@@ -764,22 +767,22 @@ module.exports.streamExecutor = async (event, context, callback) => {
 };
 
 module.exports.monitorSync = async (event, context, callback) => {
-  // Get the l
   /**
    * Get last record of listhub. If value of syncing is true and jobcount is equal to fulfilled then set syncing to false
    * 
    */
+
+   const monitorSyncPromise;
+
    try {
     const client = await pool.connect();
 
-    return new Promise((resolve, reject) => {
+    monitorSyncPromise = new Promise((resolve, reject) => {
       client.query(`SELECT * from ${tbl_listhub_replica}`, (err, res) => {
         if (err) {
           console.log("Check error" + err);
 
-          resolve ({
-            dataExists: false,
-          });
+          reject ();
         }
 
         if (res.rowCount != 0) {
@@ -797,13 +800,13 @@ module.exports.monitorSync = async (event, context, callback) => {
                 if (err) {
                   console.log(err);
                   
-                  resolve({
-                    synced: false
-                  });
+                  reject();
       
                 } else {
-                  
-                  resolve({ synced: true });
+
+                  console.log("Data has been synced")
+
+                  resolve();
                 }
               });
 
@@ -811,19 +814,17 @@ module.exports.monitorSync = async (event, context, callback) => {
         } else {
           console.log("Problems accessing listhub data");
 
-          resolve ({
-            synced: false,
-          });
+          reject ();
         }
       });
     });
   } catch (err) {
     console.log("Error in syncing" + err);
 
-    resolve ({
-      synced: false,
-    })
+    reject ()
   }
+
+  await monitorSyncPromise;
 
 } 
 

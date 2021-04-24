@@ -694,8 +694,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
         console.log("Data Sequence " + JSON.stringify(data) )
       })
 
-    stream.pipe(ndjson.parse())
-    .on('complete', async () => {
+    stream.on('complete', async () => {
         
         console.log(
           "Completed reading API range, Data to save is: " +

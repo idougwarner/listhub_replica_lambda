@@ -662,8 +662,8 @@ module.exports.streamExecutor = async (event, context, callback) => {
   console.log("End " + event.range.end);
   console.log("Table_Name " + event.table_name);
 
-  var ETag = ETag.replace('"', '')
-  ETag = "\"\\\""+ETag+"\\\"\"";
+  // var ETag = ETag.replace('"', '')
+  // ETag = "\"\\\""+ETag+"\\\"\"";
 
 
   const ETag = event.range.ETag;
@@ -678,7 +678,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     headers: {
       Accept: "application/json",
       Authorization: "Bearer " + token,
-      "If-Range": ETag,
+      "If-Range": `\"${ETag}\"`,
       Range: "sequence=" + start + "-" + end,
     },
   });

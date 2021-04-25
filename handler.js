@@ -240,6 +240,7 @@ const create_listhub_replica_metadata = async (data) => {
               });
             } else {
               console.log("Meta data row inserted with id: " + res.rows[0].id);
+              console.log("Metadata: "+JSON.stringify(res.rows))
   
               resolve({ metadataAdded: true, metadata: data });
             }
@@ -343,12 +344,9 @@ const is_meta_data_new = async (newtime) => {
   
           var storedTime = res.rows[0].last_modified
           
-          let timeResult = TimeUtil.istimeANewerthantimeB(
-            newtime,
-            storedTime
-          );
+          let timeResult = TimeUtil.istimeANewerthantimeB(newtime, storedTime );
     
-          console.log("TimeResult"+JSON.stringify(timeResult))
+          console.log("Metadata Time Result: "+JSON.stringify(timeResult))
     
           if (timeResult.newUpdate) {
   
@@ -421,7 +419,7 @@ const table_to_save_listings = async () => {
     if(result.rowCount>0)
     {
       table_stale = result.rows[0].table_stale;
-      ({table_to_save:table_stale})
+      resolve({table_to_save:table_stale})
     }
 
     })

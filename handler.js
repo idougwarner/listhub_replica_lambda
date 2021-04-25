@@ -721,7 +721,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
     stream.pipe(ndjson.parse()).on("data", (data) => {
       listingArray.push(data);
-      console.log("Data Sequence " + data.sequence);
+      // console.log("Data Sequence " + data.sequence);
       // obj is a javascript object
     });
 
@@ -773,7 +773,6 @@ module.exports.streamExecutor = async (event, context, callback) => {
             reject();
           }
           
-
         } catch (error) {
           console.log("Something went wrong while increasing the job count in listhub_replica", error);
           reject(error);
@@ -852,7 +851,6 @@ module.exports.monitorSync = async (event, context, callback) => {
 
 module.exports.checkDataInTables = async () => {
   // Read the json data one by one and compare to see if it is in database and confirm
-
   // Read the listings from the database
 
   const client = await pool.connect();

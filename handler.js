@@ -760,7 +760,7 @@ module.exports.monitorSync = async (event, context, callback) => {
    * 
    */
 
-   const monitorSyncPromise;
+   var monitorSyncPromise;
 
    try {
     const client = await pool.connect();

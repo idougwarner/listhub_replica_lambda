@@ -213,6 +213,7 @@ const setListingsTable = async (table_to_set) => {
 };
 
 const create_listhub_replica_metadata = async (data) => {
+
   console.log("Inside create new Listhub replica");
 
   try {
@@ -222,6 +223,7 @@ const create_listhub_replica_metadata = async (data) => {
     // const result = await db.query("DELETE FROM fishes WHERE id=$1"
 
     const results = await client.query(`SELECT * FROM ${tbl_listings_meta}`);
+    console.log("Last_modified " + data.last_modifed)
     
     if(results.rowCount>0) {
 
@@ -480,6 +482,7 @@ const getRangesFromMetadata = (metadata, chunkSize = 20000) => {
 const syncListhub = async (metadata, targetTable) => {
   const ranges = getRangesFromMetadata(metadata);
   console.log("Ranges.length " + ranges.length);
+  console.log("Last modified time "+ metadata.Metadata.lastmodifiedtimestamp)
   var data;
 
   // Store listhub replica data to the table prioritizing the table
@@ -580,7 +583,7 @@ const increase_job_count = async () => {
       client.query('BEGIN')
       //LOCK TABLE ${tbl_listhub_replica
 
-      client.query(`LOCK TABLE ${tbl_listhub_replica} IN SHARE ROW EXCLUSIVE MODE`)
+      client.query(`LOCK TABLE ${tbl_listhub_replica} IN ROW EXCLUSIVE MODE`)
 
       client.query(
         `UPDATE ${tbl_listhub_replica} SET fulfilled_jobs_count=$1 WHERE id=$2 RETURNING *`,
@@ -641,6 +644,7 @@ module.exports.listhubMonitor = async (event, context) => {
       const { dataExists } = await listhub_data_exist();
 
       console.log("Data: dataExists " + dataExists);
+      console.log("Metadata Data " + JSON.stringify(response.data))
 
       // Store new listhub replica data if none exists
       if (!dataExists) {

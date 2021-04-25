@@ -217,7 +217,7 @@ const create_listhub_replica_metadata = async (data) => {
   try {
     const client = await pool.connect();
 
-    const results = await db.query(`SELECT * FROM ${tbl_listings_meta}`);
+    const results = await client.query(`SELECT * FROM ${tbl_listings_meta}`);
     
     if(results.rowCount>0) {
       var id=results.row[0].id

@@ -14,6 +14,7 @@ const ndjsonParser = require("ndjson-parse");
 const lambda = new AWS.Lambda({
   region: "us-west-2",
 });
+const TimeUtil = require("../utils/timeFunctions");
 
 const { Pool, Client } = require("pg");
 const copyFrom = require("pg-copy-streams").from;

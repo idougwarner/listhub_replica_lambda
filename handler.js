@@ -744,7 +744,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                       console.log(err);
                       reject();
                     } else {
-                      client.release()
+                      //client.release()
                       resolve();
                     }
                   }

@@ -517,9 +517,41 @@ const syncListhub = async (metadata, targetTable) => {
   
       console.log(`Range: ${range.start} - ${range.end}`);
   
+      /*
       await invokeStreamExecutor(
         JSON.stringify({ range, table_name: targetTable })
-      );
+      );*/
+
+      const params = {
+        FunctionName: "listhub-replica-dev-streamExecutor",
+        InvocationType: "Event", 
+        Payload: JSON.stringify({ "range": range, "table_name": targetTable }),
+      };
+    
+      const invocationPromise = new Promise((resolve, reject) => {
+        lambda.invoke(params, (error, data) => {
+          if (error) {
+            reject(error);
+            console.error(
+              "Error in call table_a: " + JSON.stringify(error)
+            );
+    
+            return new Error(
+              `Error printing messages: ${JSON.stringify(error)}`
+            );
+          } else if (data) {
+            resolve(data);
+            console.log("table_a_results" + data);
+          }
+        });
+      });
+    
+      try {
+        const result = await invocationPromise;
+        console.log('streamExecutor is invoked', result);
+      } catch (error) {
+        console.log('streamExecutor invocation error', error);
+      }
     }
    
   } else {

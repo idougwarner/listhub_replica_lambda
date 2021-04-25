@@ -764,6 +764,8 @@ module.exports.streamExecutor = async (event, context, callback) => {
           await dbOperationPromise;
           
           console.log("Listings are added successfully!");
+          client.release() // Release connections before more connections to database
+          
           // fulfilled_jobs_count of listhub_replica by 1 in transaction mode
           const { increasedJobCount } = await increase_job_count();
 

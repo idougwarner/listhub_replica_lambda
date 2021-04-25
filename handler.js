@@ -555,7 +555,7 @@ const increase_job_count = async () => {
               increasedJobCount: true
             });
 
-            await client.query('COMMIT')
+            client.query('COMMIT')
             client.release()
 
           } else {

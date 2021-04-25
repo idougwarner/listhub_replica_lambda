@@ -582,21 +582,17 @@ const increase_job_count = async () => {
         [fulfilled_jobs_count, id],
         (err, res) => {
           if (err) {
-            console.log(err);
             
-            resolve({
-              increasedJobCount: true
-            });
-
-            client.query('COMMIT')
+            console.log(err);
+            client.query('ROLLBACK')
             client.release()
+            reject();            
 
           } else {
             
-            resolve({ increasedJobCount: false });
-
-            client.query('ROLLBACK')
+            client.query('COMMIT')
             client.release()
+            resolve({ increasedJobCount: false });      
             
           }
         });

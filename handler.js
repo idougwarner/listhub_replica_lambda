@@ -577,8 +577,8 @@ module.exports.prepareListhubTables = async () => {
   const { table_created, table_name } = await setListingsTable(listings_a);
   console.log(table_name + " created? " + table_created);
 
-  const { table_created, table_name } = await setListingsTable(listings_b);
-  console.log(table_name + " created? " + table_created);
+  await setListingsTable(listings_b);
+  //console.log(table_name + " created? " + table_created);
 
   const {meta_table_created} = await set_meta_table(meta_table);
   console.log(meta_table + " created? " + meta_table_created);

@@ -562,7 +562,7 @@ const increase_job_count = async () => {
             
             resolve({ increasedJobCount: false });
 
-            await client.query('ROLLBACK')
+            client.query('ROLLBACK')
             client.release()
             
           }

@@ -575,7 +575,7 @@ const increase_job_count = async () => {
     {
       var id = result.rows[0].id;
       var fulfilled_jobs_count = result.rows[0].fulfilled_jobs_count;
-      fulfilled_jobs_count = fulfilled_jobs_count + 1
+      fulfilled_jobs_count = parseInt(fulfilled_jobs_count) + 1
 
       client.query('BEGIN')
 
@@ -764,8 +764,9 @@ module.exports.streamExecutor = async (event, context, callback) => {
           await dbOperationPromise;
           
           console.log("Listings are added successfully!");
+
           client.release() // Release connections before more connections to database
-          
+
           // fulfilled_jobs_count of listhub_replica by 1 in transaction mode
           const { increasedJobCount } = await increase_job_count();
 

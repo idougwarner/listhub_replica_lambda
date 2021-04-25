@@ -391,7 +391,7 @@ const clear_data_from = async (table_name) => {
     if(result.rowCount>0)
     {
       // Delete all from table
-      const rslt = await db.query(`DELETE * FROM ${table_name}`);
+      const rslt = db.query(`DELETE * FROM ${table_name}`);
       if(rslt.rowCount>0)
       {
         resolve({ deleted:true, tableOk: true })

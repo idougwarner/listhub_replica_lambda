@@ -218,9 +218,14 @@ const create_listhub_replica_metadata = async (data) => {
   try {
     const client = await pool.connect();
 
+    // Delete old data and create new metadata
+    // const result = await db.query("DELETE FROM fishes WHERE id=$1"
+
     const results = await client.query(`SELECT * FROM ${tbl_listings_meta}`);
     
     if(results.rowCount>0) {
+
+      // Delete data and create new listhub metadata
       var id=results.row[0].id
       
       return new Promise((resolve, reject) => {
@@ -239,7 +244,7 @@ const create_listhub_replica_metadata = async (data) => {
                 metadata: null,
               });
             } else {
-              console.log("Meta data row inserted with id: " + res.rows[0].id);
+              console.log("Meta data updated with id: " + res.rows[0].id);
               console.log("Metadata: "+JSON.stringify(res.rows))
   
               resolve({ metadataAdded: true, metadata: data });
@@ -253,7 +258,7 @@ const create_listhub_replica_metadata = async (data) => {
       
       return new Promise((resolve, reject) => {
 
-        // Check if there is any metadata
+        // Insert new metadata
   
         client.query(
           `INSERT INTO ${tbl_listhub_replica} (id, last_modifed, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing) VALUES (DEFAULT, $1,$2,$3,$4,$5,$6) RETURNING id`,
@@ -266,6 +271,7 @@ const create_listhub_replica_metadata = async (data) => {
               });
             } else {
               console.log("Meta data row inserted with id: " + res.rows[0].id);
+              console.log("Metadata: "+JSON.stringify(res.rows))
   
               resolve({ metadataAdded: true });
             }

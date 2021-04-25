@@ -578,6 +578,9 @@ const increase_job_count = async () => {
       fulfilled_jobs_count = parseInt(fulfilled_jobs_count) + 1
 
       client.query('BEGIN')
+      //LOCK TABLE ${tbl_listhub_replica
+
+      client.query(`LOCK TABLE ${tbl_listhub_replica} IN SHARE ROW EXCLUSIVE MODE`)
 
       client.query(
         `UPDATE ${tbl_listhub_replica} SET fulfilled_jobs_count=$1 WHERE id=$2 RETURNING *`,

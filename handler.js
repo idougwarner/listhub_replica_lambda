@@ -747,6 +747,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
                       console.log(err);
                       reject();
                     } else {
+                      client.release()
                       resolve();
                     }
                   }
@@ -774,7 +775,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
           
 
         } catch (error) {
-          console.log("Something went wrong while adding the listings", error);
+          console.log("Something went wrong while increasing the job count in listhub_replica", error);
           reject(error);
         }
       })

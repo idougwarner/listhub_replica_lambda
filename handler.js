@@ -578,7 +578,7 @@ const increase_job_count = async () => {
     {
       var id = result.rows[0].id;
       var fulfilled_jobs_count = result.rows[0].fulfilled_jobs_count;
-      fulfilled_jobs_count = parseInt(fulfilled_jobs_count) + 1
+      fulfilled_jobs_count = (parseInt(fulfilled_jobs_count) + 1)
 
       client.query('BEGIN')
       //LOCK TABLE ${tbl_listhub_replica

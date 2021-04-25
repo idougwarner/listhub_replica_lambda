@@ -262,7 +262,7 @@ const create_listhub_replica_metadata = async (data) => {
 
         // Insert new metadata
         client.query(
-          `INSERT INTO ${tbl_listhub_replica} (id, last_modifed, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing) VALUES (DEFAULT, $1,$2,$3,$4,$5,$6) RETURNING id`,
+          `INSERT INTO ${tbl_listhub_replica} (last_modifed, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
           [data.last_modifed, data.table_recent, data.table_stale, data.jobs_count, data.fulfilled_jobs_count, data.syncing],
           (err, res) => {
             if (err) {
@@ -518,7 +518,7 @@ const syncListhub = async (metadata, targetTable) => {
   if (metadataAdded) {
     console.log("New metadata has been created");
 
-    for (let index = 0; index < ranges.length; index++) {
+    for (let index = 0; index < 10; index++) {
       let range = ranges[index];
   
       console.log(`Range: ${range.start} - ${range.end}`);

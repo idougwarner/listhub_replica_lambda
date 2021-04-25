@@ -340,7 +340,7 @@ const is_meta_data_new = async (newtime) => {
         
         if(res.rowCount>0) {
   
-          var storedTime = res.row[0].last_modified
+          var storedTime = res.rows[0].last_modified
           
           let timeResult = TimeUtil.istimeANewerthantimeB(
             newtime,

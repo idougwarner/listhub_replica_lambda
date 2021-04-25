@@ -259,7 +259,6 @@ const create_listhub_replica_metadata = async (data) => {
       return new Promise((resolve, reject) => {
 
         // Insert new metadata
-  
         client.query(
           `INSERT INTO ${tbl_listhub_replica} (id, last_modifed, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing) VALUES (DEFAULT, $1,$2,$3,$4,$5,$6) RETURNING id`,
           [data.last_modifed, data.table_recent, data.table_stale, data.jobs_count, data.fulfilled_jobs_count, data.syncing],
@@ -580,7 +579,6 @@ const increase_job_count = async () => {
 
       client.query('BEGIN')
 
-      client.query(`LOCK TABLE ${tbl_listhub_replica}`)
       client.query(
         `UPDATE ${tbl_listhub_replica} SET fulfilled_jobs_count=$1 WHERE id=$2 RETURNING *`,
         [fulfilled_jobs_count, id],
@@ -600,6 +598,9 @@ const increase_job_count = async () => {
             
           }
         });
+    }
+    else {
+      console.log(`No data in ${tbl_listhub_replica} to update`)
     }
 
     })

@@ -431,7 +431,7 @@ const invokeStreamExecutor = (payload) => {
   const params = {
     FunctionName: "listhub-replica-dev-streamExecutor",
     InvocationType: "Event",
-    Payload: payload,
+    Payload: payload
   };
 
   return new Promise((resolve, reject) => {

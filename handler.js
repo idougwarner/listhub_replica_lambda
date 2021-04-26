@@ -750,10 +750,19 @@ module.exports.streamExecutor = async (event, context, callback) => {
             " records"
         );
 
+        // Check if there is a change in ETag by getting a status code of 412
         if(listingArray.length==1){
-          console.log("1 result"+JSON.stringify(listingArray))
-        }
+          console.log("Error Result "+JSON.stringify(listingArray))
 
+          // We should handle this error in the midst of our fetching of data
+          if(listingArray[0].statusCode == 412)
+          {
+            console.log("We may need to restart our fetching of data as the server has changed the ETag as we fetch listings")
+            reject({ addedjobcount:false, listingdata:false });
+          }
+
+        }          
+        
         const client = await pool.connect();
 
         const dbOperationPromise = new Promise((resolve, reject) => {
@@ -780,6 +789,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
         });
 
         try {
+
           await dbOperationPromise;
           
           console.log("Listings are added successfully!");

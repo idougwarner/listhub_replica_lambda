@@ -850,12 +850,10 @@ module.exports.monitorSync = async () => {
    * 
    */
 
-   var monitorSyncPromise;
-
    try {
     const client = await pool.connect();
 
-    monitorSyncPromise = new Promise((resolve, reject) => {
+    const monitorSyncPromise = new Promise((resolve, reject) => {
       client.query(`SELECT * from ${tbl_listhub_replica}`, (err, res) => {
         if (err) {
           console.log("Check error" + err);
@@ -896,13 +894,13 @@ module.exports.monitorSync = async () => {
         }
       });
     });
+
+    await monitorSyncPromise;
   } catch (err) {
     console.log("Error in syncing" + err);
 
     reject ()
   }
-
-  await monitorSyncPromise;
 
 } 
 

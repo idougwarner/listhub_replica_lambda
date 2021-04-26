@@ -910,7 +910,9 @@ module.exports.checkDataInTables = async () => {
   // Read the json data one by one and compare to see if it is in database and confirm
   // Read the listings from the database
 
+  console.log("Inside checkData in Tables")
   /*const client = await pool.connect();
+  
 
   await client.query(`SELECT * FROM ${listings_a}`, (err, res) => {
     if (err) {

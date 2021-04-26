@@ -40,8 +40,8 @@ functions:
   monitorSync:
     handler: handler.monitorSync
     timeout: 890
-    # events:
-    #   - schedule: rate(5 minutes)
+    events:
+      - schedule: rate(5 minutes)
 
   streamExecutor1:
     handler: handler.streamExecutor1

@@ -118,7 +118,7 @@ const create_listhub_replica_table = async () => {
             console.log(`Table ${tbl_listhub_replica} deleted successfully`);
 
             client.query(
-              `CREATE TABLE IF NOT EXISTS ${tbl_listhub_replica}(id SERIAL PRIMARY KEY, last_modifed TEXT, table_recent TEXT, table_stale TEXT, jobs_count BIGINT, fulfilled_jobs_count BIGINT, syncing TEXT)`,
+              `CREATE TABLE IF NOT EXISTS ${tbl_listhub_replica}(id SERIAL PRIMARY KEY, last_modified TEXT, table_recent TEXT, table_stale TEXT, jobs_count BIGINT, fulfilled_jobs_count BIGINT, syncing TEXT)`,
               (err, result) => {
                 if (err) {
                   console.log(err);
@@ -154,7 +154,7 @@ const set_meta_table = async (meta_table) => {
           console.log(`Table ${meta_table} deleted successfully`);
 
           client.query(
-            `CREATE TABLE IF NOT EXISTS ${meta_table}(id SERIAL PRIMARY KEY, last_modifed TEXT, content_length BIGINT, etag TEXT UNIQUE, content_type TEXT)`,
+            `CREATE TABLE IF NOT EXISTS ${meta_table}(id SERIAL PRIMARY KEY, last_modified TEXT, content_length BIGINT, etag TEXT UNIQUE, content_type TEXT)`,
             (err, result) => {
               if (err) {
                 console.log(err);
@@ -223,7 +223,7 @@ const create_listhub_replica_metadata = async (data) => {
     // const result = await db.query("DELETE FROM fishes WHERE id=$1"
 
     const results = await client.query(`SELECT * FROM ${tbl_listings_meta}`);
-    console.log("Last_modified " + data.last_modifed)
+    console.log("Last_modified " + data.last_modified)
     
     if(results.rowCount>0) {
 
@@ -237,7 +237,7 @@ const create_listhub_replica_metadata = async (data) => {
   
         client.query(
           `UPDATE ${tbl_listhub_replica} SET last_modified=$1, table_recent=$2, table_stale=$3, jobs_count=$4, fulfilled_jobs_count=$5, syncing=$6 WHERE id=$6 RETURNING *`,
-          [data.last_modifed, data.table_recent, data.table_stale, data.jobs_count, data.fulfilled_jobs_count, data.syncing, id],
+          [data.last_modified, data.table_recent, data.table_stale, data.jobs_count, data.fulfilled_jobs_count, data.syncing, id],
           (err, res) => {
             if (err) {
               console.log(err);
@@ -262,8 +262,8 @@ const create_listhub_replica_metadata = async (data) => {
 
         // Insert new metadata
         client.query(
-          `INSERT INTO ${tbl_listhub_replica} (last_modifed, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
-          [data.last_modifed, data.table_recent, data.table_stale, data.jobs_count, data.fulfilled_jobs_count, data.syncing],
+          `INSERT INTO ${tbl_listhub_replica} (last_modified, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
+          [data.last_modified, data.table_recent, data.table_stale, data.jobs_count, data.fulfilled_jobs_count, data.syncing],
           (err, res) => {
             if (err) {
               console.log(err);
@@ -518,7 +518,7 @@ const syncListhub = async (metadata, targetTable) => {
   if (metadataAdded) {
     console.log("New metadata has been created");
 
-    for (let index = 0; index < 10; index++) {
+    for (let index = 0; index < ranges.length; index++) {
       let range = ranges[index];
   
       console.log(`Range: ${range.start} - ${range.end}`);
@@ -591,7 +591,7 @@ const increase_job_count = async () => {
         (err, res) => {
           if (err) {
             
-            console.log(err);
+            console.log("Error adding job count " + err);
             client.query('ROLLBACK')
             client.release()
             reject();            
@@ -607,9 +607,9 @@ const increase_job_count = async () => {
     }
     else {
       console.log(`No data in ${tbl_listhub_replica} to update`)
+      reject(); 
     }
-
-    })
+  })
 }
 
 module.exports.prepareListhubTables = async () => {

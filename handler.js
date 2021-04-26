@@ -907,6 +907,55 @@ module.exports.checkDataInTables = async () => {
   // Read the listings from the database
 
   console.log("Inside checkData in Tables")
+  try {
+    const client = await pool.connect();
+
+    const monitorSyncPromise = new Promise((resolve, reject) => {
+      client.query(`SELECT * from ${tbl_listhub_replica}`, (err, res) => {
+        if (err) {
+          console.log("Check error" + err);
+
+          reject ();
+        }
+
+        if (res.rowCount != 0) {
+          // Check the condition if syncing == true and jobcount is equal 
+          // last_modified, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing
+
+          var id = res.rows[0].id
+
+          if(res.rows[0].syncing == true && (res.rows[0].jobs_count==res.rows[0].fulfilled_jobs_count)) {
+            // Update set syncing to false
+            client.query(
+              `UPDATE ${tbl_listhub_replica} SET syncing=$1 WHERE id=$2 RETURNING *`,
+              [false, id],
+              (err, res) => {
+                if (err) {
+                  console.log(err);
+                  
+                  reject();
+      
+                } else {
+
+                  console.log("Data has been synced")
+
+                  resolve();
+                }
+              });
+
+          }
+        } else {
+          console.log("Problems accessing listhub data");
+
+          reject ();
+        }
+      });
+    });
+
+    await monitorSyncPromise;
+  } catch (err) {
+    console.log("Error in syncing" + err);
+  }
   /*const client = await pool.connect();
   
 

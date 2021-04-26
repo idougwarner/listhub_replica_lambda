@@ -898,8 +898,6 @@ module.exports.monitorSync = async () => {
     await monitorSyncPromise;
   } catch (err) {
     console.log("Error in syncing" + err);
-
-    reject ()
   }
 
 } 

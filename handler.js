@@ -844,7 +844,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
   }
 };
 
-module.exports.monitorSync = async (event, context, callback) => {
+module.exports.monitorSync = async () => {
   /**
    * Get last record of listhub. If value of syncing is true and jobcount is equal to fulfilled then set syncing to false
    * 
@@ -910,7 +910,7 @@ module.exports.checkDataInTables = async () => {
   // Read the json data one by one and compare to see if it is in database and confirm
   // Read the listings from the database
 
-  const client = await pool.connect();
+  /*const client = await pool.connect();
 
   await client.query(`SELECT * FROM ${listings_a}`, (err, res) => {
     if (err) {
@@ -919,7 +919,7 @@ module.exports.checkDataInTables = async () => {
     if (res.rowCount > 0) {
       console.log("Found - " + res.rowCount + " records");
     }
-  });
+  });*/
 
   //console.log(" Items checked "+fileCount + "Items Found" + foundCount + " Duplicates Found" + duplicateFound)
 };

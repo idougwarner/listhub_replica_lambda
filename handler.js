@@ -547,14 +547,14 @@ const syncListhub = async (metadata, targetTable) => {
             );
           } else if (data) {
             resolve(data);
-            console.log("table_a_results" + data);
+            console.log("table_a_results" + JSON.stringify(data));
           }
         });
       });
     
       try {
         const result = await invocationPromise;
-        console.log('streamExecutor is invoked', result);
+        console.log('streamExecutor is invoked', JSON.stringify(result));
       } catch (error) {
         console.log('streamExecutor invocation error', error);
       }
@@ -576,34 +576,42 @@ const increase_job_count = async () => {
     
     if(result.rowCount>0)
     {
+
+      //console.log("Inside found results in increased job count")
       var id = result.rows[0].id;
       var fulfilled_jobs_count = result.rows[0].fulfilled_jobs_count;
-      fulfilled_jobs_count = (parseInt(fulfilled_jobs_count) + 1)
+      fulfilled_jobs_count = parseInt(fulfilled_jobs_count) + 1;
 
-      client.query('BEGIN')
-      //LOCK TABLE ${tbl_listhub_replica
+      //console.log("id" + id)
 
-      client.query(`LOCK TABLE ${tbl_listhub_replica} IN ROW EXCLUSIVE MODE`)
-
-      client.query(
-        `UPDATE ${tbl_listhub_replica} SET fulfilled_jobs_count=$1 WHERE id=$2 RETURNING *`,
-        [fulfilled_jobs_count, id],
-        (err, res) => {
-          if (err) {
-            
-            console.log("Error adding job count " + err);
-            client.query('ROLLBACK')
-            client.release()
-            reject();            
-
-          } else {
-            
-            client.query('COMMIT')
-            client.release()
-            resolve({ increasedJobCount: false });      
-            
+      client.query("BEGIN",(err) => {
+        if(err){
+          console.log("Did not manage to begin adding count"+err)
+          reject()
+        }
+        client.query(`LOCK TABLE ${tbl_listhub_replica} IN ROW EXCLUSIVE MODE`,(err, res) => {
+          if(err) {
+            console.log("Did not manage to lock table: "+err)
+            reject()
           }
-        });
+          client.query(
+            `UPDATE ${tbl_listhub_replica} SET fulfilled_jobs_count=$1 WHERE id=$2 RETURNING *`,
+            [fulfilled_jobs_count, id],
+            (err, res) => {
+              if (err) {
+                console.log("Error adding job count " + err);
+                client.query("ROLLBACK");
+                client.release();
+                reject();
+              } else {
+                client.query("COMMIT");
+                client.release();
+                resolve({ increasedJobCount: true });
+              }
+            });
+        })
+      })
+
     }
     else {
       console.log(`No data in ${tbl_listhub_replica} to update`)
@@ -693,7 +701,7 @@ module.exports.streamExecutor1 = async (event, context, callback) => {
  * Streams the range and adds all listings in that range to the database
  */
 module.exports.streamExecutor = async (event, context, callback) => {
-  console.log("From List Hub Monitor " + JSON.stringify(event));
+  console.log("\n\nFrom List Hub Monitor " + JSON.stringify(event));
   console.log("ETag " + event.range.ETag);
   console.log("Start " + event.range.start);
   console.log("End " + event.range.end);
@@ -779,10 +787,10 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
           if(increasedJobCount)
           {
-            resolve();
+            resolve({addedjobcount:true, listingdata:true});
           }else {
             console.log("Problem with adding job count")
-            reject();
+            reject({addedjobcount:false, listingdata:true});
           }
           
         } catch (error) {
@@ -792,11 +800,34 @@ module.exports.streamExecutor = async (event, context, callback) => {
       })
       .on("error", (err) => {
         console.log("Error in getting listings" + err);
-        reject(err);
+        stream.end();
+        reject({addedjobcount:false, listingdata:false});
       });
   });
 
-  await streamingPromise;
+  const {addedjobcount, listingdata } = await streamingPromise;
+  
+  if(addedjobcount && listingdata) {
+    const response = {
+      statusCode: 200,
+      body: JSON.stringify({
+        message: `${event} - data added well`
+      })
+    };
+    stream.end();
+    callback(null, response)
+  }
+  else {
+    const response = {
+      statusCode: 500,
+      body: JSON.stringify({
+        message: `${event} - problem adding data`
+      })
+    };
+    stream.end();
+    callback(null, response)
+
+  }
 };
 
 module.exports.monitorSync = async (event, context, callback) => {

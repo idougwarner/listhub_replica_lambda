@@ -750,6 +750,10 @@ module.exports.streamExecutor = async (event, context, callback) => {
             " records"
         );
 
+        if(listingArray.length==1){
+          console.log("1 result"+JSON.stringify(listingArray))
+        }
+
         const client = await pool.connect();
 
         const dbOperationPromise = new Promise((resolve, reject) => {

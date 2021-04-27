@@ -716,9 +716,22 @@ module.exports.monitorSync = async () => {
             }
           }
         );
-      } else {
-        console.log("Data is already synced...");
-      }
+      }else if (
+        (result.rows[0].syncing === "true" || result.rows[0].syncing) &&
+        result.rows[0].jobs_count < result.rows[0].fulfilled_jobs_count
+      ) {
+
+        console.log("Data is still syncing...\n");
+
+      } 
+      else if (
+        (result.rows[0].syncing === "false" || result.rows[0].syncing==false) &&
+        result.rows[0].jobs_count == result.rows[0].fulfilled_jobs_count
+      ) {
+        
+        console.log("Data is already synced...\n");
+
+      } 
     } else {
       console.log("There is no data to sync...");
     }

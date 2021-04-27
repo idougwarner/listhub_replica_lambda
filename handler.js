@@ -431,7 +431,7 @@ const increaseJobCount = async () => {
                   reject();
                 } else {
                   client.query("COMMIT");
-                  //client.release();
+                  client.release();
                   resolve({ increasedJobCount: true });
                 }
               }
@@ -600,11 +600,14 @@ module.exports.streamExecutor = async (event, context, callback) => {
           
           console.log("Operation Success"+ operationSuccess)
 
+          client.release();
+
           if(operationSuccess)
           {
+            stream.end();
             console.log("Listings are added successfully!");
 
-            client.release(); // Release connections before more connections to database
+            // Release connections before more connections to database
 
             // fulfilled_jobs_count of listhub_replica by 1 in transaction mode
             const { increasedJobCount } = await increaseJobCount();
@@ -644,7 +647,6 @@ module.exports.streamExecutor = async (event, context, callback) => {
       }),
     };
     stream.end();
-    callback(null, response);
   } else {
     console.log("Problem Adding Data")
     const response = {
@@ -653,9 +655,9 @@ module.exports.streamExecutor = async (event, context, callback) => {
         message: `${event} - problem adding data`,
       }),
     };
-    stream.end();
-    callback(null, response);
+    
   }
+  stream.end();
 };
 
 module.exports.monitorSync = async () => {

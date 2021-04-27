@@ -298,7 +298,7 @@ const invokeStreamExecutor = async (payload) => {
   const params = {
     FunctionName: "listhub-replica-dev-streamExecutor",
     InvocationType: "Event",
-    Payload: payload,
+    Payload: JSON.stringify(payload),
   };
 
   return new Promise((resolve, reject) => {
@@ -518,7 +518,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
         // Check if our most recent syncing finished
         const { downloadFishished, tableRecent } = await didDownloadFinish();
-        
+
         if (!downloadFishished) {
           await syncListhub(response.data, tableRecent);
         } else {

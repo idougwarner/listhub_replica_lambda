@@ -29,9 +29,9 @@ functions:
           - "lambda:InvokeFunction"
           - "lambda:InvokeAsync"
         Resource: '*'
-    # timeout: 900
-    # events:
-    #   - schedule: rate(1 hour)
+    timeout: 900
+    events:
+      - schedule: rate(1 hour)
 
   streamExecutor:
     handler: handler.streamExecutor

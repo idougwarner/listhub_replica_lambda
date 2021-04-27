@@ -310,7 +310,7 @@ const invokeStreamExecutor = async (payload) => {
         return new Error(`Error printing messages: ${JSON.stringify(error)}`);
       } else if (data) {
         resolve(data);
-        console.log("table_a_results" + JSON.stringify(data));
+        console.log("table_results" + JSON.stringify(data));
       }
     });
   });
@@ -418,9 +418,9 @@ const syncListhub = async (metadata, targetTable) => {
           range: range,
           table_name: targetTable,
         });
-        console.log("streamExecutor is invoked", JSON.stringify(result));
+        //console.log("streamExecutor is invoked", JSON.stringify(result));
       } catch (error) {
-        console.log("streamExecutor invocation error", error);
+        //console.log("streamExecutor invocation error", error);
       }
     }
   } else {
@@ -513,31 +513,36 @@ module.exports.listhubMonitor = async (event, context) => {
         const { hasdata } = await tableHasListings(listings_b);
 
         if (!hasdata) {
+          console.log("Listings_b has no data")
           await syncListhub(response.data, listings_b);
         }
+        else {
+          // We can now continue our checks since all tables have full data
+          // Check if our most recent syncing finished
+          const { downloadFishished, tableRecent } = await didDownloadFinish();
 
-        // Check if our most recent syncing finished
-        const { downloadFishished, tableRecent } = await didDownloadFinish();
+          if (!downloadFishished) {
+            await syncListhub(response.data, tableRecent);
+          } else {
+            // Compare stored listhub replica meta data new meta_data coming in from listhub to see if we have new listings
+            const { newUpdate } = await isMetadataNew(
+              response.data.Metadata.lastmodifiedtimestamp
+            );
 
-        if (!downloadFishished) {
-          await syncListhub(response.data, tableRecent);
-        } else {
-          // Compare stored listhub replica meta data new meta_data coming in from listhub to see if we have new listings
-          const { newUpdate } = await isMetadataNew(
-            response.data.Metadata.lastmodifiedtimestamp
-          );
+            if (newUpdate) {
+              
+              // Update listhub_replica data with new timestamp and check which table to now set data to
+              const { table_to_save } = await tableToSaveListings();
 
-          if (newUpdate) {
-            // Update listhub_replica data with new timestamp and check which table to now set data to
-            const { table_to_save } = await tableToSaveListings();
+              // Clear data from the table if existing data then save data
+              const { deleted, tableOk } = await clearDataFrom(table_to_save);
+              if (deleted || tableOk) {
+                await syncListhub(response.data, table_to_save);
+              }
 
-            // Clear data from the table if existing data then save data
-            const { deleted, tableOk } = await clearDataFrom(table_to_save);
-            if (deleted || tableOk) {
-              await syncListhub(response.data, table_to_save);
             }
           }
-        }
+        }   
       }
     }
   } catch (err) {
@@ -728,7 +733,7 @@ module.exports.monitorSync = async () => {
         (result.rows[0].syncing === "false" || result.rows[0].syncing==false) &&
         result.rows[0].jobs_count == result.rows[0].fulfilled_jobs_count
       ) {
-        
+
         console.log("Data is already synced...\n");
 
       } 

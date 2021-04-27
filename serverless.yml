@@ -16,7 +16,7 @@ provider:
     DB_USER: ${param:DB_USER}
     DB_PASSWORD: ${param:DB_PASSWORD}
     DB_DIALECT: ${param:DB_DIALECT}
-  memorySize: 1024
+  memorySize: 4024
   timeout: 900
 
 functions:

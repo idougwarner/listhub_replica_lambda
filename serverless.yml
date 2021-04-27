@@ -41,7 +41,7 @@ functions:
     handler: handler.monitorSync
     timeout: 890
     events:
-      - schedule: rate(5 minutes)
+     # - schedule: rate(5 minutes)
 
   checkDataInTables:
     handler: handler.checkDataInTables

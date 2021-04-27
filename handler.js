@@ -513,7 +513,7 @@ module.exports.listhubMonitor = async (event, context) => {
         const { hasdata } = await tableHasListings(listings_b);
 
         if (!hasdata) {
-          console.log("Listings_b has no data")
+          console.log("Listings_b has no data therefore populate it")
           await syncListhub(response.data, listings_b);
         }
         else {

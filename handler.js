@@ -383,13 +383,13 @@ const syncListhub = async (metadata, targetTable) => {
       //console.log(`Range: ${range.start} - ${range.end}`);
 
       try {
-        invokeStreamExecutor({
+        const result = await invokeStreamExecutor({
           range: range,
           table_name: targetTable,
         });
         //console.log("streamExecutor is invoked", JSON.stringify(result));
       } catch (error) {
-        //console.log("streamExecutor invocation error", error);
+        console.log("streamExecutor invocation error", error);
       }
     }
   } else {
@@ -566,7 +566,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
             console.log(
               "We may need to restart our fetching of data as the server has changed the ETag as we fetch listings"
             );
-            reject({ addedjobcount: false, listingdata: false });
+            reject({ "addedjobcount": false, "listingdata": false });
           }
         }
 

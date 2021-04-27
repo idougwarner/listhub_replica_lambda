@@ -366,7 +366,14 @@ const didDownloadFinish = async () => {
           jobs_count
         );
         resolve({ downloadFishished: true, tableRecent: table_recent });
-      } else {
+      } else if (jobs_count == fulfilled_jobs_count && syncing == "true") {
+        console.log(
+          "Download completed successfully", syncing == "false",
+          jobs_count
+        );
+        resolve({ downloadFishished: true, tableRecent: table_recent });
+      } 
+      else {
         console.log("Downloads did not complete");
         resolve({ downloadFishished: false, tableRecent: table_recent });
       }
@@ -513,34 +520,26 @@ module.exports.listhubMonitor = async (event, context) => {
         const { hasdata } = await tableHasListings(listings_b);
 
         if (!hasdata) {
+          // This will in turn make it the recent table
           console.log("Listings_b has no data therefore populate it")
           await syncListhub(response.data, listings_b);
         }
         else {
-          // We can now continue our checks since all tables have full data
-          // Check if our most recent syncing finished
-          const { downloadFishished, tableRecent } = await didDownloadFinish();
+          const { newUpdate } = await isMetadataNew(
+            response.data.Metadata.lastmodifiedtimestamp
+          );
 
-          if (!downloadFishished) {
-            await syncListhub(response.data, tableRecent);
-          } else {
-            // Compare stored listhub replica meta data new meta_data coming in from listhub to see if we have new listings
-            const { newUpdate } = await isMetadataNew(
-              response.data.Metadata.lastmodifiedtimestamp
-            );
+          if (newUpdate) {
+            
+            // Update listhub_replica data with new timestamp and check which table to now set data to
+            const { table_to_save } = await tableToSaveListings();
 
-            if (newUpdate) {
-              
-              // Update listhub_replica data with new timestamp and check which table to now set data to
-              const { table_to_save } = await tableToSaveListings();
-
-              // Clear data from the table if existing data then save data
-              const { deleted, tableOk } = await clearDataFrom(table_to_save);
-              if (deleted || tableOk) {
-                await syncListhub(response.data, table_to_save);
-              }
-
+            // Clear data from the table if existing data then save data
+            const { deleted, tableOk } = await clearDataFrom(table_to_save);
+            if (deleted || tableOk) {
+              await syncListhub(response.data, table_to_save);
             }
+
           }
         }   
       }

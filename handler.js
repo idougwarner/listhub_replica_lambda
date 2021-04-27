@@ -596,36 +596,29 @@ module.exports.streamExecutor = async (event, context, callback) => {
               })
           );
 
-          Promise.all(promises).then(()=>{
-            client.release()
-            resolve({"operationSuccess":true})
-          }).catch(reject({"operationSuccess":false}));
+          Promise.all(promises).then(resolve()).catch(reject());
         });
 
         try {
-          const {operationSuccess} = await dbOperationPromise;
+          await dbOperationPromise;
           
-          console.log("Operation Success"+ operationSuccess)
-
           client.release();
 
-          if(operationSuccess)
-          {
-            stream.end();
-            console.log("Listings are added successfully!");
+          stream.end();
+          console.log("Listings are added successfully!");
 
-            // Release connections before more connections to database
+          // Release connections before more connections to database
 
-            // fulfilled_jobs_count of listhub_replica by 1 in transaction mode
-            const { increasedJobCount } = await increaseJobCount();
+          // fulfilled_jobs_count of listhub_replica by 1 in transaction mode
+          const { increasedJobCount } = await increaseJobCount();
 
-            if (increasedJobCount) {
-              resolve({ "addedjobcount": true, "listingdata": true });
-            } else {
-              console.log("Problem with adding job count");
-              reject({ "addedjobcount": false, "listingdata": true });
-            }
+          if (increasedJobCount) {
+            resolve({ "addedjobcount": true, "listingdata": true });
+          } else {
+            console.log("Problem with adding job count");
+            reject({ "addedjobcount": false, "listingdata": true });
           }
+     
           
         } catch (error) {
           console.log(

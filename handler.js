@@ -381,6 +381,10 @@ const syncListhub = async (metadata, targetTable) => {
       let range = ranges[index];
 
       //console.log(`Range: ${range.start} - ${range.end}`);
+      if(ranges.length==index+1)
+      {
+        console.log("We have called"+(index+1)+ "Stream executors")
+      }
 
       try {
         const result = await invokeStreamExecutor({
@@ -592,7 +596,10 @@ module.exports.streamExecutor = async (event, context, callback) => {
               })
           );
 
-          Promise.all(promises).then(resolve({operationSuccess:true})).catch(reject({operationSuccess:false}));
+          Promise.all(promises).then(()=>{
+            client.release()
+            resolve({"operationSuccess":true})
+          }).catch(reject({"operationSuccess":false}));
         });
 
         try {

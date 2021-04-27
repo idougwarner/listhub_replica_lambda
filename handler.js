@@ -431,7 +431,7 @@ const increaseJobCount = async () => {
                   reject();
                 } else {
                   client.query("COMMIT");
-                  client.release();
+                  //client.release();
                   resolve({ increasedJobCount: true });
                 }
               }

@@ -44,7 +44,7 @@ const getMetaDataStream = async () => {
   });
 };
 
-const create_listhub_replica_table = async () => {
+const createListhubReplicaTable = async () => {
   /*id
       last_modified
       table_recent (one of listhub_listings_a and listhub_listings_b)
@@ -129,7 +129,7 @@ const setListingsTable = async (table_to_set) => {
   }
 };
 
-const create_listhub_replica_metadata = async (data) => {
+const createListhubReplicaMetadata = async (data) => {
   console.log("Inside create new Listhub replica");
 
   try {
@@ -177,7 +177,7 @@ const create_listhub_replica_metadata = async (data) => {
   }
 };
 
-const listhub_data_exist = async () => {
+const listhubDataExists = async () => {
   try {
     const client = await pool.connect();
 
@@ -217,7 +217,7 @@ const listhub_data_exist = async () => {
   }
 };
 
-const is_meta_data_new = async (newtime) => {
+const isMetadataNew = async (newtime) => {
   try {
     const client = await pool.connect();
 
@@ -251,7 +251,7 @@ const is_meta_data_new = async (newtime) => {
   }
 };
 
-const clear_data_from = async (table_name) => {
+const clearDataFrom = async (table_name) => {
   const client = await pool.connect();
   const result = await client.query(`SELECT * FROM ${table_name}`);
 
@@ -271,7 +271,7 @@ const clear_data_from = async (table_name) => {
   });
 };
 
-const table_to_save_listings = async () => {
+const tableToSaveListings = async () => {
   var table_stale;
 
   const client = await pool.connect();
@@ -362,7 +362,7 @@ const syncListhub = async (metadata, targetTable) => {
   }
 
   // Store the new Metadata details to Listhub replica this time
-  const { metadataAdded } = await create_listhub_replica_metadata(data);
+  const { metadataAdded } = await createListhubReplicaMetadata(data);
 
   // Check if meta_data has been stored for the first time
   if (metadataAdded) {
@@ -407,7 +407,7 @@ const syncListhub = async (metadata, targetTable) => {
   }
 };
 
-const increase_job_count = async () => {
+const increaseJobCount = async () => {
   // select fulfilled job count and increment by one then update the table in transaction mode
   const client = await pool.connect();
   const result = await client.query(`SELECT * FROM ${tbl_listhub_replica}`);
@@ -463,7 +463,7 @@ module.exports.prepareListhubTables = async () => {
   await setListingsTable(listings_b);
   //console.log(table_name + " created? " + table_created);
 
-  const { listhub_table_created } = await create_listhub_replica_table();
+  const { listhub_table_created } = await createListhubReplicaTable();
   console.log("Lishub_replica table" + " created? " + listhub_table_created);
 };
 
@@ -478,7 +478,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
     if (response) {
       // Check whether there is new data by comparing what is in listhub_replica last_modified versus what is in the metadata
-      const { dataExists } = await listhub_data_exist();
+      const { dataExists } = await listhubDataExists();
 
       console.log("Data: dataExists " + dataExists);
       console.log("Metadata Data " + JSON.stringify(response.data));
@@ -489,16 +489,16 @@ module.exports.listhubMonitor = async (event, context) => {
         await syncListhub(response.data, listings_a);
       } else {
         // Compare stored listhub replica meta data new meta_data coming in from listhub to see if we have new listings
-        const { newUpdate } = await is_meta_data_new(
+        const { newUpdate } = await isMetadataNew(
           response.data.Metadata.lastmodifiedtimestamp
         );
 
         if (newUpdate) {
           // Update listhub_replica data with new timestamp and check which table to now set data to
-          const { table_to_save } = await table_to_save_listings();
+          const { table_to_save } = await tableToSaveListings();
 
           // Clear data from the table if existing data then save data
-          const { deleted, tableOk } = await clear_data_from(table_to_save);
+          const { deleted, tableOk } = await clearDataFrom(table_to_save);
           if (deleted || tableOk) {
             await syncListhub(response.data, table_to_save);
           }
@@ -609,7 +609,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
           client.release(); // Release connections before more connections to database
 
           // fulfilled_jobs_count of listhub_replica by 1 in transaction mode
-          const { increasedJobCount } = await increase_job_count();
+          const { increasedJobCount } = await increaseJobCount();
 
           if (increasedJobCount) {
             resolve({ addedjobcount: true, listingdata: true });

@@ -43,10 +43,6 @@ functions:
     events:
       - schedule: rate(5 minutes)
 
-  streamExecutor1:
-    handler: handler.streamExecutor1
-    timeout: 890
-
   checkDataInTables:
     handler: handler.checkDataInTables
     timeout: 890

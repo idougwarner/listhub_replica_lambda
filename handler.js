@@ -314,7 +314,7 @@ const invokeStreamExecutor = async (payload) => {
   });
 };
 
-const getRangesFromMetadata = (metadata, chunkSize = 20000) => {
+const getRangesFromMetadata = (metadata, chunkSize = 30000) => {
   const ETag = metadata.ETag;
   const lastSequence = bigInt(metadata.Metadata.lastsequence.toString());
   const count = metadata.Metadata.totallinecount;

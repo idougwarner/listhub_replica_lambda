@@ -411,7 +411,7 @@ const syncListhub = async (metadata, targetTable) => {
     for (let index = 0; index < ranges.length; index++) {
       let range = ranges[index];
 
-      console.log(`Range: ${range.start} - ${range.end}`);
+      //console.log(`Range: ${range.start} - ${range.end}`);
 
       try {
         const result = await invokeStreamExecutor({

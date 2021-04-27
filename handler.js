@@ -247,7 +247,7 @@ const isMetadataNew = async (newtime) => {
 
 const tableHasListings = async (table_name) => {
   const client = await pool.connect();
-  const result = await client.query(`SELECT * FROM ${table_name}`);
+  const result = await client.query(`SELECT * FROM ${table_name} LIMIT 50`);
 
   return new Promise((resolve, reject) => {
     if (result.rowCount > 0) {
@@ -439,7 +439,6 @@ const increaseJobCount = async () => {
           }
         );
       });
-      client.release()
     } else {
       console.log(`No data in ${tbl_listhub_replica} to update`);
       reject();

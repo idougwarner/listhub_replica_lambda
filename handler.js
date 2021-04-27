@@ -477,7 +477,7 @@ const increaseJobCount = async () => {
   });
 };
 
-module.exports.prepareListhubTables = async () => {
+module.exports.prepareListhubTables = async (event, context) => {
   const { table_created, table_name } = await setListingsTable(listings_a);
   console.log(table_name + " created? " + table_created);
 

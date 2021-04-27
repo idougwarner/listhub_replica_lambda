@@ -40,12 +40,8 @@ functions:
   monitorSync:
     handler: handler.monitorSync
     timeout: 890
-    events:
+    #events:
      # - schedule: rate(5 minutes)
-
-  checkDataInTables:
-    handler: handler.checkDataInTables
-    timeout: 890
 
   prepareListhubTables:
     handler: handler.prepareListhubTables

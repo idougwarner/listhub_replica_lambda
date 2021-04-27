@@ -703,7 +703,7 @@ module.exports.monitorSync = async () => {
 
         client.query(
           `UPDATE ${tbl_listhub_replica} SET syncing=$1 WHERE id=$2 RETURNING *`,
-          ["false", id],
+          [false, id],
           (err, res) => {
             if (err) {
               console.log(err);

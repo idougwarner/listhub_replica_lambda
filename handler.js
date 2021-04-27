@@ -345,42 +345,6 @@ const getRangesFromMetadata = (metadata, chunkSize = 20000) => {
   return ranges;
 };
 
-const didDownloadFinish = async () => {
-  const client = await pool.connect();
-  // await client.query(`SELECT * FROM ${tbl_listhub_replica} WHERE table_stale=$1 ORDER BY time_stamp DESC`,[table_name]);
-  const result = await client.query(
-    `SELECT * FROM ${tbl_listhub_replica} ORDER BY time_stamp DESC`
-  );
-
-  return new Promise((resolve, reject) => {
-    if (result.rowCount > 0) {
-      var fulfilled_jobs_count = result.rows[0].fulfilled_jobs_count;
-      var jobs_count = result.rows[0].jobs_count;
-      var syncing = result.rows[0].syncing;
-      var table_recent = result.rows[0].table_recent;
-
-      if (jobs_count == fulfilled_jobs_count && syncing == "false") {
-        console.log(
-          "Download completed successfully",
-          syncing == "false",
-          jobs_count
-        );
-        resolve({ downloadFishished: true, tableRecent: table_recent });
-      } else if (jobs_count == fulfilled_jobs_count && syncing == "true") {
-        console.log(
-          "Download completed successfully", syncing == "false",
-          jobs_count
-        );
-        resolve({ downloadFishished: true, tableRecent: table_recent });
-      } 
-      else {
-        console.log("Downloads did not complete");
-        resolve({ downloadFishished: false, tableRecent: table_recent });
-      }
-    }
-  });
-};
-
 const syncListhub = async (metadata, targetTable) => {
   const ranges = getRangesFromMetadata(metadata);
   console.log("Ranges.length " + ranges.length);
@@ -698,7 +662,7 @@ module.exports.monitorSync = async () => {
 
     if (result.rowCount > 0) {
       if (
-        (result.rows[0].syncing === "true" || result.rows[0].syncing) &&
+        (result.rows[0].syncing) &&
         result.rows[0].jobs_count == result.rows[0].fulfilled_jobs_count
       ) {
         console.log("Data will be synced...\n");
@@ -721,15 +685,15 @@ module.exports.monitorSync = async () => {
           }
         );
       }else if (
-        (result.rows[0].syncing === "true" || result.rows[0].syncing) &&
-        result.rows[0].jobs_count < result.rows[0].fulfilled_jobs_count
+        (result.rows[0].syncing) &&
+         result.rows[0].fulfilled_jobs_count < result.rows[0].jobs_count
       ) {
 
         console.log("Data is still syncing...\n");
 
       } 
       else if (
-        (result.rows[0].syncing === "false" || result.rows[0].syncing==false) &&
+        (result.rows[0].syncing==false) &&
         result.rows[0].jobs_count == result.rows[0].fulfilled_jobs_count
       ) {
 

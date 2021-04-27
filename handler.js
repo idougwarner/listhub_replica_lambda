@@ -592,25 +592,31 @@ module.exports.streamExecutor = async (event, context, callback) => {
               })
           );
 
-          Promise.all(promises).then(resolve).catch(reject);
+          Promise.all(promises).then(resolve({operationSuccess:true})).catch(reject({operationSuccess:false}));
         });
 
         try {
-          await dbOperationPromise;
+          const {operationSuccess} = await dbOperationPromise;
+          
+          console.log("Operation Success"+ operationSuccess)
 
-          console.log("Listings are added successfully!");
+          if(operationSuccess)
+          {
+            console.log("Listings are added successfully!");
 
-          client.release(); // Release connections before more connections to database
+            client.release(); // Release connections before more connections to database
 
-          // fulfilled_jobs_count of listhub_replica by 1 in transaction mode
-          const { increasedJobCount } = await increaseJobCount();
+            // fulfilled_jobs_count of listhub_replica by 1 in transaction mode
+            const { increasedJobCount } = await increaseJobCount();
 
-          if (increasedJobCount) {
-            resolve({ addedjobcount: true, listingdata: true });
-          } else {
-            console.log("Problem with adding job count");
-            reject({ addedjobcount: false, listingdata: true });
+            if (increasedJobCount) {
+              resolve({ "addedjobcount": true, "listingdata": true });
+            } else {
+              console.log("Problem with adding job count");
+              reject({ "addedjobcount": false, "listingdata": true });
+            }
           }
+          
         } catch (error) {
           console.log(
             "Something went wrong while increasing the job count in listhub_replica",
@@ -629,6 +635,8 @@ module.exports.streamExecutor = async (event, context, callback) => {
   const { addedjobcount, listingdata } = await streamingPromise;
 
   if (addedjobcount && listingdata) {
+
+    console.log("Added Data successfully")
     const response = {
       statusCode: 200,
       body: JSON.stringify({
@@ -638,6 +646,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     stream.end();
     callback(null, response);
   } else {
+    console.log("Problem Adding Data")
     const response = {
       statusCode: 500,
       body: JSON.stringify({

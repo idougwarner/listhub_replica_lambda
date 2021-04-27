@@ -402,7 +402,7 @@ const syncListhub = async (metadata, targetTable) => {
 const increaseJobCount = async () => {
   // select fulfilled job count and increment by one then update the table in transaction mode
   const client = await pool.connect();
-  const result = await client.query(`SELECT * FROM ${tbl_listhub_replica}`);
+  const result = await client.query(`SELECT * FROM ${tbl_listhub_replica} ORDER BY time_stamp DESC`);
 
   return new Promise((resolve, reject) => {
     if (result.rowCount > 0) {
@@ -441,6 +441,7 @@ const increaseJobCount = async () => {
           }
         );
       });
+      client.release()
     } else {
       console.log(`No data in ${tbl_listhub_replica} to update`);
       reject();

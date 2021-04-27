@@ -67,7 +67,7 @@ const createListhubReplicaTable = async () => {
             console.log(`Table ${tbl_listhub_replica} deleted successfully`);
 
             client.query(
-              `CREATE TABLE IF NOT EXISTS ${tbl_listhub_replica}(id SERIAL PRIMARY KEY, last_modified TIMESTAMP, table_recent TEXT, table_stale TEXT, jobs_count BIGINT, fulfilled_jobs_count BIGINT, syncing BOOLEAN, timestamp TIMESTAMP)`,
+              `CREATE TABLE IF NOT EXISTS ${tbl_listhub_replica}(id SERIAL PRIMARY KEY, last_modified TIMESTAMP, table_recent TEXT, table_stale TEXT, jobs_count BIGINT, fulfilled_jobs_count BIGINT, syncing BOOLEAN, time_stamp TIMESTAMP)`,
               (err, result) => {
                 if (err) {
                   console.log(err);
@@ -139,7 +139,7 @@ const createListhubReplicaMetadata = async (data) => {
       var now = new Date();
 
       client.query(
-        `INSERT INTO ${tbl_listhub_replica} (last_modified, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing, timestamp) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
+        `INSERT INTO ${tbl_listhub_replica} (last_modified, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing, time_stamp) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
         [
           data.last_modified,
           data.table_recent,

@@ -216,7 +216,7 @@ const isMetadataNew = async (newtime) => {
     const client = await pool.connect();
 
     return new Promise((resolve, reject) => {
-      client.query(`SELECT * from ${tbl_listhub_replica}`, (err, res) => {
+      client.query(`SELECT * from ${tbl_listhub_replica} ORDER BY time_stamp DESC`, (err, res) => {
         if (res.rowCount > 0) {
           var storedTime = res.rows[0].last_modified;
 
@@ -282,9 +282,7 @@ const tableToSaveListings = async () => {
   var table_stale;
 
   const client = await pool.connect();
-  const result = await client.query(
-    `SELECT * FROM ${tbl_listhub_replica} ORDER BY time_stamp DESC`
-  );
+  const result = await client.query(`SELECT * FROM ${tbl_listhub_replica} ORDER BY time_stamp DESC`);
 
   return new Promise((resolve, reject) => {
     if (result.rowCount > 0) {

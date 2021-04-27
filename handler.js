@@ -383,7 +383,7 @@ const syncListhub = async (metadata, targetTable) => {
       //console.log(`Range: ${range.start} - ${range.end}`);
 
       try {
-        const result = await invokeStreamExecutor({
+        invokeStreamExecutor({
           range: range,
           table_name: targetTable,
         });

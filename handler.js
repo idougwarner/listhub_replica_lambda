@@ -140,10 +140,8 @@ const getMetaDataStream = () => axios({
 });
 
 const checkIfListhubUpdated = (metadata, lastSyncMetadata) => {
-  console.log('checkIfListhubUpdated', metadata, lastSyncMetadata);
   const newTime = new Date(metadata.Metadata.lastmodifiedtimestamp);
   const storedTime = new Date(lastSyncMetadata.last_modified);
-  console.log('checkIfListhubUpdated', newTime, storedTime, newTime > storedTime);
 
   return newTime > storedTime;
 };
@@ -241,7 +239,7 @@ module.exports.listhubMonitor = async (event, context) => {
 
       lastSyncMetadata = await addSyncMetadata({
         lastModified: metadata.Metadata.lastmodifiedtimestamp,
-        tableRecent: lastSyncMetadata ? lastSyncMetadata.table_stable : listhubListingsATableName,
+        tableRecent: lastSyncMetadata ? lastSyncMetadata.table_stale : listhubListingsATableName,
         tableStale: lastSyncMetadata ? lastSyncMetadata.table_recent : listhubListingsBTableName,
         jobsCount: ranges.length
       });

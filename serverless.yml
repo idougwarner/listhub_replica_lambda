@@ -16,6 +16,8 @@ provider:
     DB_USER: ${param:DB_USER}
     DB_PASSWORD: ${param:DB_PASSWORD}
     DB_DIALECT: ${param:DB_DIALECT}
+    LISTHUB_CLIENT_ID: ${param:LISTHUB_CLIENT_ID}
+    LISTHUB_CLIENT_SECRET: ${param:LISTHUB_CLIENT_SECRET}
   memorySize: 4024
   timeout: 900
 

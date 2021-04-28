@@ -27,8 +27,7 @@ async function connectToPool() {
 const { metaURL, replicationURL, token } = require("./config/url");
 
 const listhubReplicaTableName = "listhub_replica";
-const listhubListingsATableName = "listhub_listings_a";
-const listhubListingsBTableName = "listhub_listings_b";
+const listhubListingsInitial = "listhub_listings_initial";
 
 const sendQuery = (query, variables) => new Promise((resolve, reject) => {
   const callback = (error, res) => {
@@ -46,7 +45,7 @@ const sendQuery = (query, variables) => new Promise((resolve, reject) => {
   }
 });
 
-const createReplicaTable = async (dropFirst = false) => {
+const createReplicaTable = async (dropFirst = true) => {
   try {
     if (dropFirst) {
       await sendQuery(`DROP TABLE IF EXISTS ${listhubReplicaTableName}`);
@@ -60,21 +59,7 @@ const createReplicaTable = async (dropFirst = false) => {
   }
 }
 
-const createListingsTables = async (dropFirst = false) => {
-  try {
-    if (dropFirst) {
-      await sendQuery(`DROP TABLE IF EXISTS ${listhubListingsATableName}`);
-      await sendQuery(`DROP TABLE IF EXISTS ${listhubListingsBTableName}`);
-    }
-
-    await sendQuery(`CREATE TABLE IF NOT EXISTS ${listhubListingsATableName}(id SERIAL PRIMARY KEY, sequence VARCHAR (30), property JSON)`);
-    await sendQuery(`CREATE TABLE IF NOT EXISTS ${listhubListingsBTableName}(id SERIAL PRIMARY KEY, sequence VARCHAR (30), property JSON)`);
-  } catch (error) {
-    console.log('createListingsTables error', error);
-  }
-};
-
-const createListingsTable = async (name, dropFirst = false) => {
+const createListingsTable = async (name, dropFirst = true) => {
   try {
     if (dropFirst) {
       await sendQuery(`DROP TABLE IF EXISTS ${name}`);
@@ -83,6 +68,14 @@ const createListingsTable = async (name, dropFirst = false) => {
     await sendQuery(`CREATE TABLE IF NOT EXISTS ${name}(id SERIAL PRIMARY KEY, sequence VARCHAR (30), property JSON)`);
   } catch (error) {
     console.log('createListingsTable error', error);
+  }
+};
+
+const dropListingsTable = async (tableName)  => {
+  try {
+    await sendQuery(`DROP TABLE IF EXISTS ${tableName}`);
+  } catch (error) {
+    console.log('dropListingsTable error', error);
   }
 };
 
@@ -217,8 +210,8 @@ const syncListhub = async (metadata, lastSyncMetadata) => {
 module.exports.prepareListhubTables = async (event, context) => {
   await connectToPool();
 
-  await createListingsTables(true);
-  await createReplicaTable(true);
+  await createListingsTable(listhubListingsInitial);
+  await createReplicaTable();
 };
 
 /**
@@ -235,15 +228,23 @@ module.exports.listhubMonitor = async (event, context) => {
       let lastSyncMetadata = await getLastSyncMetadata();
 
       if (lastSyncMetadata && !checkIfListhubUpdated(metadata, lastSyncMetadata)) return;
+
+      if (lastSyncMetadata && lastSyncMetadata.table_stale) {
+        await dropListingsTable(lastSyncMetadata.table_stale);
+      }
+
       const ranges = getRangesFromMetadata(metadata);
 
       lastSyncMetadata = await addSyncMetadata({
         lastModified: metadata.Metadata.lastmodifiedtimestamp,
-        tableRecent: lastSyncMetadata ? lastSyncMetadata.table_stale : listhubListingsATableName,
-        tableStale: lastSyncMetadata ? lastSyncMetadata.table_recent : listhubListingsBTableName,
+        tableRecent: lastSyncMetadata ? `listhub_listings_${Date.now()}` : listhubListingsInitial,
+        tableStale: lastSyncMetadata ? lastSyncMetadata.table_recent : null,
         jobsCount: ranges.length
       });
-      await createListingsTable(lastSyncMetadata.table_recent);
+
+      if (lastSyncMetadata.table_recent !== listhubListingsInitial) {
+        await createListingsTable(lastSyncMetadata.table_recent);
+      }
 
       await syncListhub(metadata, lastSyncMetadata);
     }

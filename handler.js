@@ -423,8 +423,8 @@ const syncListhub = async (metadata, lastSyncMetadata) => {
     try {
       await invokeStreamExecutor({
         range: range,
-        lastSyncMetadataId: lastSyncMetadata.id,
-        tableName: lastSyncMetadata.table_recent,
+        last_sync_metadata_id: lastSyncMetadata.id,
+        table_name: lastSyncMetadata.table_recent,
       });
     } catch (error) {
       console.log("syncListhub error", error);
@@ -518,17 +518,18 @@ module.exports.listhubMonitor = async (event, context) => {
  * Streams the range and adds all listings in that range to the database
  */
 module.exports.streamExecutor = async (event, context, callback) => {
+  console.log('sss', event);
   console.log("ETag " + event.range.ETag);
   console.log("Start " + event.range.start);
   console.log("End " + event.range.end);
-  console.log("Table_Name " + event.tableName);
-  console.log('Last sync meta data id: ', event.lastSyncMetadataId)
+  console.log("Table_Name " + event.table_name);
+  console.log('Last sync meta data id: ', event.last_sync_metadata_id)
 
   const ETag = event.range.ETag;
   const start = event.range.start;
   const end = event.range.end;
-  const tableName = event.tableName;
-  const lastSyncMetadataId = event.lastSyncMetadataId;
+  const tableName = event.table_name;
+  const lastSyncMetadataId = event.last_sync_metadata_id;
   const listingArray = [];
 
   // Get inputStream from replication request with range headers

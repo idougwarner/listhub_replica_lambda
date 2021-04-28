@@ -1,8 +1,0 @@
-module.exports = {
-    metaURL: "http://api.listhub.com/public_sandbox/replication/metadata",
-    replicationURL: "http://api.listhub.com/public_sandbox/replication/query",
-    token: "eyJraWQiOiI1c0RNZ1dhbDlSUXFyLTJDNVRmNVFES3I3MGZSMXM3a202X1FzUUxWb2w4IiwiYWxnIjoiUFMyNTYifQ.eyJ1c2VyIjp7ImNsaWVudElkIjoicmVkZWZ5cmVuIiwiY2hhbm5lbElkIjo1MDh9LCJzdWIiOiJyZWRlZnlyZW4iLCJhdWQiOiJhcGkubGlzdGh1Yi5jb20iLCJpc3MiOiJ0cnVzcy5saXN0aHViLm1vdmVhd3MuY29tIiwiaWF0IjoxNjE5NTI4ODM3LCJleHAiOjE2MTk2MTUyMzd9.mbWvUhS9nRB4CTmgnK89ypNn248lN4J_9d6W_zzVjbS9NFydJn6VumQQt4XssEyDC23dWSxaqaCxltfjfuVn_U8EigHYkSpm4IiJxcA_ZDQx4R8M6aw1YivqccrlGlTak1TZfbzAqM8dpxfY_bVcN1gc5Sp33nWB_2qXPeFwmpIo0eK1xT8RGZhaO-MYJri8blCs5U0JiICVxtukst9co4aooYslLVPZpaOW87X9boEuZHFNbnurnGMGpZvG4U7SgKCVCcZezYSpn2WBch3-jl1h6DOzm_18YemAIXRG1RVwwc9507LIWEVnDcEj54YepYaL7w2yfv1ZMlsleDyYvA"
-  };
-
-  // http://api.listhub.com/public_sandbox
-  // https://api.listhub.com/replication/query

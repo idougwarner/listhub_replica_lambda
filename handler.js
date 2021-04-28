@@ -22,7 +22,12 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
 });
-const client = await pool.connect();
+
+let client;
+
+async function connectToPool() {
+  client = await pool.connect();
+}
 
 const { metaURL, replicationURL, token } = require("./config/url");
 
@@ -437,6 +442,7 @@ module.exports.prepareListhubTables = async (event, context) => {
  */
 module.exports.listhubMonitor = async (event, context) => {
   try {
+    await connectToPool();
     // Get meta_data info
     const response = await getMetaDataStream();
 
@@ -531,6 +537,8 @@ module.exports.streamExecutor = async (event, context, callback) => {
       Range: "sequence=" + start + "-" + end,
     },
   });
+
+  await connectToPool();
 
   const streamingPromise = new Promise((resolve, reject) => {
     console.log("Start Time: " + new Date());

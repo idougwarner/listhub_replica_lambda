@@ -335,9 +335,9 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
         let listingsCount = listingArray.length;
 
-        if (listingsCount > 10) {
-          listingsCount = 10;
-        }
+        // if (listingsCount > 10) {
+        //   listingsCount = 10;
+        // }
 
         for (let index = 0; index < listingsCount; index += 1) {
           const listing = listingArray[index];

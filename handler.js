@@ -22,109 +22,174 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
 });
+const client = await pool.connect();
 
 const { metaURL, replicationURL, token } = require("./config/url");
 
-const tbl_listhub_replica = "listhub_replica";
-const listings_a = "listhub_listings_a";
-const listings_b = "listhub_listings_b";
+const listhubReplicaTableName = "listhub_replica";
+const listhubListingsATableName = "listhub_listings_a";
+const listhubListingsBTableName = "listhub_listings_b";
 
-// Fetch MetaData
-const getMetaDataStream = async () => {
-  // Get inputStream from replication request with range headers
-  return axios({
-    url: metaURL,
-    method: "get",
-    headers: {
-      Accept: "application/json",
-      Authorization: "Bearer " + token,
-    },
-  });
-};
+const sendQuery = (query, variables) => new Promise((resolve, reject) => {
+  const callback = (error, res) => {
+    if (error) {
+      reject(error);
+    } else {
+      resolve(res);
+    }
+  };
 
-const createListhubReplicaTable = async () => {
-  /*id
-      last_modified
-      table_recent (one of listhub_listings_a and listhub_listings_b)
-      table_stale (one of listhub_listings_a and listhub_listings_b)
-      jobs_count
-      fulfulled_jobs_count
-      syncing*/
+  if (!variables) {
+    client.query(query, callback);
+  } else {
+    client.query(query, variables, callback);
+  }
+});
 
+const createReplicaTable = async (dropFirst = false) => {
   try {
-    const client = await pool.connect();
+    if (dropFirst) {
+      await sendQuery(`DROP TABLE IF EXISTS ${listhubReplicaTableName} CASCADE`);
+    }
 
-    // id, last_modifed, content_length, etag, content_type
-    // Get list_a_time_modifed
-    return new Promise((resolve, reject) => {
-      client.query(
-        `DROP TABLE IF EXISTS ${tbl_listhub_replica} CASCADE`,
-        (err, result) => {
-          if (err) {
-            console.log(err);
-            resolve({ listhub_table_created: false });
-          } else {
-            console.log(`Table ${tbl_listhub_replica} deleted successfully`);
+    await sendQuery(`CREATE TABLE IF NOT EXISTS ${listhubReplicaTableName}(id SERIAL PRIMARY KEY, last_modified TIMESTAMP, table_recent VARCHAR(20), table_stale VARCHAR(20), jobs_count INT, fulfilled_jobs_count INT, syncing BOOLEAN, created_at TIMESTAMP)`);
 
-            client.query(
-              `CREATE TABLE IF NOT EXISTS ${tbl_listhub_replica}(id SERIAL PRIMARY KEY, last_modified TIMESTAMP, table_recent TEXT, table_stale TEXT, jobs_count BIGINT, fulfilled_jobs_count BIGINT, syncing BOOLEAN, time_stamp TIMESTAMP)`,
-              (err, result) => {
-                if (err) {
-                  console.log(err);
-                } else {
-                  console.log(
-                    `Table ${tbl_listhub_replica} created successfully"`
-                  );
+    console.log(`${listhubReplicaTableName} created successfully!`);
+  } catch (error) {
+    console.log('createReplicaTable error', error);
+  }
+}
 
-                  resolve({ listhub_table_created: true });
-                }
-              }
-            ); // End of Create Table
-          }
-        }
-      );
-    });
-  } catch (err) {
-    console.log(`Create ${tbl_listhub_replica} listings error` + err);
-    // return ({updated:false, data: result.rows[0], error:err})
+const createListingsTables = async (dropFirst = false) => {
+  try {
+    if (dropFirst) {
+      await sendQuery(`DROP TABLE IF EXISTS ${listhubListingsATableName} CASCADE`);
+      await sendQuery(`DROP TABLE IF EXISTS ${listhubListingsBTableName} CASCADE`);
+    }
+
+    await sendQuery(`CREATE TABLE IF NOT EXISTS ${listhubListingsATableName}(id SERIAL PRIMARY KEY, sequence VARCHAR (30), property JSON)`);
+    await sendQuery(`CREATE TABLE IF NOT EXISTS ${listhubListingsBTableName}(id SERIAL PRIMARY KEY, sequence VARCHAR (30), property JSON)`);
+  } catch (error) {
+    console.log('createListingsTables error', error);
   }
 };
 
-const setListingsTable = async (table_to_set) => {
+const createListingsTable = async (name, dropFirst = false) => {
   try {
-    const client = await pool.connect();
+    if (dropFirst) {
+      await sendQuery(`DROP TABLE IF EXISTS ${name} CASCADE`);
+    }
 
-    return new Promise((resolve, reject) => {
-      // Get list_a_time_modifed
-      client.query(
-        `DROP TABLE IF EXISTS ${table_to_set} CASCADE`,
-        (err, res) => {
-          if (err) {
-            console.log(err);
-            resolve({ table_created: false, table_name: table_to_set });
-          } else {
-            console.log(`Table ${table_to_set} deleted successfully`);
-
-            client.query(
-              `CREATE TABLE IF NOT EXISTS ${table_to_set}(id SERIAL PRIMARY KEY, sequence TEXT, property JSON)`,
-              (err, res) => {
-                if (err) {
-                  console.log(err);
-                } else {
-                  console.log(`Table ${table_to_set} created successfully"`);
-
-                  resolve({ table_created: true, table_name: table_to_set });
-                }
-              }
-            ); // End of Create Table
-          }
-        }
-      );
-    }); // End of Promise
-  } catch (err) {
-    console.log("Create table listings error" + err);
-    return { table_created: false, data: null, error: err };
+    await sendQuery(`CREATE TABLE IF NOT EXISTS ${name}(id SERIAL PRIMARY KEY, sequence VARCHAR (30), property JSON)`);
+  } catch (error) {
+    console.log('createListingsTables error', error);
   }
+};
+
+const addSyncMetadata = async ({
+  lastModified,
+  tableRecent,
+  tableStale,
+  jobsCount,
+  fulfilledJobsCount = 0,
+  syncing = true
+}) => {
+  try {
+    const query = `INSERT INTO ${listhubReplicaTableName} (last_modified, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`;
+    const variables = [lastModified, tableRecent, tableStale, jobsCount, fulfilledJobsCount, syncing, new Date()];
+
+    return sendQuery(query, variables);
+  } catch (error) {
+    console.log('addReplicaMeta error', error);
+  }
+};
+
+const getLastSyncMetadata = async() => {
+  try {
+    const result = await sendQuery(`SELECT * from ${listhubReplicaTableName} ORDER BY created_at DESC LIMIT 1`);
+    return result.rows[0];
+  } catch (error) {
+    console.log('getLastSyncMetadata error', error);
+    return null;
+  }
+};
+
+const increaseJobCount = async (id) => {
+  const readQuery = `SELECT fulfilled_jobs_count from ${listhubReplicaTableName} where id = $1 FOR UPDATE`;
+  const updateQuery = `UPDATE ${listhubReplicaTableName} SET fulfilled_jobs_count = $1 WHERE id = $2 RETURNING id`;
+
+  try {
+    await client.query('BEGIN');
+    const result = await client.query(readQuery, [id]);
+    console.log('increase job count', result);
+    await client.query(updateQuery, [result.rows[0].fulfilled_jobs_count + 1, id])
+    await client.query('COMMIT');
+  } catch (error) {
+    await cllient.query('ROLLBACK');
+  }
+
+  // // select fulfilled job count and increment by one then update the table in transaction mode
+  // const result = await client.query(`SELECT * FROM ${listhubReplicaTableName} ORDER BY time_stamp DESC`);
+
+  // return new Promise((resolve, reject) => {
+  //   if (result.rowCount > 0) {
+  //     var id = result.rows[0].id;
+  //     var fulfilled_jobs_count = result.rows[0].fulfilled_jobs_count;
+  //     fulfilled_jobs_count = parseInt(fulfilled_jobs_count) + 1;
+
+  //     client.query("BEGIN", (err) => {
+  //       if (err) {
+  //         console.log("Did not manage to begin adding count" + err);
+  //         reject();
+  //       }
+  //       client.query(
+  //         `LOCK TABLE ${listhubReplicaTableName} IN ROW EXCLUSIVE MODE`,
+  //         (err, res) => {
+  //           if (err) {
+  //             console.log("Did not manage to lock table: " + err);
+  //             reject();
+  //           }
+  //           client.query(
+  //             `UPDATE ${listhubReplicaTableName} SET fulfilled_jobs_count=$1 WHERE id=$2 RETURNING *`,
+  //             [fulfilled_jobs_count, id],
+  //             (err, res) => {
+  //               if (err) {
+  //                 console.log("Error adding job count " + err);
+  //                 client.query("ROLLBACK");
+  //                 client.release();
+  //                 reject();
+  //               } else {
+  //                 client.query("COMMIT");
+  //                 client.release();
+  //                 resolve({ increasedJobCount: true });
+  //               }
+  //             }
+  //           );
+  //         }
+  //       );
+  //     });
+  //   } else {
+  //     console.log(`No data in ${listhubReplicaTableName} to update`);
+  //     reject();
+  //   }
+  // });
+};
+
+// Get inputStream from replication request with range headers
+const getMetaDataStream = () => axios({
+  url: metaURL,
+  method: "get",
+  headers: {
+    Accept: "application/json",
+    Authorization: "Bearer " + token,
+  },
+});
+
+const checkIfListhubUpdated = (metadata, lastSyncMetadata) => {
+  const newTime = new Date(metadata.Metadata.lastmodifiedtimestamp);
+  const storedTime = new Date(lastSyncMetadata.last_modified);
+
+  return newTime > storedTime;
 };
 
 const createListhubReplicaMetadata = async (data) => {
@@ -139,7 +204,7 @@ const createListhubReplicaMetadata = async (data) => {
       var now = new Date();
 
       client.query(
-        `INSERT INTO ${tbl_listhub_replica} (last_modified, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing, time_stamp) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
+        `INSERT INTO ${listhubReplicaTableName} (last_modified, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
         [
           data.last_modified,
           data.table_recent,
@@ -173,12 +238,13 @@ const createListhubReplicaMetadata = async (data) => {
   }
 };
 
+
 const listhubDataExists = async () => {
   try {
     const client = await pool.connect();
 
     return new Promise((resolve, reject) => {
-      client.query(`SELECT * from ${tbl_listhub_replica}`, (err, res) => {
+      client.query(`SELECT * from ${listhubReplicaTableName}`, (err, res) => {
         if (err) {
           console.log("Check error" + err);
 
@@ -216,7 +282,7 @@ const isMetadataNew = async (newtime) => {
     const client = await pool.connect();
 
     return new Promise((resolve, reject) => {
-      client.query(`SELECT * from ${tbl_listhub_replica} ORDER BY time_stamp DESC`, (err, res) => {
+      client.query(`SELECT * from ${listhubReplicaTableName} ORDER BY created_at DESC`, (err, res) => {
         if (res.rowCount > 0) {
           var storedTime = res.rows[0].last_modified;
 
@@ -282,7 +348,7 @@ const tableToSaveListings = async () => {
   var table_stale;
 
   const client = await pool.connect();
-  const result = await client.query(`SELECT * FROM ${tbl_listhub_replica} ORDER BY time_stamp DESC`);
+  const result = await client.query(`SELECT * FROM ${listhubReplicaTableName} ORDER BY created_at DESC`);
 
   return new Promise((resolve, reject) => {
     if (result.rowCount > 0) {
@@ -303,12 +369,8 @@ const invokeStreamExecutor = async (payload) => {
     lambda.invoke(params, (error, data) => {
       if (error) {
         reject(error);
-        console.error("Error in call table_a: " + JSON.stringify(error));
-
-        return new Error(`Error printing messages: ${JSON.stringify(error)}`);
       } else if (data) {
         resolve(data);
-        console.log("table_results" + JSON.stringify(data));
       }
     });
   });
@@ -343,122 +405,30 @@ const getRangesFromMetadata = (metadata, chunkSize = 30000) => {
   return ranges;
 };
 
-const syncListhub = async (metadata, targetTable) => {
+const syncListhub = async (metadata, lastSyncMetadata) => {
   const ranges = getRangesFromMetadata(metadata);
   console.log("Ranges.length " + ranges.length);
-  console.log("Last modified time " + metadata.Metadata.lastmodifiedtimestamp);
-  var data;
 
-  // Store listhub replica data to the table prioritizing the table
-  if (targetTable == listings_a) {
-    data = {
-      last_modified: metadata.Metadata.lastmodifiedtimestamp,
-      table_recent: listings_a,
-      table_stale: listings_b,
-      jobs_count: ranges.length,
-      fulfilled_jobs_count: 0,
-      syncing: true,
-    };
-  } else if (targetTable == listings_b) {
-    data = {
-      last_modified: metadata.Metadata.lastmodifiedtimestamp,
-      table_recent: listings_b,
-      table_stale: listings_a,
-      jobs_count: ranges.length,
-      fulfilled_jobs_count: 0,
-      syncing: true,
-    };
-  }
+  for (let index = 0; index < ranges.length; index++) {
+    let range = ranges[index];
 
-  // Store the new Metadata details to Listhub replica this time
-  const { metadataAdded } = await createListhubReplicaMetadata(data);
+    console.log(`Range: ${range.start} - ${range.end}`);
 
-  // Check if meta_data has been stored for the first time
-  if (metadataAdded) {
-    console.log("New metadata has been created");
-
-    for (let index = 0; index < ranges.length; index++) {
-      let range = ranges[index];
-
-      //console.log(`Range: ${range.start} - ${range.end}`);
-      if(ranges.length==index+1)
-      {
-        console.log("We have called"+(index+1)+ "Stream executors")
-      }
-
-      try {
-        const result = await invokeStreamExecutor({
-          range: range,
-          table_name: targetTable,
-        });
-        //console.log("streamExecutor is invoked", JSON.stringify(result));
-      } catch (error) {
-        console.log("streamExecutor invocation error", error);
-      }
-    }
-  } else {
-    console.log("Problem creating meta Data. Please try later");
-  }
-};
-
-const increaseJobCount = async () => {
-  // select fulfilled job count and increment by one then update the table in transaction mode
-  const client = await pool.connect();
-  const result = await client.query(`SELECT * FROM ${tbl_listhub_replica} ORDER BY time_stamp DESC`);
-
-  return new Promise((resolve, reject) => {
-    if (result.rowCount > 0) {
-      var id = result.rows[0].id;
-      var fulfilled_jobs_count = result.rows[0].fulfilled_jobs_count;
-      fulfilled_jobs_count = parseInt(fulfilled_jobs_count) + 1;
-
-      client.query("BEGIN", (err) => {
-        if (err) {
-          console.log("Did not manage to begin adding count" + err);
-          reject();
-        }
-        client.query(
-          `LOCK TABLE ${tbl_listhub_replica} IN ROW EXCLUSIVE MODE`,
-          (err, res) => {
-            if (err) {
-              console.log("Did not manage to lock table: " + err);
-              reject();
-            }
-            client.query(
-              `UPDATE ${tbl_listhub_replica} SET fulfilled_jobs_count=$1 WHERE id=$2 RETURNING *`,
-              [fulfilled_jobs_count, id],
-              (err, res) => {
-                if (err) {
-                  console.log("Error adding job count " + err);
-                  client.query("ROLLBACK");
-                  client.release();
-                  reject();
-                } else {
-                  client.query("COMMIT");
-                  client.release();
-                  resolve({ increasedJobCount: true });
-                }
-              }
-            );
-          }
-        );
+    try {
+      await invokeStreamExecutor({
+        range: range,
+        lastSyncMetadataId: lastSyncMetadata.id,
+        tableName: lastSyncMetadata.table_recent,
       });
-    } else {
-      console.log(`No data in ${tbl_listhub_replica} to update`);
-      reject();
+    } catch (error) {
+      console.log("syncListhub error", error);
     }
-  });
+  }
 };
 
 module.exports.prepareListhubTables = async (event, context) => {
-  const { table_created, table_name } = await setListingsTable(listings_a);
-  console.log(table_name + " created? " + table_created);
-
-  await setListingsTable(listings_b);
-  //console.log(table_name + " created? " + table_created);
-
-  const { listhub_table_created } = await createListhubReplicaTable();
-  console.log("Lishub_replica table" + " created? " + listhub_table_created);
+  await createListingsTables(true);
+  await createReplicaTable(true);
 };
 
 /**
@@ -471,44 +441,62 @@ module.exports.listhubMonitor = async (event, context) => {
     const response = await getMetaDataStream();
 
     if (response) {
-      // Check whether there is new data by comparing what is in listhub_replica last_modified versus what is in the metadata
-      const { dataExists } = await listhubDataExists();
+      const metadata = response.data;
 
-      console.log("Data: dataExists " + dataExists);
-      console.log("Metadata Data " + JSON.stringify(response.data));
+      let lastSyncMetadata = await getLastSyncMetadata();
 
-      // Store new listhub replica data if none exists
-      if (!dataExists) {
-        // Call SyncListhub with metadata and create listings a table
-        await syncListhub(response.data, listings_a);
-      } else {
-        // Check if listhub_listings_b has data, if not populate it with data
-        const { hasdata } = await tableHasListings(listings_b);
+      if (lastSyncMetadata && !checkIfListhubUpdated(metadata, lastSyncMetadata)) return;
 
-        if (!hasdata) {
-          // This will in turn make it the recent table
-          console.log("Listings_b has no data therefore populate it")
-          await syncListhub(response.data, listings_b);
-        }
-        else {
-          const { newUpdate } = await isMetadataNew(
-            response.data.Metadata.lastmodifiedtimestamp
-          );
+      const ranges = getRangesFromMetadata(metadata);
 
-          if (newUpdate) {
+      lastSyncMetadata = await addSyncMetadata({
+        lastModified: metadata.Metadata.lastmodifiedtimestamp,
+        tableRecent: lastSyncMetadata ? lastSyncMetadata.table_stable : listhubListingsATableName,
+        tableStale: lastSyncMetadata ? lastSyncMetadata.table_recent : listhubListingsBTableName,
+        jobsCount: ranges.length
+      });
+      console.log('last sync data', lastSyncMetadata);
+      await createListingsTable(lastSyncMetadata.table_recent);
+
+      await syncListhub(metadata, lastSyncMetadata);
+      // // Check whether there is new data by comparing what is in listhub_replica last_modified versus what is in the metadata
+      // const { dataExists } = await listhubDataExists();
+
+      // console.log("Data: dataExists " + dataExists);
+      // console.log("Metadata Data " + JSON.stringify(response.data));
+
+      // // Store new listhub replica data if none exists
+      // if (!dataExists) {
+      //   // Call SyncListhub with metadata and create listings a table
+      //   await syncListhub(response.data, listhubListingsATableName);
+      // } else {
+      //   // Check if listhub_listings_b has data, if not populate it with data
+      //   const { hasdata } = await tableHasListings(listhubListingsBTableName);
+
+      //   if (!hasdata) {
+      //     // This will in turn make it the recent table
+      //     console.log("Listings_b has no data therefore populate it")
+      //     await syncListhub(response.data, listhubListingsBTableName);
+      //   }
+      //   else {
+      //     const { newUpdate } = await isMetadataNew(
+      //       response.data.Metadata.lastmodifiedtimestamp
+      //     );
+
+      //     if (newUpdate) {
             
-            // Update listhub_replica data with new timestamp and check which table to now set data to
-            const { table_to_save } = await tableToSaveListings();
+      //       // Update listhub_replica data with new timestamp and check which table to now set data to
+      //       const { table_to_save } = await tableToSaveListings();
 
-            // Clear data from the table if existing data then save data
-            const { deleted, tableOk } = await clearDataFrom(table_to_save);
-            if (deleted || tableOk) {
-              await syncListhub(response.data, table_to_save);
-            }
+      //       // Clear data from the table if existing data then save data
+      //       const { deleted, tableOk } = await clearDataFrom(table_to_save);
+      //       if (deleted || tableOk) {
+      //         await syncListhub(response.data, table_to_save);
+      //       }
 
-          }
-        }   
-      }
+      //     }
+      //   }   
+      // }
     }
   } catch (err) {
     console.log("Error: " + err);
@@ -520,16 +508,17 @@ module.exports.listhubMonitor = async (event, context) => {
  * Streams the range and adds all listings in that range to the database
  */
 module.exports.streamExecutor = async (event, context, callback) => {
-  console.log("\n\nFrom List Hub Monitor " + JSON.stringify(event));
   console.log("ETag " + event.range.ETag);
   console.log("Start " + event.range.start);
   console.log("End " + event.range.end);
-  console.log("Table_Name " + event.table_name);
+  console.log("Table_Name " + event.tableName);
+  console.log('Last sync meta data id: ', event.lastSyncMetadataId)
 
   const ETag = event.range.ETag;
   const start = event.range.start;
   const end = event.range.end;
-  const table_name = event.table_name;
+  const tableName = event.tableName;
+  const lastSyncMetadataId = event.lastSyncMetadataId;
   const listingArray = [];
 
   // Get inputStream from replication request with range headers
@@ -544,127 +533,66 @@ module.exports.streamExecutor = async (event, context, callback) => {
   });
 
   const streamingPromise = new Promise((resolve, reject) => {
-    // STREAMING WITH JSON STREAM
     console.log("Start Time: " + new Date());
 
     stream.pipe(ndjson.parse()).on("data", (data) => {
       listingArray.push(data);
-      // console.log("Data Sequence " + data.sequence);
-      // obj is a javascript object
     });
 
     stream
       .on("complete", async () => {
-        console.log(
-          "Completed reading API range, Data to save is: " +
-            listingArray.length +
-            " records"
-        );
+        console.log(`Streamed records count: ${listingArray.length}`);
 
-        // Check if there is a change in ETag by getting a status code of 412
-        if (listingArray.length == 1) {
-          console.log("Error Result " + JSON.stringify(listingArray));
+        // // Check if there is a change in ETag by getting a status code of 412
+        // if (listingArray.length == 1) {
+        //   console.log("Error Result " + JSON.stringify(listingArray));
 
-          // We should handle this error in the midst of our fetching of data
-          if (listingArray[0].statusCode == 412) {
-            console.log(
-              "We may need to restart our fetching of data as the server has changed the ETag as we fetch listings"
-            );
-            reject({ "addedjobcount": false, "listingdata": false });
-          }
+        //   // We should handle this error in the midst of our fetching of data
+        //   if (listingArray[0].statusCode == 412) {
+        //     console.log(
+        //       "We may need to restart our fetching of data as the server has changed the ETag as we fetch listings"
+        //     );
+        //     reject({ "addedjobcount": false, "listingdata": false });
+        //   }
+        // }
+
+        let listingsCount = listingArray.length;
+
+        if (true) {
+          listingsCount = 10;
         }
 
-        const client = await pool.connect();
-
-        const dbOperationPromise = new Promise((resolve, reject) => {
-          const promises = listingArray.map(
-            (listing) =>
-              new Promise((resolve, reject) => {
-                client.query(
-                  `INSERT INTO ${table_name} (sequence, Property) VALUES ($1,$2) RETURNING sequence`,
-                  [listing.sequence, listing.Property],
-                  (err) => {
-                    if (err) {
-                      console.log(err);
-                      reject();
-                    } else {
-                      //client.release()
-                      resolve();
-                    }
-                  }
-                );
-              })
-          );
-
-          Promise.all(promises).then(resolve()).catch(reject());
-        });
-
-        try {
-          await dbOperationPromise;
-          
-          client.release();
-
-          stream.end();
-          console.log("Listings are added successfully!");
-
-          // Release connections before more connections to database
-
-          // fulfilled_jobs_count of listhub_replica by 1 in transaction mode
-          const { increasedJobCount } = await increaseJobCount();
-
-          if (increasedJobCount) {
-            resolve({ "addedjobcount": true, "listingdata": true });
-          } else {
-            console.log("Problem with adding job count");
-            reject({ "addedjobcount": false, "listingdata": true });
-          }
-     
-          
-        } catch (error) {
-          console.log(
-            "Something went wrong while increasing the job count in listhub_replica",
-            error
-          );
-          reject(error);
+        for (let index = 0; index < listingsCount; index += 1) {
+          const listing = listingArray[index];
+          const query = `INSERT INTO ${tableName} (sequence, Property) VALUES ($1,$2) RETURNING sequence`;
+          const variables =  [listing.sequence, listing.Property];
+          await sendQuery(query, variables);
         }
+
+        stream.end();
+
+        resolve();
       })
       .on("error", (err) => {
         console.log("Error in getting listings" + err);
         stream.end();
-        reject({ addedjobcount: false, listingdata: false });
+        reject();
       });
   });
 
-  const { addedjobcount, listingdata } = await streamingPromise;
-
-  if (addedjobcount && listingdata) {
-
-    console.log("Added Data successfully")
-    const response = {
-      statusCode: 200,
-      body: JSON.stringify({
-        message: `${event} - data added well`,
-      }),
-    };
-    stream.end();
-  } else {
-    console.log("Problem Adding Data")
-    const response = {
-      statusCode: 500,
-      body: JSON.stringify({
-        message: `${event} - problem adding data`,
-      }),
-    };
+  try {
+    await streamingPromise;
+    await increaseJobCount(lastSyncMetadataId);
+  } catch (error) {
     
   }
-  stream.end();
 };
 
 module.exports.monitorSync = async () => {
   try {
     const client = await pool.connect();
     const result = await client.query(
-      `SELECT * from ${tbl_listhub_replica} ORDER BY time_stamp DESC`
+      `SELECT * from ${listhubReplicaTableName} ORDER BY created_at DESC`
     );
 
     console.log("Checking data...\n");
@@ -679,7 +607,7 @@ module.exports.monitorSync = async () => {
         const id = result.rows[0].id;
 
         client.query(
-          `UPDATE ${tbl_listhub_replica} SET syncing=$1 WHERE id=$2 RETURNING *`,
+          `UPDATE ${listhubReplicaTableName} SET syncing=$1 WHERE id=$2 RETURNING *`,
           [false, id],
           (err, res) => {
             if (err) {

@@ -275,19 +275,13 @@ module.exports.prepareListhubTables = async (event, context) => {
 module.exports.listhubMonitor = async (event, context) => {
   try {
     await connectToPool();
-    console.log('step 1');
-    // Get meta_data info
     const response = await getMetaDataStream();
-    console.log('step 2');
-
     if (response) {
       const metadata = response.data;
 
       let lastSyncMetadata = await getLastSyncMetadata();
-      console.log('step 3', metadata, lastSyncMetadata);
 
       if (lastSyncMetadata && !checkIfListhubUpdated(metadata, lastSyncMetadata)) return;
-      console.log('step 4');
       const ranges = getRangesFromMetadata(metadata);
 
       lastSyncMetadata = await addSyncMetadata({
@@ -296,13 +290,12 @@ module.exports.listhubMonitor = async (event, context) => {
         tableStale: lastSyncMetadata ? lastSyncMetadata.table_recent : listhubListingsBTableName,
         jobsCount: ranges.length
       });
-      console.log('last sync data', lastSyncMetadata);
       await createListingsTable(lastSyncMetadata.table_recent);
 
       await syncListhub(metadata, lastSyncMetadata);
     }
   } catch (err) {
-    console.log("Error: " + err);
+    console.log("listhubMonitor error", err);
   }
 };
 
@@ -391,6 +384,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
     await increaseJobCount(lastSyncMetadataId);
   } catch (error) {
     console.log('streamExecutor error', error);
+    throw error;
   }
 };
 

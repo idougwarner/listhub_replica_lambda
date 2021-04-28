@@ -128,7 +128,7 @@ const increaseJobCount = async (id) => {
     await client.query('BEGIN');
     const result = await client.query(readQuery, [id]);
     console.log('increase job count', result);
-    await client.query(updateQuery, [result.rows[0].fulfilled_jobs_count + 1, id])
+    await client.query(updateQuery, [parseInt(result.rows[0].fulfilled_jobs_count) + 1, id])
     await client.query('COMMIT');
   } catch (error) {
     await cllient.query('ROLLBACK');

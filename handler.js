@@ -248,8 +248,6 @@ module.exports.listhubMonitor = async (event, context) => {
 
     await refreshListhubToken();
 
-    console.log('listhub access token', listhubAccessToken);
-    return;
     const response = await getMetaDataStream();
     if (response) {
       const metadata = response.data;

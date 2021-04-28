@@ -51,7 +51,7 @@ const createReplicaTable = async (dropFirst = true) => {
       await sendQuery(`DROP TABLE IF EXISTS ${listhubReplicaTableName}`);
     }
 
-    await sendQuery(`CREATE TABLE IF NOT EXISTS ${listhubReplicaTableName}(id SERIAL PRIMARY KEY, last_modified TIMESTAMP, table_recent VARCHAR(20), table_stale VARCHAR(20), jobs_count INT, fulfilled_jobs_count INT, syncing BOOLEAN, created_at TIMESTAMP)`);
+    await sendQuery(`CREATE TABLE IF NOT EXISTS ${listhubReplicaTableName}(id SERIAL PRIMARY KEY, last_modified TIMESTAMP, table_recent VARCHAR(50), table_stale VARCHAR(50), jobs_count INT, fulfilled_jobs_count INT, syncing BOOLEAN, created_at TIMESTAMP)`);
 
     console.log(`${listhubReplicaTableName} created successfully!`);
   } catch (error) {

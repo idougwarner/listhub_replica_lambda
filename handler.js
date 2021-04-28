@@ -54,7 +54,7 @@ const sendQuery = (query, variables) => new Promise((resolve, reject) => {
 const createReplicaTable = async (dropFirst = false) => {
   try {
     if (dropFirst) {
-      await sendQuery(`DROP TABLE IF EXISTS ${listhubReplicaTableName} CASCADE`);
+      await sendQuery(`DROP TABLE IF EXISTS ${listhubReplicaTableName}`);
     }
 
     await sendQuery(`CREATE TABLE IF NOT EXISTS ${listhubReplicaTableName}(id SERIAL PRIMARY KEY, last_modified TIMESTAMP, table_recent VARCHAR(20), table_stale VARCHAR(20), jobs_count INT, fulfilled_jobs_count INT, syncing BOOLEAN, created_at TIMESTAMP)`);
@@ -68,8 +68,8 @@ const createReplicaTable = async (dropFirst = false) => {
 const createListingsTables = async (dropFirst = false) => {
   try {
     if (dropFirst) {
-      await sendQuery(`DROP TABLE IF EXISTS ${listhubListingsATableName} CASCADE`);
-      await sendQuery(`DROP TABLE IF EXISTS ${listhubListingsBTableName} CASCADE`);
+      await sendQuery(`DROP TABLE IF EXISTS ${listhubListingsATableName}`);
+      await sendQuery(`DROP TABLE IF EXISTS ${listhubListingsBTableName}`);
     }
 
     await sendQuery(`CREATE TABLE IF NOT EXISTS ${listhubListingsATableName}(id SERIAL PRIMARY KEY, sequence VARCHAR (30), property JSON)`);
@@ -82,12 +82,12 @@ const createListingsTables = async (dropFirst = false) => {
 const createListingsTable = async (name, dropFirst = false) => {
   try {
     if (dropFirst) {
-      await sendQuery(`DROP TABLE IF EXISTS ${name} CASCADE`);
+      await sendQuery(`DROP TABLE IF EXISTS ${name}`);
     }
 
     await sendQuery(`CREATE TABLE IF NOT EXISTS ${name}(id SERIAL PRIMARY KEY, sequence VARCHAR (30), property JSON)`);
   } catch (error) {
-    console.log('createListingsTables error', error);
+    console.log('createListingsTable error', error);
   }
 };
 
@@ -433,6 +433,8 @@ const syncListhub = async (metadata, lastSyncMetadata) => {
 };
 
 module.exports.prepareListhubTables = async (event, context) => {
+  await connectToPool();
+
   await createListingsTables(true);
   await createReplicaTable(true);
 };

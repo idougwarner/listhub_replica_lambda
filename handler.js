@@ -9,7 +9,6 @@ const lambda = new AWS.Lambda({
 });
 
 const { Pool } = require("pg");
-
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -17,17 +16,42 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
 });
+let pgClient;
 
-let client;
-
-async function connectToPool() {
-  client = await pool.connect();
-}
-
-const { metaURL, replicationURL, token } = require("./config/url");
-
+let listhubAccessToken;
+const listhubClientId = process.env.LISTHUB_CLIENT_ID;
+const listhubClientSecret = process.env.LISTHUB_CLIENT_SECRET;
+const listhubOAuth2TokenApi = process.env.LISTHUB_OAUTH2_TOKEN_API;
+const listhubMetadataApi = process.env.LISTHUB_META_API;
+const listhubReplicationApi = process.env.LISTHUB_REPLICATION_API;
 const listhubReplicaTableName = "listhub_replica";
 const listhubListingsInitial = "listhub_listings_initial";
+
+const refreshListhubToken = async () => {
+  const oauth2Body = {
+    grant_type: "client_credentials",
+    client_id: listhubClientId,
+    client_secret: listhubClientSecret,
+  };
+
+  try {
+    const response = await axios.post(
+      listhubOAuth2TokenApi,
+      qs.stringify(oauth2Body),
+      { headers: { "Content-type": "application/x-www-form-urlencoded" } }
+    );
+    listhubAccessToken = response.data.access_token;
+
+    console.log('refreshListhubToken success');
+  } catch (error) {
+    console.log('refreshListhubToken error', error);
+    listhubAccessToken = null;
+  }
+};
+
+async function connectToPool() {
+  pgClient = await pool.connect();
+}
 
 const sendQuery = (query, variables) => new Promise((resolve, reject) => {
   const callback = (error, res) => {
@@ -39,9 +63,9 @@ const sendQuery = (query, variables) => new Promise((resolve, reject) => {
   };
 
   if (!variables) {
-    client.query(query, callback);
+    pgClient.query(query, callback);
   } else {
-    client.query(query, variables, callback);
+    pgClient.query(query, variables, callback);
   }
 });
 
@@ -113,10 +137,10 @@ const increaseJobCount = async (id) => {
   const updateQuery = `UPDATE ${listhubReplicaTableName} SET fulfilled_jobs_count = $1 WHERE id = $2 RETURNING id`;
 
   try {
-    await client.query('BEGIN');
-    const result = await client.query(readQuery, [id]);
-    await client.query(updateQuery, [parseInt(result.rows[0].fulfilled_jobs_count) + 1, id])
-    await client.query('COMMIT');
+    await pgClient.query('BEGIN');
+    const result = await pgClient.query(readQuery, [id]);
+    await pgClient.query(updateQuery, [parseInt(result.rows[0].fulfilled_jobs_count) + 1, id])
+    await pgClient.query('COMMIT');
   } catch (error) {
     await cllient.query('ROLLBACK');
   }
@@ -124,11 +148,11 @@ const increaseJobCount = async (id) => {
 
 // Get inputStream from replication request with range headers
 const getMetaDataStream = () => axios({
-  url: metaURL,
+  url: listhubMetadataApi,
   method: "get",
   headers: {
     Accept: "application/json",
-    Authorization: "Bearer " + token,
+    Authorization: `Bearer ${listhubAccessToken}`,
   },
 });
 
@@ -200,6 +224,7 @@ const syncListhub = async (metadata, lastSyncMetadata) => {
         range: range,
         last_sync_metadata_id: lastSyncMetadata.id,
         table_name: lastSyncMetadata.table_recent,
+        listhub_access_token: listhubAccessToken
       });
     } catch (error) {
       console.log("syncListhub error", error);
@@ -221,6 +246,11 @@ module.exports.prepareListhubTables = async (event, context) => {
 module.exports.listhubMonitor = async (event, context) => {
   try {
     await connectToPool();
+
+    await refreshListhubToken();
+
+    console.log('listhub access token', listhubAccessToken);
+    return;
     const response = await getMetaDataStream();
     if (response) {
       const metadata = response.data;
@@ -262,21 +292,23 @@ module.exports.streamExecutor = async (event, context, callback) => {
   console.log("start: ", event.range.start);
   console.log("end: ", event.range.end);
   console.log("table name:  ", event.table_name);
-  console.log('last sync meta data id: ', event.last_sync_metadata_id)
+  console.log('last sync meta data id: ', event.last_sync_metadata_id);
 
+  listhubAccessToken = event.listhub_access_token;
   const ETag = event.range.ETag;
   const start = event.range.start;
   const end = event.range.end;
   const tableName = event.table_name;
   const lastSyncMetadataId = event.last_sync_metadata_id;
+
   const listingArray = [];
 
   // Get inputStream from replication request with range headers
   const stream = request({
-    url: replicationURL,
+    url: listhubReplicationApi,
     headers: {
       Accept: "application/json",
-      Authorization: "Bearer " + token,
+      Authorization: `Bearer ${listhubAccessToken}`,
       "If-Range": ETag,
       Range: "sequence=" + start + "-" + end,
     },

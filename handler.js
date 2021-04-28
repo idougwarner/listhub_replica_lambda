@@ -452,10 +452,10 @@ module.exports.listhubMonitor = async (event, context) => {
       const metadata = response.data;
 
       let lastSyncMetadata = await getLastSyncMetadata();
-      console.log('step 3', lastSyncMetadata);;
+      console.log('step 3', metadata, lastSyncMetadata);
 
       if (lastSyncMetadata && !checkIfListhubUpdated(metadata, lastSyncMetadata)) return;
-
+      console.log('step 4');
       const ranges = getRangesFromMetadata(metadata);
 
       lastSyncMetadata = await addSyncMetadata({

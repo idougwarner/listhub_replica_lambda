@@ -443,13 +443,16 @@ module.exports.prepareListhubTables = async (event, context) => {
 module.exports.listhubMonitor = async (event, context) => {
   try {
     await connectToPool();
+    console.log('step 1');
     // Get meta_data info
     const response = await getMetaDataStream();
+    console.log('step 2');
 
     if (response) {
       const metadata = response.data;
 
       let lastSyncMetadata = await getLastSyncMetadata();
+      console.log('step 3', lastSyncMetadata);;
 
       if (lastSyncMetadata && !checkIfListhubUpdated(metadata, lastSyncMetadata)) return;
 

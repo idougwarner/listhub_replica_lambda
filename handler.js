@@ -122,58 +122,11 @@ const increaseJobCount = async (id) => {
   try {
     await client.query('BEGIN');
     const result = await client.query(readQuery, [id]);
-    console.log('increase job count', result);
     await client.query(updateQuery, [parseInt(result.rows[0].fulfilled_jobs_count) + 1, id])
     await client.query('COMMIT');
   } catch (error) {
     await cllient.query('ROLLBACK');
   }
-
-  // // select fulfilled job count and increment by one then update the table in transaction mode
-  // const result = await client.query(`SELECT * FROM ${listhubReplicaTableName} ORDER BY time_stamp DESC`);
-
-  // return new Promise((resolve, reject) => {
-  //   if (result.rowCount > 0) {
-  //     var id = result.rows[0].id;
-  //     var fulfilled_jobs_count = result.rows[0].fulfilled_jobs_count;
-  //     fulfilled_jobs_count = parseInt(fulfilled_jobs_count) + 1;
-
-  //     client.query("BEGIN", (err) => {
-  //       if (err) {
-  //         console.log("Did not manage to begin adding count" + err);
-  //         reject();
-  //       }
-  //       client.query(
-  //         `LOCK TABLE ${listhubReplicaTableName} IN ROW EXCLUSIVE MODE`,
-  //         (err, res) => {
-  //           if (err) {
-  //             console.log("Did not manage to lock table: " + err);
-  //             reject();
-  //           }
-  //           client.query(
-  //             `UPDATE ${listhubReplicaTableName} SET fulfilled_jobs_count=$1 WHERE id=$2 RETURNING *`,
-  //             [fulfilled_jobs_count, id],
-  //             (err, res) => {
-  //               if (err) {
-  //                 console.log("Error adding job count " + err);
-  //                 client.query("ROLLBACK");
-  //                 client.release();
-  //                 reject();
-  //               } else {
-  //                 client.query("COMMIT");
-  //                 client.release();
-  //                 resolve({ increasedJobCount: true });
-  //               }
-  //             }
-  //           );
-  //         }
-  //       );
-  //     });
-  //   } else {
-  //     console.log(`No data in ${listhubReplicaTableName} to update`);
-  //     reject();
-  //   }
-  // });
 };
 
 // Get inputStream from replication request with range headers
@@ -242,7 +195,7 @@ const getRangesFromMetadata = (metadata, chunkSize = 30000) => {
 
 const syncListhub = async (metadata, lastSyncMetadata) => {
   const ranges = getRangesFromMetadata(metadata);
-  console.log("Ranges.length " + ranges.length);
+  console.log("ranges.length " + ranges.length);
 
   for (let index = 0; index < ranges.length; index++) {
     let range = ranges[index];
@@ -304,12 +257,11 @@ module.exports.listhubMonitor = async (event, context) => {
  * Streams the range and adds all listings in that range to the database
  */
 module.exports.streamExecutor = async (event, context, callback) => {
-  console.log('sss', event);
-  console.log("ETag " + event.range.ETag);
-  console.log("Start " + event.range.start);
-  console.log("End " + event.range.end);
-  console.log("Table_Name " + event.table_name);
-  console.log('Last sync meta data id: ', event.last_sync_metadata_id)
+  console.log("etag: ", event.range.ETag);
+  console.log("start: ", event.range.start);
+  console.log("end: ", event.range.end);
+  console.log("table name:  ", event.table_name);
+  console.log('last sync meta data id: ', event.last_sync_metadata_id)
 
   const ETag = event.range.ETag;
   const start = event.range.start;
@@ -330,15 +282,16 @@ module.exports.streamExecutor = async (event, context, callback) => {
   });
 
   const streamingPromise = new Promise((resolve, reject) => {
-    console.log("Start Time: " + new Date());
+    console.log("start time: ", new Date());
 
-    stream.pipe(ndjson.parse()).on("data", (data) => {
-      listingArray.push(data);
-    });
+    stream.pipe(ndjson.parse())
+      .on("data", (data) => {
+        listingArray.push(data);
+      });
 
     stream
       .on("complete", async () => {
-        console.log(`Streamed records count: ${listingArray.length}`);
+        console.log(`streamed records count: ${listingArray.length}`);
 
         // // Check if there is a change in ETag by getting a status code of 412
         // if (listingArray.length == 1) {
@@ -355,7 +308,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
         let listingsCount = listingArray.length;
 
-        if (true) {
+        if (listingsCount > 10) {
           listingsCount = 10;
         }
 
@@ -371,7 +324,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
         resolve();
       })
       .on("error", (err) => {
-        console.log("Error in getting listings" + err);
+        console.log("stream error: ", err);
         stream.end();
         reject();
       });

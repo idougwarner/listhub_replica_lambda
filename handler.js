@@ -15,9 +15,9 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
 });
-let pgClient;
+let pgClient = null;
 
-let listhubAccessToken;
+let listhubAccessToken = null;
 const listhubClientId = process.env.LISTHUB_CLIENT_ID;
 const listhubClientSecret = process.env.LISTHUB_CLIENT_SECRET;
 const listhubOAuth2TokenApi = process.env.LISTHUB_OAUTH2_TOKEN_API;
@@ -50,6 +50,12 @@ const refreshListhubToken = async () => {
 
 async function connectToPool() {
   pgClient = await pool.connect();
+}
+
+function releaseClient() {
+  if (pgClient) {
+    pgClient.release();
+  }
 }
 
 const sendQuery = (query, variables) => new Promise((resolve, reject) => {
@@ -236,6 +242,8 @@ module.exports.prepareListhubTables = async (event, context) => {
 
   await createListingsTable(listhubListingsInitial);
   await createReplicaTable();
+
+  releaseClient();
 };
 
 /**
@@ -278,6 +286,8 @@ module.exports.listhubMonitor = async (event, context) => {
   } catch (err) {
     console.log("listhubMonitor error", err);
   }
+
+  releaseClient();
 };
 
 /**
@@ -357,6 +367,8 @@ module.exports.streamExecutor = async (event, context, callback) => {
     console.log('streamExecutor error', error);
     throw error;
   }
+
+  releaseClient();
 };
 
 module.exports.monitorSync = async () => {
@@ -372,4 +384,6 @@ module.exports.monitorSync = async () => {
   } catch (error) {
     console.log("monitorSync", error);
   }
+
+  releaseClient();
 };

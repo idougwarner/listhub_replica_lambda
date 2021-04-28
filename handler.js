@@ -243,7 +243,6 @@ module.exports.listhubMonitor = async (event, context) => {
         tableStale: lastSyncMetadata ? lastSyncMetadata.table_recent : listhubListingsBTableName,
         jobsCount: ranges.length
       });
-      console.log('listhubMonitor', lastSyncMetadata);
       await createListingsTable(lastSyncMetadata.table_recent);
 
       await syncListhub(metadata, lastSyncMetadata);
@@ -294,19 +293,6 @@ module.exports.streamExecutor = async (event, context, callback) => {
       .on("complete", async () => {
         console.log(`streamed records count: ${listingArray.length}`);
 
-        // // Check if there is a change in ETag by getting a status code of 412
-        // if (listingArray.length == 1) {
-        //   console.log("Error Result " + JSON.stringify(listingArray));
-
-        //   // We should handle this error in the midst of our fetching of data
-        //   if (listingArray[0].statusCode == 412) {
-        //     console.log(
-        //       "We may need to restart our fetching of data as the server has changed the ETag as we fetch listings"
-        //     );
-        //     reject({ "addedjobcount": false, "listingdata": false });
-        //   }
-        // }
-
         let listingsCount = listingArray.length;
 
         if (listingsCount > 10) {
@@ -315,6 +301,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
 
         for (let index = 0; index < listingsCount; index += 1) {
           const listing = listingArray[index];
+          if (!listing || !listing.sequence || !listing.Property || listing.statusCode === 412) continue;
           const query = `INSERT INTO ${tableName} (sequence, Property) VALUES ($1,$2) RETURNING sequence`;
           const variables =  [listing.sequence, listing.Property];
           await sendQuery(query, variables);

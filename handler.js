@@ -4,9 +4,8 @@ const request = require("request");
 const AWS = require("aws-sdk");
 const bigInt = require("big-integer");
 const ndjson = require("ndjson");
-const lambda = new AWS.Lambda({
-  region: "us-west-2",
-});
+const qs = require("querystring");
+const lambda = new AWS.Lambda({ region: "us-west-2" });
 
 const { Pool } = require("pg");
 const pool = new Pool({

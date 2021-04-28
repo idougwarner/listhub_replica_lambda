@@ -103,7 +103,8 @@ const addSyncMetadata = async ({
     const query = `INSERT INTO ${listhubReplicaTableName} (last_modified, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`;
     const variables = [lastModified, tableRecent, tableStale, jobsCount, fulfilledJobsCount, syncing, new Date()];
 
-    return sendQuery(query, variables);
+    const result = await sendQuery(query, variables);
+    return result.rows[0];
   } catch (error) {
     console.log('addReplicaMeta error', error);
   }

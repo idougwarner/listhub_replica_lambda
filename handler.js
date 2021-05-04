@@ -23,8 +23,8 @@ const listhubClientSecret = process.env.LISTHUB_CLIENT_SECRET;
 const listhubOAuth2TokenApi = process.env.LISTHUB_OAUTH2_TOKEN_API;
 const listhubMetadataApi = process.env.LISTHUB_META_API;
 const listhubReplicationApi = process.env.LISTHUB_REPLICATION_API;
-const listhubReplicaTableName = "listhub_replica";
-const listhubListingsInitial = "listhub_listings_initial";
+const listhubReplicaJobsTableName = "replica_jobs";
+const listhubListingsInitial = "listings_initial";
 
 const refreshListhubToken = async () => {
   const oauth2Body = {
@@ -74,17 +74,17 @@ const sendQuery = (query, variables) => new Promise((resolve, reject) => {
   }
 });
 
-const createReplicaTable = async (dropFirst = true) => {
+const createReplicaJobsTable = async (dropFirst = true) => {
   try {
     if (dropFirst) {
-      await sendQuery(`DROP TABLE IF EXISTS ${listhubReplicaTableName}`);
+      await sendQuery(`DROP TABLE IF EXISTS ${listhubReplicaJobsTableName}`);
     }
 
-    await sendQuery(`CREATE TABLE IF NOT EXISTS ${listhubReplicaTableName}(id SERIAL PRIMARY KEY, last_modified TIMESTAMP, table_recent VARCHAR(50), table_stale VARCHAR(50), jobs_count INT, fulfilled_jobs_count INT, syncing BOOLEAN, created_at TIMESTAMP)`);
+    await sendQuery(`CREATE TABLE IF NOT EXISTS ${listhubReplicaJobsTableName}(id SERIAL PRIMARY KEY, last_modified TIMESTAMP, table_recent VARCHAR(50), table_stale VARCHAR(50), jobs_count INT, fulfilled_jobs_count INT, syncing BOOLEAN, created_at TIMESTAMP)`);
 
-    console.log(`${listhubReplicaTableName} created successfully!`);
+    console.log(`${listhubReplicaJobsTableName} created successfully!`);
   } catch (error) {
-    console.log('createReplicaTable error', error);
+    console.log('createReplicaJobsTable error', error);
   }
 }
 
@@ -94,7 +94,11 @@ const createListingsTable = async (name, dropFirst = true) => {
       await sendQuery(`DROP TABLE IF EXISTS ${name}`);
     }
 
-    await sendQuery(`CREATE TABLE IF NOT EXISTS ${name}(id SERIAL PRIMARY KEY, sequence VARCHAR (30), property JSON)`);
+    await sendQuery(`CREATE TABLE IF NOT EXISTS ${name}(id SERIAL PRIMARY KEY, listing_id VARCHAR (50), address VARCHAR (100), city VARCHAR (35), state VARCHAR (2), property JSON)`);
+    await sendQuery(`CREATE INDEX on ${name}(listing_id)`);
+    await sendQuery(`CREATE INDEX on ${name}(address)`);
+    await sendQuery(`CREATE INDEX on ${name}(city)`);
+    await sendQuery(`CREATE INDEX on ${name}(state)`);
   } catch (error) {
     console.log('createListingsTable error', error);
   }
@@ -117,7 +121,7 @@ const addSyncMetadata = async ({
   syncing = true
 }) => {
   try {
-    const query = `INSERT INTO ${listhubReplicaTableName} (last_modified, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`;
+    const query = `INSERT INTO ${listhubReplicaJobsTableName} (last_modified, table_recent, table_stale, jobs_count, fulfilled_jobs_count, syncing, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`;
     const variables = [lastModified, tableRecent, tableStale, jobsCount, fulfilledJobsCount, syncing, new Date()];
 
     const result = await sendQuery(query, variables);
@@ -129,7 +133,7 @@ const addSyncMetadata = async ({
 
 const getLastSyncMetadata = async() => {
   try {
-    const result = await sendQuery(`SELECT * from ${listhubReplicaTableName} ORDER BY created_at DESC LIMIT 1`);
+    const result = await sendQuery(`SELECT * from ${listhubReplicaJobsTableName} ORDER BY created_at DESC LIMIT 1`);
     return result.rows[0];
   } catch (error) {
     console.log('getLastSyncMetadata error', error);
@@ -138,8 +142,8 @@ const getLastSyncMetadata = async() => {
 };
 
 const increaseJobCount = async (id) => {
-  const readQuery = `SELECT fulfilled_jobs_count from ${listhubReplicaTableName} where id = $1 FOR UPDATE`;
-  const updateQuery = `UPDATE ${listhubReplicaTableName} SET fulfilled_jobs_count = $1 WHERE id = $2 RETURNING id`;
+  const readQuery = `SELECT fulfilled_jobs_count from ${listhubReplicaJobsTableName} where id = $1 FOR UPDATE`;
+  const updateQuery = `UPDATE ${listhubReplicaJobsTableName} SET fulfilled_jobs_count = $1 WHERE id = $2 RETURNING id`;
 
   try {
     await pgClient.query('BEGIN');
@@ -241,7 +245,7 @@ module.exports.prepareListhubTables = async (event, context) => {
   await connectToPool();
 
   await createListingsTable(listhubListingsInitial);
-  await createReplicaTable();
+  await createReplicaJobsTable();
 
   releaseClient();
 };
@@ -342,8 +346,8 @@ module.exports.streamExecutor = async (event, context, callback) => {
         for (let index = 0; index < listingsCount; index += 1) {
           const listing = listingArray[index];
           if (!listing || !listing.sequence || !listing.Property || listing.statusCode === 412) continue;
-          const query = `INSERT INTO ${tableName} (sequence, Property) VALUES ($1,$2) RETURNING sequence`;
-          const variables =  [listing.sequence, listing.Property];
+          const query = `INSERT INTO ${tableName} (listing_id, address, city, state, property) VALUES ($1,$2)`;
+          const variables =  [listing.ListingKey, listing.UnparsedAddress, listing.PostalCity, listing.StateOrProvince, listing.Property];
           await sendQuery(query, variables);
         }
 
@@ -377,7 +381,7 @@ module.exports.monitorSync = async () => {
 
     const lastSyncMetadata = await getLastSyncMetadata();
     if (lastSyncMetadata.syncing && lastSyncMetadata.jobs_count === lastSyncMetadata.fulfilled_jobs_count) {
-      const query = `UPDATE ${listhubReplicaTableName} SET syncing=$1 WHERE id=$2`;
+      const query = `UPDATE ${listhubReplicaJobsTableName} SET syncing=$1 WHERE id=$2`;
       const variables = [false, lastSyncMetadata.id];
       await sendQuery(query, variables);
     }

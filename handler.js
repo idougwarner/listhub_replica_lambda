@@ -347,7 +347,7 @@ module.exports.streamExecutor = async (event, context, callback) => {
           const listing = listingArray[index];
           if (!listing || !listing.sequence || !listing.Property || listing.statusCode === 412) continue;
           const query = `INSERT INTO ${tableName} (listing_id, address, city, state, property) VALUES ($1,$2,$3,$4,$5)`;
-          const variables =  [listing.ListingKey, listing.UnparsedAddress, listing.PostalCity, listing.StateOrProvince, listing.Property];
+          const variables =  [listing.Property.ListingKey, listing.Property.UnparsedAddress, listing.Property.PostalCity, listing.Property.StateOrProvince, listing.Property];
           await sendQuery(query, variables);
         }
 

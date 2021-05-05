@@ -59,3 +59,4 @@ functions:
 plugins:
   - serverless-plugin-lambda-insights
   - serverless-iam-roles-per-function
+  - serverless-plugin-lambda-dead-letter

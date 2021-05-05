@@ -94,7 +94,7 @@ const createListingsTable = async (name, dropFirst = true) => {
       await sendQuery(`DROP TABLE IF EXISTS ${name}`);
     }
 
-    await sendQuery(`CREATE TABLE IF NOT EXISTS ${name}(id SERIAL PRIMARY KEY, listing_id VARCHAR (50), address VARCHAR (255), city VARCHAR (100), state VARCHAR (2), property JSON)`);
+    await sendQuery(`CREATE TABLE IF NOT EXISTS ${name}(id SERIAL PRIMARY KEY, listing_id VARCHAR (100), address VARCHAR (255), city VARCHAR (100), state VARCHAR (2), property JSON)`);
     await sendQuery(`CREATE INDEX on ${name}(listing_id)`);
     await sendQuery(`CREATE INDEX on ${name}(address)`);
     await sendQuery(`CREATE INDEX on ${name}(city)`);

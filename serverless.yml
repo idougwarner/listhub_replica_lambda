@@ -42,6 +42,12 @@ functions:
     handler: handler.streamExecutor
     timeout: 890
     reservedConcurrency: 10
+    iamRoleStatementsName: streamExecutorRole
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - "sqs:SendMessage"
+        Resource: '*'
 
     deadLetter:
       sqs: streamExecutor-dl-queue

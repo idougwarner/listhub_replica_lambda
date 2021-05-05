@@ -41,6 +41,10 @@ functions:
   streamExecutor:
     handler: handler.streamExecutor
     timeout: 890
+    reservedConcurrency: 10
+
+    deadLetter:
+      sqs: streamExecutor-dl-queue
 
   monitorSync:
     handler: handler.monitorSync

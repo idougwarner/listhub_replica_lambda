@@ -48,7 +48,6 @@ functions:
         Action:
           - "sqs:SendMessage"
         Resource: '*'
-
     deadLetter:
       sqs: streamExecutor-dl-queue
 

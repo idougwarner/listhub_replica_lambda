@@ -21,8 +21,6 @@ provider:
     LISTHUB_OAUTH2_TOKEN_API: ${param:LISTHUB_OAUTH2_TOKEN_API}
     LISTHUB_META_API: ${param:LISTHUB_META_API}
     LISTHUB_REPLICATION_API: ${param:LISTHUB_REPLICATION_API}
-  memorySize: 4024
-  timeout: 900
 
 functions:
   listhubMonitor:
@@ -34,14 +32,14 @@ functions:
           - "lambda:InvokeFunction"
           - "lambda:InvokeAsync"
         Resource: '*'
-    timeout: 900
     # events:
     #   - schedule: rate(1 hour)
 
   streamExecutor:
     handler: handler.streamExecutor
-    timeout: 890
+    timeout: 900
     reservedConcurrency: 10
+    memorySize: 4024
     iamRoleStatementsName: streamExecutorRole
     iamRoleStatements:
       - Effect: "Allow"
@@ -53,13 +51,11 @@ functions:
 
   monitorSync:
     handler: handler.monitorSync
-    timeout: 890
     events:
      - schedule: rate(5 minutes)
 
   prepareListhubTables:
     handler: handler.prepareListhubTables
-    timeout: 890
   
 plugins:
   - serverless-plugin-lambda-insights

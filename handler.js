@@ -109,7 +109,7 @@ const createListingsTable = async (name, dropFirst = true) => {
       
       /* Trigger on update */
       CREATE TRIGGER tsvector_address_update BEFORE INSERT OR UPDATE
-      ON comments FOR EACH ROW EXECUTE PROCEDURE address_search_trigger();
+      ON ${name} FOR EACH ROW EXECUTE PROCEDURE address_search_trigger();
     `);
   } catch (error) {
     console.log('createListingsTable error', error);

@@ -94,11 +94,23 @@ const createListingsTable = async (name, dropFirst = true) => {
       await sendQuery(`DROP TABLE IF EXISTS ${name}`);
     }
 
-    await sendQuery(`CREATE TABLE IF NOT EXISTS ${name}(id SERIAL PRIMARY KEY, listing_id VARCHAR (100), address VARCHAR (255), city VARCHAR (100), state VARCHAR (2), property JSON)`);
-    await sendQuery(`CREATE INDEX on ${name}(listing_id)`);
-    await sendQuery(`CREATE INDEX on ${name}(address)`);
-    await sendQuery(`CREATE INDEX on ${name}(city)`);
-    await sendQuery(`CREATE INDEX on ${name}(state)`);
+    await sendQuery(`CREATE TABLE IF NOT EXISTS ${name}(id SERIAL PRIMARY KEY, listing_id VARCHAR (100), address VARCHAR (255), city VARCHAR (100), state VARCHAR (2), tsv_address tsvector, property JSON)`);
+    await sendQuery(`CREATE INDEX tsv_address_idx ON ${name} USING gin(tsv_address)`);
+    await sendQuery(`
+      CREATE FUNCTION address_search_trigger() RETURNS trigger AS $$
+      begin
+        new.tsv_address :=
+          setweight(to_tsvector(coalesce(new.address,'')), 'A') ||
+          setweight(to_tsvector(coalesce(new.city,'')), 'B') ||
+          setweight(to_tsvector(coalesce(new.state,'')), 'C');
+      return new;
+      end
+      $$ LANGUAGE plpgsql;
+      
+      /* Trigger on update */
+      CREATE TRIGGER tsvector_address_update BEFORE INSERT OR UPDATE
+      ON comments FOR EACH ROW EXECUTE PROCEDURE address_search_trigger();
+    `);
   } catch (error) {
     console.log('createListingsTable error', error);
   }

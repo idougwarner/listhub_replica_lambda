@@ -268,10 +268,6 @@ module.exports.prepareListhubTables = async (event, context) => {
  * This lambda handler allows us to sync our database up with the listhub database.
  */
 module.exports.listhubMonitor = async (event, context) => {
-  await connectToPool();
-  await createListingsTable(`table_${Date.now()}`);
-
-  return;
   try {
     await connectToPool();
 

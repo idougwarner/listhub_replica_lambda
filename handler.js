@@ -97,7 +97,7 @@ const createListingsTable = async (name, dropFirst = true) => {
     await sendQuery(`CREATE TABLE IF NOT EXISTS ${name}(id SERIAL PRIMARY KEY, listing_id VARCHAR (100), address VARCHAR (255), city VARCHAR (100), state VARCHAR (2), zipcode VARCHAR (10), tsv_address tsvector, property JSON)`);
     await sendQuery(`CREATE INDEX tsv_address_idx_${Date.now()} ON ${name} USING gin(tsv_address)`);
     await sendQuery(`
-      CREATE FUNCTION IF NOT EXISTS address_search_trigger() RETURNS trigger AS $$
+      CREATE OR REPLACE FUNCTION address_search_trigger() RETURNS trigger AS $$
       begin
         new.tsv_address :=
           setweight(to_tsvector(coalesce(new.address,'')), 'A') ||

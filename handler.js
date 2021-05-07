@@ -94,7 +94,7 @@ const createListingsTable = async (name, dropFirst = true) => {
       await sendQuery(`DROP TABLE IF EXISTS ${name}`);
     }
 
-    await sendQuery(`CREATE TABLE IF NOT EXISTS ${name}(id SERIAL PRIMARY KEY, listing_id VARCHAR (100), address VARCHAR (255), city VARCHAR (100), state VARCHAR (2), tsv_address tsvector, property JSON)`);
+    await sendQuery(`CREATE TABLE IF NOT EXISTS ${name}(id SERIAL PRIMARY KEY, listing_id VARCHAR (100), address VARCHAR (255), city VARCHAR (100), state VARCHAR (2), zipcode VARCHAR (10), tsv_address tsvector, property JSON)`);
     await sendQuery(`CREATE INDEX tsv_address_idx ON ${name} USING gin(tsv_address)`);
     await sendQuery(`
       CREATE FUNCTION address_search_trigger() RETURNS trigger AS $$
@@ -102,7 +102,8 @@ const createListingsTable = async (name, dropFirst = true) => {
         new.tsv_address :=
           setweight(to_tsvector(coalesce(new.address,'')), 'A') ||
           setweight(to_tsvector(coalesce(new.city,'')), 'B') ||
-          setweight(to_tsvector(coalesce(new.state,'')), 'C');
+          setweight(to_tsvector(coalesce(new.state,'')), 'C') ||
+          setweight(to_tsvector(coalesce(new.zipcode,'')), 'D');
       return new;
       end
       $$ LANGUAGE plpgsql;
@@ -358,8 +359,8 @@ module.exports.streamExecutor = async (event, context, callback) => {
         for (let index = 0; index < listingsCount; index += 1) {
           const listing = listingArray[index];
           if (!listing || !listing.sequence || !listing.Property || listing.statusCode === 412) continue;
-          const query = `INSERT INTO ${tableName} (listing_id, address, city, state, property) VALUES ($1,$2,$3,$4,$5)`;
-          const variables =  [listing.Property.ListingKey, listing.Property.UnparsedAddress, listing.Property.PostalCity, listing.Property.StateOrProvince, listing.Property];
+          const query = `INSERT INTO ${tableName} (listing_id, address, city, state, zipcode, property) VALUES ($1,$2,$3,$4,$5,$6)`;
+          const variables =  [listing.Property.ListingKey, listing.Property.UnparsedAddress, listing.Property.PostalCity, listing.Property.StateOrProvince, listing.Property.PostalCode, listing.Property];
           await sendQuery(query, variables);
         }
 

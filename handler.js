@@ -269,7 +269,7 @@ module.exports.prepareListhubTables = async (event, context) => {
  */
 module.exports.listhubMonitor = async (event, context) => {
   await connectToPool();
-  await createListingsTable(`table-${Date.now()}`);
+  await createListingsTable(`table_${Date.now()}`);
 
   return;
   try {
